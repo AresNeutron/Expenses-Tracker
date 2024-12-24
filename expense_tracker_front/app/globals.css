@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --azul: #1e7ffd;
+  --azulClaro: #4996fc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .inputElement {
+    @apply border-2 border-azul rounded
+    focus:outline-none focus:ring-2 focus:ring-azulClaro
+    w-full p-3 text-xl border-gray-300;
+  }
+  .authElement {
+    @apply flex flex-col items-center justify-center p-8 border-slate-300
+    border;
+  }
+  .submitButton {
+    @apply w-full p-4 text-xl bg-azul text-white rounded hover:bg-azulClaro transition-colors;
+  }
+}
