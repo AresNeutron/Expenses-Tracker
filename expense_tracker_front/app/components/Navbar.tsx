@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { logout } from "../utils/logout";
 import { useRouter } from "next/navigation";
 import { useExpenseContext } from "./Context";
+import { logout } from "../utils/auth";
 
 function Navbar() {
   const router = useRouter();
