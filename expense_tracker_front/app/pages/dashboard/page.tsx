@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useExpenseContext } from "../../components/Context";
-import { getUserName } from "@/app/utils/fetchUserData";
+import { getUserName } from "@/app/utils/auth";
 
 export default function Dashboard() {
   const [description, setDescription] = useState<string>("");

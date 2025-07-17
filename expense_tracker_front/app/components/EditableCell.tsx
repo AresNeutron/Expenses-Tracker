@@ -1,6 +1,6 @@
 import { CellProps } from "react-table";
 import { useState } from "react";
-import { Expense } from "../utils/interfaces";
+import { Expense } from "../interfaces/interfaces";
 import { validateUpdate } from "../utils/validations";
 
 interface EditableCellProps extends CellProps<Expense> {
@@ -26,13 +26,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   const onBlur = (identifier: string) => {
     const isUpdateValid = validateUpdate(value, identifier);
-    if (value === initialValue || !isUpdateValid){
+    if (value === initialValue || !isUpdateValid) {
       alert(`Invalid ${identifier} update!`);
       setValue(initialValue);
       setIsEditing(false);
       return;
-    }; // No change or invalid update
-    
+    } // No change or invalid update
+
     setIsEditing(false);
     updateExpense(row.index, column.id, value);
   };

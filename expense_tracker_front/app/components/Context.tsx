@@ -10,7 +10,7 @@ import React, {
   useEffect,
 } from "react";
 import { isTokenValid, setupTokenRefresh } from "../utils/tokens";
-import { Expense, ExpenseContextProps } from "../utils/interfaces";
+import { Expense, ExpenseContextProps } from "../interfaces/interfaces";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
   undefined

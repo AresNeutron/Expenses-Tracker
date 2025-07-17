@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { useTable, Column } from "react-table";
 import { useExpenseContext } from "@/app/components/Context";
 import EditableCell from "@/app/components/EditableCell";
-import { Expense } from "@/app/utils/interfaces";
+import { Expense } from "@/app/interfaces/interfaces";
 
 const ExpensesPage: React.FC = () => {
   const { data, setData, deleteExpense, updateExpense, fetchExpenses } =

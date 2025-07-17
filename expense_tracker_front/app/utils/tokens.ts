@@ -1,26 +1,31 @@
 import axios from "axios";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
+// Importa la URL del backend desde el entorno
+const BACKEND_URL = process.env.EXPENSE_TRACKER_BACKEND_URL;
+
 export const refreshToken = async () => {
   const refresh = localStorage.getItem("refresh_token");
   if (refresh) {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/token/refresh/",
+        `${BACKEND_URL}/api/auth/token/refresh/`, // Endpoint actualizado
         {
           refresh: refresh,
         }
       );
-
-      alert("Token refreshed successfully");
+      console.log("Token refreshed successfully");
       // Update localStorage with the new tokens
       localStorage.setItem("access_token", response.data.access);
       localStorage.setItem("refresh_token", response.data.refresh);
+      return response.data.access; 
     } catch (err) {
-      console.error(err);
+      console.error("Error refreshing token:", err);
+      throw err;
     }
   } else {
     console.error("No refresh token available");
+    throw new Error("No refresh token available. Please log in.");
   }
 };
 
