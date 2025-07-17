@@ -3,36 +3,196 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --azul: #1e7ffd;
-  --azulClaro: #4996fc;
+  /* Colores base */
+  --background: #fafbfc;
+  --foreground: #1a1d21;
+
+  /* Paleta principal - Azules */
+  --primary-50: #eff8ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-400: #60a5fa;
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+
+  /* Grises cálidos - Neutrales */
+  --neutral-50: #f9fafb;
+  --neutral-100: #f3f4f6;
+  --neutral-200: #e5e7eb;
+  --neutral-300: #d1d5db;
+  --neutral-400: #9ca3af;
+  --neutral-500: #6b7280;
+  --neutral-600: #4b5563;
+  --neutral-700: #374151;
+  --neutral-800: #1f2937;
+  --neutral-900: #111827;
+
+  /* Colores de estado - Éxito (Verde) */
+  --success-50: #f0fdf4;
+  --success-100: #dcfce7;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+
+  /* Colores de estado - Advertencia (Ámbar) */
+  --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+
+  /* Colores de estado - Error (Rojo suave) */
+  --error-50: #fef2f2;
+  --error-100: #fee2e2;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+  --error-700: #b91c1c;
+
+  /* Colores financieros específicos */
+  --income: #22c55e;
+  --expense: #ef4444;
+  --balance: #3b82f6;
+
+  /* Superficies */
+  --surface-primary: #ffffff;
+  --surface-secondary: #f8fafc;
+  --surface-tertiary: #f1f5f9;
+
+  /* Bordes */
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --border-focus: #3b82f6;
+
+  /* Sombras */
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-input-focus: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  /* Colores base oscuros */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+
+  /* Paleta principal - Azules oscuros */
+  --primary-50: #1e293b;
+  --primary-100: #334155;
+  --primary-200: #475569;
+  --primary-300: #64748b;
+  --primary-400: #94a3b8;
+  --primary-500: #60a5fa;
+  --primary-600: #3b82f6;
+  --primary-700: #2563eb;
+  --primary-800: #1d4ed8;
+  --primary-900: #1e40af;
+
+  /* Grises oscuros */
+  --neutral-50: #1e293b;
+  --neutral-100: #334155;
+  --neutral-200: #475569;
+  --neutral-300: #64748b;
+  --neutral-400: #94a3b8;
+  --neutral-500: #cbd5e1;
+  --neutral-600: #e2e8f0;
+  --neutral-700: #f1f5f9;
+  --neutral-800: #f8fafc;
+  --neutral-900: #ffffff;
+
+  /* Superficies oscuras */
+  --surface-primary: #1e293b;
+  --surface-secondary: #334155;
+  --surface-tertiary: #475569;
+
+  /* Bordes oscuros */
+  --border-primary: #475569;
+  --border-secondary: #64748b;
+
+  /* Sombras oscuras */
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
+  /* Elementos de entrada mejorados */
   .inputElement {
-    @apply border-2 border-azul rounded
-    focus:outline-none focus:ring-2 focus:ring-azulClaro
-    w-full p-3 text-xl border-gray-300;
+    @apply border-2 border-border-primary rounded-input
+           focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus
+           w-full p-3 text-base bg-surface-primary
+           transition-all duration-200 ease-in-out
+           placeholder:text-neutral-400
+           hover:border-border-secondary;
   }
+
+  /* Elementos de autenticación */
   .authElement {
-    @apply flex flex-col items-center justify-center p-8 border-slate-300
-    border;
+    @apply flex flex-col items-center justify-center p-8 
+           border border-border-primary rounded-card
+           bg-surface-primary shadow-card;
   }
+
+  /* Botones principales */
   .submitButton {
-    @apply w-full p-4 text-xl bg-azul text-white rounded hover:bg-azulClaro transition-colors;
+    @apply w-full p-4 text-base font-medium
+           bg-primary-500 text-white rounded-button
+           hover:bg-primary-600 active:bg-primary-700
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-primary-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Botones secundarios */
+  .secondaryButton {
+    @apply w-full p-4 text-base font-medium
+           bg-surface-secondary text-neutral-700 rounded-button
+           border border-border-primary
+           hover:bg-neutral-50 active:bg-neutral-100
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-neutral-200;
+  }
+
+  /* Tarjetas */
+  .card {
+    @apply bg-surface-primary border border-border-primary rounded-card
+           shadow-card hover:shadow-card-hover
+           transition-all duration-200 ease-in-out;
+  }
+
+  /* Elementos financieros */
+  .income-text {
+    @apply text-success-600 font-semibold;
+  }
+
+  .expense-text {
+    @apply text-error-600 font-semibold;
+  }
+
+  .balance-text {
+    @apply text-primary-600 font-bold;
+  }
+
+  /* Estados de transacciones */
+  .transaction-positive {
+    @apply bg-success-50 text-success-700 border-success-200;
+  }
+
+  .transaction-negative {
+    @apply bg-error-50 text-error-700 border-error-200;
+  }
+
+  .transaction-pending {
+    @apply bg-warning-50 text-warning-700 border-warning-200;
   }
 }
