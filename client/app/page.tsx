@@ -20,7 +20,7 @@ export default function Login() {
     setErrors([]) // Clear any previous errors
     try {
       console.log("Payload:", { identifier, password })
-      const response = await axios.post(`${process.env.EXPENSE_TRACKER_BACKEND_URL}/api/auth/login/`, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/logout/`, {
         identifier,
         password,
       })
@@ -51,13 +51,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-neutral-50 to-primary-100 flex items-center justify-center px-4 py-12">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-success-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000"></div>
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="relative w-full max-w-md">
         {/* Main login card */}
         <div className="card p-8 backdrop-blur-sm bg-surface-primary/80">

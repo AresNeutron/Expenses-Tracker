@@ -4,6 +4,7 @@ import "./globals.css";
 import ExpenseProvider from "./components/Context";
 import Navbar from "./components/Navbar";
 import ThemeToggle from "./components/ThemeToggle";
+import GlobalBackground from "./components/GlobalBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,15 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div className="flex flex-col">
+     <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <GlobalBackground />
+        <div className="relative flex flex-col min-h-screen">
           <ExpenseProvider>
             <Navbar />
             <ThemeToggle />
-            {children}
+            <main className="flex-1">{children}</main>
           </ExpenseProvider>
         </div>
       </body>

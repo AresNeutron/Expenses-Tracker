@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
 // Importa la URL del backend desde el entorno
-const BACKEND_URL = process.env.EXPENSE_TRACKER_BACKEND_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const refreshToken = async () => {
   const refresh = localStorage.getItem("refresh_token");
@@ -18,7 +18,7 @@ export const refreshToken = async () => {
       // Update localStorage with the new tokens
       localStorage.setItem("access_token", response.data.access);
       localStorage.setItem("refresh_token", response.data.refresh);
-      return response.data.access; 
+      return response.data.access;
     } catch (err) {
       console.error("Error refreshing token:", err);
       throw err;
@@ -32,7 +32,7 @@ export const refreshToken = async () => {
 export const setupTokenRefresh = (): void => {
   const accessToken = localStorage.getItem("access_token"); // Correcting the key to match refreshToken
 
-  if (accessToken) { 
+  if (accessToken) {
     const decoded: JwtPayload = jwtDecode<JwtPayload>(accessToken); // Type-safe decoding
     const expiresIn = decoded.exp! * 1000 - Date.now(); // `exp` is in seconds, convert to ms
     console.log("Token expires in:", expiresIn); // Debugging
@@ -52,7 +52,6 @@ export const setupTokenRefresh = (): void => {
     }
   }
 };
-
 
 export const isTokenValid = (): boolean => {
   const accessToken = localStorage.getItem("access_token");

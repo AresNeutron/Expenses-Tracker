@@ -1,86 +1,72 @@
-"use client";
-import { useExpenseContext } from "@/app/components/Context";
-import PasswordInput from "@/app/components/PasswordInput";
-import { validateEmail, validatePassword } from "@/app/utils/validations";
-import axios from "axios";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import type React from "react";
+"use client"
+import { useExpenseContext } from "@/app/components/Context"
+import PasswordInput from "@/app/components/PasswordInput"
+import { validateEmail, validatePassword } from "@/app/utils/validations"
+import axios from "axios"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import type React from "react"
 
 function Register() {
-  const { password } = useExpenseContext();
-  const [username, setUsername] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [errors, setErrors] = useState<string[]>([]);
-  const router = useRouter();
+  const { password } = useExpenseContext()
+  const [username, setUsername] = useState<string>("")
+  const [email, setEmail] = useState<string>("")
+  const [errors, setErrors] = useState<string[]>([])
+  const router = useRouter()
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const errorMessages: string[] = [];
+    e.preventDefault()
+    const errorMessages: string[] = []
 
     // Validate email
     if (!validateEmail(email)) {
-      errorMessages.push("Please enter a valid email address.");
+      errorMessages.push("Please enter a valid email address.")
     }
 
     // Validate password
     if (!validatePassword(password)) {
       errorMessages.push(
-        "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
-      );
+        "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character.",
+      )
     }
 
     if (errorMessages.length > 0) {
-      setErrors(errorMessages);
-      return;
+      setErrors(errorMessages)
+      return
     }
 
     // Clear errors
-    setErrors([]);
+    setErrors([])
 
     try {
-      const response = await axios.post(
-        `${process.env.EXPENSE_TRACKER_BACKEND_URL}/api/auth/register/`,
-        {
-          username: username,
-          email: email,
-          password: password,
-        }
-      );
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/register/`, {
+        username: username,
+        email: email,
+        password: password,
+      })
 
       // Store the tokens in localStorage
-      localStorage.setItem("access_token", response.data.access);
-      localStorage.setItem("refresh_token", response.data.refresh);
+      localStorage.setItem("access_token", response.data.access)
+      localStorage.setItem("refresh_token", response.data.refresh)
 
       // Redirect to dashboard
-      router.push("/pages/dashboard");
+      router.push("/pages/dashboard")
     } catch (err) {
-      console.error(err);
-      setErrors(["Registration failed. Please try again."]);
+      console.error(err)
+      setErrors(["Registration failed. Please try again."])
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-success-50 via-neutral-50 to-primary-100 flex items-center justify-center px-4 py-12">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-success-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000"></div>
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="relative w-full max-w-md">
         {/* Main register card */}
         <div className="card p-8 backdrop-blur-sm bg-surface-primary/80">
           {/* Header section */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-success-500 to-primary-600 rounded-full mb-4 shadow-lg">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -89,22 +75,15 @@ function Register() {
                 />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-neutral-800 mb-2">
-              Create Account
-            </h1>
-            <p className="text-neutral-600 text-sm">
-              Join us to start managing your finances
-            </p>
+            <h1 className="text-2xl font-bold text-neutral-800 mb-2">Create Account</h1>
+            <p className="text-neutral-600 text-sm">Join us to start managing your finances</p>
           </div>
 
           {/* Register form */}
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-neutral-700 mb-2"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
                   Email Address
                 </label>
                 <input
@@ -119,10 +98,7 @@ function Register() {
               </div>
 
               <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-neutral-700 mb-2"
-                >
+                <label htmlFor="username" className="block text-sm font-medium text-neutral-700 mb-2">
                   Username
                 </label>
                 <input
@@ -137,10 +113,7 @@ function Register() {
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-neutral-700 mb-2"
-                >
+                <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
                   Password
                 </label>
                 <PasswordInput />
@@ -177,12 +150,7 @@ function Register() {
 
             <button type="submit" className="submitButton">
               <span className="flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -197,16 +165,10 @@ function Register() {
 
           {/* Password requirements info */}
           <div className="mt-6 p-4 bg-primary-50 border border-primary-200 rounded-input">
-            <h3 className="text-sm font-medium text-primary-800 mb-2">
-              Password Requirements:
-            </h3>
+            <h3 className="text-sm font-medium text-primary-800 mb-2">Password Requirements:</h3>
             <ul className="text-xs text-primary-700 space-y-1">
               <li className="flex items-center">
-                <svg
-                  className="w-3 h-3 mr-2 text-primary-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-3 h-3 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -216,11 +178,7 @@ function Register() {
                 At least 8 characters long
               </li>
               <li className="flex items-center">
-                <svg
-                  className="w-3 h-3 mr-2 text-primary-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-3 h-3 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -230,11 +188,7 @@ function Register() {
                 Include uppercase and lowercase letters
               </li>
               <li className="flex items-center">
-                <svg
-                  className="w-3 h-3 mr-2 text-primary-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-3 h-3 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -263,13 +217,12 @@ function Register() {
         {/* Footer text */}
         <div className="text-center mt-8">
           <p className="text-xs text-neutral-500">
-            By creating an account, you agree to our Terms of Service and
-            Privacy Policy
+            By creating an account, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default Register;
+export default Register

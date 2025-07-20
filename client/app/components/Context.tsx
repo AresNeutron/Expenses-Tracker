@@ -207,11 +207,11 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
           // Opcional: limpiar tokens si expiró y redirigir al login
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
-          router.push("/pages/login"); // O tu página de login
+          router.push("/"); // O tu página de login
         }
       } else {
         setIsAuth(false);
-        router.push("/pages/login"); // Redirigir al login si no hay token
+        router.push("/"); // Redirigir al login si no hay token
       }
     };
 

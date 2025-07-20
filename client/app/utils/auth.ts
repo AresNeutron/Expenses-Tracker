@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Importa la URL del backend desde el entorno
-const BACKEND_URL = process.env.EXPENSE_TRACKER_BACKEND_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 // Fetch user data
 export const fetchUserData = async () => {

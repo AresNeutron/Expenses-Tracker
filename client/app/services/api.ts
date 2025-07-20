@@ -1,7 +1,7 @@
 // services/api.ts
 import axios from "axios";
 
-const BACKEND_URL = process.env.EXPENSE_TRACKER_BACKEND_URL; // Use NEXT_PUBLIC_ for client-side access
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL; // Use NEXT_PUBLIC_ for client-side access
 
 const api = axios.create({ 
   baseURL: `${BACKEND_URL}/api`,

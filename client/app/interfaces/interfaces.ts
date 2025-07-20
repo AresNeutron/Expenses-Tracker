@@ -37,7 +37,7 @@ export interface Transaction {
 
 // Interfaz para las propiedades del contexto (lo que provee el ExpenseProvider)
 export interface ExpenseContextProps {
-  password?: string;
+  password: string;
   isAuth: boolean;
   setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
