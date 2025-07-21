@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.views import APIView
+from .base import BaseAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate
 
 # --- User Authentication & Management Views ---
 
-class RegisterUserView(APIView):
+class RegisterUserView(BaseAPIView):
     """
     Handles user registration. Creates a new User instance and returns JWT tokens.
     """
@@ -41,7 +41,7 @@ class RegisterUserView(APIView):
         except Exception as e:
             return Response({'error': f'Failed to register user: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class LoginUserView(APIView):
+class LoginUserView(BaseAPIView):
     """
     Handles user login. Authenticates user by username/email and password,
     then returns JWT access and refresh tokens.
@@ -83,7 +83,7 @@ class LoginUserView(APIView):
             'refresh': str(refresh),
         }, status=status.HTTP_200_OK)
 
-class LogoutUserView(APIView):
+class LogoutUserView(BaseAPIView):
     """
     Blacklists the provided refresh token, effectively logging out the user.
     Requires authentication.
@@ -101,7 +101,7 @@ class LogoutUserView(APIView):
             return Response({"error": "Invalid token or token not provided."}, status=status.HTTP_400_BAD_REQUEST)
 
     
-class UserDetailView(APIView):
+class UserDetailView(BaseAPIView):
     """
     Retrieves details of the currently authenticated user.
     Requires authentication.

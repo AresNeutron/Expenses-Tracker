@@ -1,13 +1,12 @@
-# your_app_name/category_views.py
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from ..models import Category
 from ..serializers import CategorySerializer
+from .base import BaseAPIView
 
 # --- Category CRUD Views ---
 
-class CategoryListCreateAPIView(generics.ListCreateAPIView):
+class CategoryListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
     """
     Handles listing all categories for the authenticated user and creating new categories.
     """
@@ -26,7 +25,7 @@ class CategoryListCreateAPIView(generics.ListCreateAPIView):
         """
         serializer.save(user=self.request.user)
 
-class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+class CategoryRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateDestroyAPIView):
     """
     Handles retrieving, updating, and deleting a specific category by ID.
     Ensures users can only interact with their own categories.

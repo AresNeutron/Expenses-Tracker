@@ -3,10 +3,11 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from ..models import Transaction
 from ..serializers import TransactionSerializer
+from .base import BaseAPIView
 
 # --- Transaction CRUD Views ---
 
-class TransactionListCreateAPIView(generics.ListCreateAPIView):
+class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -20,7 +21,7 @@ class TransactionListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user) # Assign the user to the transaction
 
-class TransactionRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+class TransactionRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateDestroyAPIView):
     """
     Handles retrieving, updating, and deleting a specific transaction by ID.
     Ensures users can only interact with their own transactions.

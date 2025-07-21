@@ -1,13 +1,13 @@
 # your_app_name/account_views.py
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from ..models import Account
 from ..serializers import AccountSerializer
+from .base import BaseAPIView
 
 # --- Account CRUD Views ---
 
-class AccountListCreateAPIView(generics.ListCreateAPIView):
+class AccountListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
     """
     Handles listing all accounts for the authenticated user and creating new accounts.
     """
@@ -43,7 +43,7 @@ class AccountListCreateAPIView(generics.ListCreateAPIView):
         
         serializer.save(user=self.request.user)
 
-class AccountRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+class AccountRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateDestroyAPIView):
     """
     Handles retrieving, updating, and deleting a specific account by ID.
     Ensures users can only interact with their own accounts.
