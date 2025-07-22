@@ -1,68 +1,236 @@
-# your_app_name/transaction_views.py
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from ..models import Transaction
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from django.db import transaction as db_transaction
+from django.shortcuts import get_object_or_404
+from ..models import Transaction, Account
 from ..serializers import TransactionSerializer
-from .base import BaseAPIView
+from django.utils import timezone
 
-# --- Transaction CRUD Views ---
-
-class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
+class TransactionViewSet(generics.ListCreateAPIView):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Ensures users only see their own transactions.
-        """
-        # Filter transactions to only show the current user's transactions
-        return Transaction.objects.filter(user=self.request.user).order_by('-date', '-id') # Order by date descending
+        queryset = Transaction.objects.filter(user=self.request.user, deleted_at__isnull=True)
+        return queryset.order_by('-date', '-id')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user) # Assign the user to the transaction
+        transaction_type = serializer.validated_data.get('transaction_type')
+        amount = serializer.validated_data.get('amount')
+        source_account = serializer.validated_data.get('account')
+        category = serializer.validated_data.get('category')
+        notes = serializer.validated_data.get('notes')
+        date = serializer.validated_data.get('date')
+        status_val = serializer.validated_data.get('status', Transaction.CLEARED)
 
-class TransactionRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateDestroyAPIView):
-    """
-    Handles retrieving, updating, and deleting a specific transaction by ID.
-    Ensures users can only interact with their own transactions.
-    """
-    queryset = Transaction.objects.all() # All transactions are loaded first, then filtered by get_object
+        with db_transaction.atomic():
+            if transaction_type == Transaction.TRANSFER:
+                # this field doesn't exists in the model
+                destination_account_id = serializer.validated_data.get('destination_account_id')
+                
+                if not destination_account_id:
+                    raise DRFValidationError({"destination_account_id": "Destination account is required for transfer transactions."})
+                
+                destination_account = get_object_or_404(Account.objects.filter(user=self.request.user), id=destination_account_id.id) 
+
+                if source_account == destination_account:
+                    raise DRFValidationError({"account": "Source and destination accounts cannot be the same for a transfer."})
+
+                # Validar balance de la cuenta de origen (saldrá dinero)
+                source_new_balance = source_account.balance - amount
+                if source_account.acc_type != Account.CARD and source_new_balance < 0:
+                    raise DRFValidationError({"amount": f"Insufficient funds in source account '{source_account.name}'."})
+                if source_account.acc_type == Account.CARD and source_new_balance > 0:
+                    raise DRFValidationError({"amount": f"Credit card account '{source_account.name}' cannot have a positive balance after this transfer."})
+
+                # Validar balance de la cuenta de destino (entrará dinero)
+                dest_new_balance = destination_account.balance + amount
+                if destination_account.acc_type == Account.CARD and dest_new_balance > 0:
+                    raise DRFValidationError({"destination_account_id": f"Credit card account '{destination_account.name}' cannot have a positive balance after receiving this transfer."})
+                if destination_account.acc_type != Account.CARD and dest_new_balance < 0:
+                     # Esto es más un caso de borde, si la cuenta de destino es normal y el monto la hace negativa (por un ajuste, por ejemplo)
+                     # Aunque en una transferencia normal, el monto siempre es positivo para la cuenta de destino.
+                     raise DRFValidationError({"destination_account_id": f"Account '{destination_account.name}' cannot have a negative balance after receiving this transfer."})
+
+                outgoing_transaction = serializer.save(
+                    user=self.request.user,
+                    amount=-amount, # El monto negativo para la salida
+                    transaction_type=Transaction.EXPENSE, # La salida es un gasto desde la perspectiva de la cuenta de origen
+                    linked_transaction=None # Temporalmente nulo, se llenará después
+                )
+
+                incoming_transaction = Transaction.objects.create(
+                    user=self.request.user,
+                    account=destination_account,
+                    transaction_type=Transaction.INCOME,
+                    amount=amount, # El monto positivo para la entrada
+                    category=category,
+                    notes=notes,
+                    date=date,
+                    status=status_val,
+                    linked_transaction=outgoing_transaction # Enlazar la entrada con la salida
+                )
+                
+                outgoing_transaction.linked_transaction = incoming_transaction
+                outgoing_transaction.save(update_fields=['linked_transaction'])
+
+                source_account.balance = source_new_balance
+                destination_account.balance = dest_new_balance
+                
+                source_account.last_transaction_date = date
+                destination_account.last_transaction_date = date
+
+                source_account.save(update_fields=['balance', 'last_transaction_date'])
+                destination_account.save(update_fields=['balance', 'last_transaction_date'])
+
+            else:
+                # Transacción normal (Expense, Income, Adjustment)
+                current_account = source_account
+                calculated_balance = current_account.balance
+
+                if transaction_type == Transaction.EXPENSE:
+                    calculated_balance -= amount
+                elif transaction_type == Transaction.INCOME:
+                    calculated_balance += amount
+                elif transaction_type == Transaction.ADJUSTMENT:
+                    # Para ajustes, el monto puede ser positivo o negativo, se suma directamente.
+                    calculated_balance += amount
+                
+                # Validar el balance después de la transacción
+                if current_account.acc_type != Account.CARD and calculated_balance < 0:
+                    raise DRFValidationError({"amount": f"Transaction would result in a negative balance for account '{current_account.name}'."})
+                if current_account.acc_type == Account.CARD and calculated_balance > 0:
+                    raise DRFValidationError({"amount": f"Credit card account '{current_account.name}' cannot have a positive balance after this transaction."})
+
+                instance = serializer.save(user=self.request.user)
+                
+                current_account.balance = calculated_balance
+                current_account.last_transaction_date = instance.date
+                current_account.save(update_fields=['balance', 'last_transaction_date'])
+
+
+class TransactionRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'pk' # The URL keyword argument for lookup (e.g., /transactions/123/)
+    lookup_field = 'pk'
 
     def get_object(self):
-        """
-        Ensures a user can only retrieve, update, or delete their own transactions.
-        """
-        # Get the transaction based on the lookup field (pk)
         obj = super().get_object()
-        # Check if the retrieved object belongs to the current user
         if obj.user != self.request.user:
             raise generics.exceptions.PermissionDenied("You do not have permission to perform this action on this transaction.")
         return obj
 
     def perform_update(self, serializer):
-        """
-        Performs the update operation.
-        The model's save method will handle balance adjustments.
-        """
-        serializer.save(user=self.request.user) # Ensure user is not changed accidentally
-        
-    def perform_destroy(self, instance):
-        if instance.status in [Transaction.CLEARED, Transaction.RECONCILED]:
-            # Determine the factor for reversal
-            factor = 0
-            if instance.transaction_type == Transaction.EXPENSE:
-                factor = 1 # Adding back for an expense
-            elif instance.transaction_type == Transaction.INCOME:
-                factor = -1 # Subtracting for an income
-            elif instance.transaction_type == Transaction.TRANSFER:
-                factor = 1 # Adding back for an outgoing transfer
-            elif instance.transaction_type == Transaction.ADJUSTMENT:
-                factor = -1 # Subtracting if amount was positive, adding if negative
+        old_instance = self.get_object()
+        old_amount = old_instance.amount
+        old_type = old_instance.transaction_type
+        old_account = old_instance.account
 
-            instance.account.balance += (factor * instance.amount)
-            instance.account.save(update_fields=["balance"])
-        
-        instance.delete()
+        # Deshabilitar actualización de transferencias que afecten balances directamente
+        if old_type == Transaction.TRANSFER or serializer.validated_data.get('transaction_type') == Transaction.TRANSFER:
+            # Puedes permitir actualizar solo 'notes', 'category', 'date', 'status'
+            # Si se intenta cambiar monto, tipo o cuentas, se podría levantar un error
+            if serializer.validated_data.get('amount') != old_amount or \
+               serializer.validated_data.get('account') != old_account or \
+               serializer.validated_data.get('transaction_type') != old_type:
+                raise DRFValidationError("Direct modification of amount, account, or type for transfer transactions is not allowed. Please delete and recreate.")
+            # Si solo se modifican campos que no afectan el balance (e.g., notes, category, date, status)
+            instance = serializer.save(user=self.request.user)
+            # No se actualiza el balance de la cuenta, se asume que solo son metadatos.
+            return
+
+        with db_transaction.atomic():
+            # Revertir el impacto de la transacción antigua
+            current_old_balance = old_account.balance
+            if old_type == Transaction.EXPENSE:
+                current_old_balance += old_amount
+            elif old_type == Transaction.INCOME:
+                current_old_balance -= old_amount
+            elif old_type == Transaction.ADJUSTMENT:
+                current_old_balance -= old_amount
+            old_account.balance = current_old_balance
+            old_account.save(update_fields=['balance'])
+
+            # Guardar la instancia actualizada
+            instance = serializer.save(user=self.request.user)
+
+            # Aplicar el impacto de la nueva transacción
+            new_amount = instance.amount
+            new_type = instance.transaction_type
+            new_account = instance.account
+            calculated_balance = new_account.balance
+
+            if new_type == Transaction.EXPENSE:
+                calculated_balance -= new_amount
+            elif new_type == Transaction.INCOME:
+                calculated_balance += new_amount
+            elif new_type == Transaction.ADJUSTMENT:
+                calculated_balance += new_amount
+            
+            # Validar el balance resultante
+            if new_account.acc_type != Account.CARD and calculated_balance < 0:
+                # Revertir y levantar error si la validación falla
+                old_account.balance -= old_amount if old_type == Transaction.EXPENSE else -old_amount if old_type == Transaction.INCOME else -old_amount # Revertir el rollback previo
+                old_account.save(update_fields=['balance'])
+                raise DRFValidationError({"amount": f"Update would result in a negative balance for account '{new_account.name}'."})
+            if new_account.acc_type == Account.CARD and calculated_balance > 0:
+                old_account.balance -= old_amount if old_type == Transaction.EXPENSE else -old_amount if old_type == Transaction.INCOME else -old_amount
+                old_account.save(update_fields=['balance'])
+                raise DRFValidationError({"amount": f"Credit card account '{new_account.name}' cannot have a positive balance after this update."})
+
+            new_account.balance = calculated_balance
+            new_account.last_transaction_date = instance.date
+            new_account.save(update_fields=['balance', 'last_transaction_date'])
+
+    def perform_destroy(self, instance):
+        with db_transaction.atomic():
+            if instance.transaction_type == Transaction.TRANSFER:
+                linked_tx = instance.linked_transaction
+                if linked_tx:
+                    # Revertir el balance de la cuenta de la transacción original (la que se está eliminando)
+                    source_account_tx = instance.account
+                    if instance.amount < 0: # Si es la transacción de salida original
+                        source_account_tx.balance += abs(instance.amount) # Sumar el monto de vuelta
+                    else: # Si es la transacción de entrada original
+                        source_account_tx.balance -= instance.amount # Restar el monto
+                    source_account_tx.save(update_fields=['balance'])
+
+                    # Revertir el balance de la cuenta de la transacción vinculada
+                    dest_account_tx = linked_tx.account
+                    if linked_tx.amount < 0: # Si la vinculada es de salida
+                        dest_account_tx.balance += abs(linked_tx.amount)
+                    else: # Si la vinculada es de entrada
+                        dest_account_tx.balance -= linked_tx.amount
+                    dest_account_tx.save(update_fields=['balance'])
+
+                    # Marcar ambas como eliminadas/void
+                    instance.deleted_at = timezone.now()
+                    instance.status = Transaction.VOID
+                    instance.save(update_fields=['deleted_at', 'status'])
+
+                    linked_tx.deleted_at = timezone.now()
+                    linked_tx.status = Transaction.VOID
+                    linked_tx.save(update_fields=['deleted_at', 'status'])
+                else:
+                    # Esto no debería ocurrir si las transferencias se crean en pares
+                    raise DRFValidationError("Linked transaction not found for transfer. Manual correction may be needed.")
+
+            else:
+                # Transacción normal (Expense, Income, Adjustment)
+                account = instance.account
+                # Revertir el impacto en el balance
+                if instance.transaction_type == Transaction.EXPENSE:
+                    account.balance += instance.amount
+                elif instance.transaction_type == Transaction.INCOME:
+                    account.balance -= instance.amount
+                elif instance.transaction_type == Transaction.ADJUSTMENT:
+                    account.balance -= instance.amount
+                
+                account.save(update_fields=['balance'])
+
+                # Realizar la eliminación suave de la transacción actual
+                instance.deleted_at = timezone.now()
+                instance.status = Transaction.VOID
+                instance.save(update_fields=['deleted_at', 'status'])
