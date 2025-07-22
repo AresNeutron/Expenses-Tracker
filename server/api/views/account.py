@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import exceptions
 from ..models import Account
 from ..serializers import AccountSerializer
 from .base import BaseAPIView
@@ -34,7 +35,7 @@ class AccountRetrieveDestroyAPIView(BaseAPIView, generics.RetrieveAPIView, gener
     def get_object(self):
         obj = super().get_object()
         if obj.user != self.request.user:
-            raise generics.exceptions.PermissionDenied("You do not have permission to perform this action on this account.")
+            raise exceptions.PermissionDenied("You do not have permission to perform this action on this account.")
         return obj
 
     # Deshabilitar explícitamente la actualización (PUT y PATCH)
