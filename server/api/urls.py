@@ -2,9 +2,8 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views.authentication import RegisterUserView, LoginUserView, LogoutUserView, UserDetailView
 from .views.transaction import TransactionListCreateAPIView, TransactionRetrieveUpdateDestroyAPIView
-from .views.account import AccountListCreateAPIView, AccountRetrieveUpdateDestroyAPIView
+from .views.account import AccountListCreateAPIView, AccountRetrieveDestroyAPIView
 from .views.category import CategoryListCreateAPIView, CategoryRetrieveUpdateDestroyAPIView
-
 
 urlpatterns = [
     # --- Authentication & User Management URLs ---
@@ -20,7 +19,7 @@ urlpatterns = [
 
     # --- Account URLs ---
     path('accounts/', AccountListCreateAPIView.as_view(), name='account-list-create'),
-    path('accounts/<int:pk>/', AccountRetrieveUpdateDestroyAPIView.as_view(), name='account-detail'),
+    path('accounts/<int:pk>/', AccountRetrieveDestroyAPIView.as_view(), name='account-detail'),
 
     # --- Category URLs ---
     path('categories/', CategoryListCreateAPIView.as_view(), name='category-list-create'),
