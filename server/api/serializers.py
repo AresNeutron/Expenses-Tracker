@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.core.validators import RegexValidator
 from .models import Account, Category, Transaction
+from decimal import Decimal
 
 class AccountSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
@@ -79,7 +80,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     amount = serializers.DecimalField(
         max_digits=10,
         decimal_places=2,
-        min_value=0.01,
+        min_value=Decimal('0.01'),
         error_messages={
             'min_value': 'Transaction amount must be greater than zero.'
         }
