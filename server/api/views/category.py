@@ -1,12 +1,15 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from ..models import Category
 from ..serializers import CategorySerializer
+from django.db import models
+from rest_framework import serializers
 from .base import BaseAPIView
 
 # --- Category CRUD Views ---
 
-class CategoryListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
+class CategoryListCreateAPIView(BaseAPIView, generics.ListCreateAPIView): # BaseAPIView eliminada si no es necesaria
     """
     Handles listing all categories for the authenticated user and creating new categories.
     """
@@ -25,12 +28,13 @@ class CategoryListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         """
         serializer.save(user=self.request.user)
 
+
 class CategoryRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateDestroyAPIView):
     """
     Handles retrieving, updating, and deleting a specific category by ID.
     Ensures users can only interact with their own categories.
     """
-    queryset = Category.objects.all()
+    queryset = Category.objects.all() # Se filtra por get_object para seguridad
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'pk'
@@ -41,7 +45,7 @@ class CategoryRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateD
         """
         obj = super().get_object()
         if obj.user != self.request.user:
-            raise generics.exceptions.PermissionDenied("You do not have permission to perform this action on this category.")
+            raise PermissionDenied("You do not have permission to perform this action on this category.") # ¡Uso corregido!
         return obj
 
     def perform_destroy(self, instance):
@@ -49,5 +53,13 @@ class CategoryRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateD
         Performs the delete operation for a category.
         Due to `on_delete=models.PROTECT` on Transaction, deleting a category with
         associated transactions will raise a ProtectedError. This is desired behavior.
+
+        Consider implementing soft delete for categories if desired,
+        to avoid ProtectedError directly.
         """
-        instance.delete()# your_app_name/category_views.py
+        try:
+            instance.delete()
+        except models.ProtectedError as e: # Asegúrate de importar `models` de Django
+            raise serializers.ValidationError(
+                {"detail": f"Cannot delete category '{instance.name}' because it has associated transactions. Please reassign transactions first."}
+            ) from e

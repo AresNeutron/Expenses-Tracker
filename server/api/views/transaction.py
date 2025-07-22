@@ -14,7 +14,27 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Transaction.objects.filter(user=self.request.user, deleted_at__isnull=True)
+
+        # --- Lógica de filtrado manual (si no usas DjangoFilterBackend) ---
+        transaction_type = self.request.query_params.get('transaction_type')
+        if transaction_type:
+            queryset = queryset.filter(transaction_type=transaction_type)
+
+        account = self.request.query_params.get('account')
+        if account:
+            queryset = queryset.filter(account=account)
+
+        category = self.request.query_params.get('category')
+        if category:
+            queryset = queryset.filter(category=category)
+
         return queryset.order_by('-date', '-id')
+    
+    def get_serializer_context(self):
+        """
+        Extra context provided to the serializer class for filtering related fields.
+        """
+        return {'request': self.request}
 
     def perform_create(self, serializer):
         transaction_type = serializer.validated_data.get('transaction_type')
