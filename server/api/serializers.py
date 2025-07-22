@@ -68,6 +68,13 @@ class CategoryNestedSerializer(serializers.ModelSerializer):
 class TransactionSerializer(serializers.ModelSerializer):
     account_name = serializers.CharField(source='account.name', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
+    
+    destination_account_id = serializers.PrimaryKeyRelatedField(
+        queryset=Account.objects.all(), 
+        write_only=True, 
+        required=False, 
+        allow_null=True 
+    )
 
     amount = serializers.DecimalField(
         max_digits=10,
@@ -80,25 +87,27 @@ class TransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = "__all__"
+        fields = "__all__" + ('destination_account_id',)
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
 
     def validate(self, data):
         transaction_type = data.get('transaction_type')
         linked_transaction = data.get('linked_transaction')
-        account = data.get('account')
+        account = data.get('account') # Esta es la cuenta de origen
 
-        if transaction_type == Transaction.TRANSFER and not linked_transaction:
-            raise serializers.ValidationError({"linked_transaction": "Transfer transactions must have a linked transaction."})
+        # Validar que destination_account_id exista y no sea la misma cuenta de origen si es una transferencia
+        if transaction_type == Transaction.TRANSFER:
+            destination_account = data.get('destination_account_id') # Ahora lo obtenemos de validated_data
+            if not destination_account: # Si el campo no fue provisto
+                raise serializers.ValidationError({"destination_account_id": "Destination account is required for transfer transactions."})
+            
+            if account and destination_account == account: # Compara objetos Account
+                raise serializers.ValidationError({"account": "Source and destination accounts cannot be the same for a transfer."})
 
         current_id = self.instance.id if self.instance else None
         linked_id = linked_transaction.id if linked_transaction else None
         
         if linked_id and current_id == linked_id:
             raise serializers.ValidationError({'linked_transaction': 'A transaction cannot be linked to itself.'})
-
-        if transaction_type == Transaction.TRANSFER and linked_transaction:
-            if account and linked_transaction.account == account:
-                raise serializers.ValidationError({'account': 'Transfer transactions must involve different accounts.'})
 
         return data
