@@ -87,7 +87,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = "__all__" + ('destination_account_id',)
+        fields = "__all__" + ('destination_account_id')
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
 
     def validate(self, data):

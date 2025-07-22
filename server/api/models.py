@@ -18,6 +18,7 @@ class Account(models.Model):
     user            = models.ForeignKey(User, on_delete=models.CASCADE, related_name="accounts", db_index=True)
     name            = models.CharField(max_length=100, db_index=True)
     acc_type        = models.CharField(max_length=10, choices=ACCOUNT_TYPES, default=BANK, db_index=True)
+    currency        = models.CharField(max_length=3, default="USD", db_index=True)
     balance         = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     initial_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     is_active       = models.BooleanField(default=True, db_index=True)
