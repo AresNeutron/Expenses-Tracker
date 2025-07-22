@@ -49,7 +49,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'user', 'name', 'parent_category', 'color', 'is_expense', 'icon']
+        read_only_fields = ['user']
 
         validators = [
             serializers.UniqueTogetherValidator(
@@ -67,8 +68,16 @@ class CategoryNestedSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    account_name = serializers.CharField(source='account.name', read_only=True)
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    account = serializers.PrimaryKeyRelatedField(
+        queryset=Account.objects.all(),
+        error_messages={'does_not_exist': "Account not found or does not belong to you."}
+    )
+
+    # Similar para category
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        error_messages={'does_not_exist': "Category not found or does not belong to you."}
+    )
     
     destination_account_id = serializers.PrimaryKeyRelatedField(
         queryset=Account.objects.all(), 
@@ -88,8 +97,17 @@ class TransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = "__all__" + ('destination_account_id')
+        fields = ['id', 'user', 'account', 'transaction_type', 'linked_transaction', 'status', 'category', 
+                  'amount', 'notes', 'date', 'destination_account_id']
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'request' in self.context:
+            user = self.context['request'].user
+            self.fields['account'].queryset = Account.objects.filter(user=user)
+            self.fields['category'].queryset = Category.objects.filter(user=user)
+            self.fields['destination_account_id'].queryset = Account.objects.filter(user=user)
 
     def validate(self, data):
         transaction_type = data.get('transaction_type')
