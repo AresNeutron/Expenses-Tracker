@@ -16,12 +16,6 @@ class DefaultCategory(models.Model):
     
     class Meta:
         ordering = ['order', 'name']
-        # constraints = [
-            # models.CheckConstraint(
-            #     check=Q(color__regex=r'^#[0-9A-Fa-f]{6}$'),
-            #     name='default_category_valid_hex_color'
-            # ),
-        # ]
     
     def __str__(self):
         return f"{self.name} ({'Expense' if self.is_expense else 'Income'})"
