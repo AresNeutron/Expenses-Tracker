@@ -1,4 +1,4 @@
-import { Transaction, Account, Category, CreateAccountPayload, CreateTransactionPayload, CreateCategoryPayload } from "./api_interfaces";
+import { Transaction, Account, Category, CreateAccountPayload, CreateTransactionPayload, CreateCategoryPayload, DefaultCategory } from "./api_interfaces";
 
 // Interfaz para las propiedades del contexto (lo que provee el ExpenseProvider)
 export interface ExpenseContextProps {
@@ -31,4 +31,6 @@ export interface ExpenseContextProps {
   fetchCategories: () => Promise<void>;
   createCategory: (newCategory: CreateCategoryPayload) => Promise<Category | undefined>;
   deleteCategory: (id: number) => Promise<void>;
+
+  memorizedCategories: DefaultCategory[];
 }

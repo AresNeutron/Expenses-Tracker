@@ -32,6 +32,15 @@ export interface Category {
   updated_at: string; // Las fechas se reciben del backend
 }
 
+export interface DefaultCategory {
+  id: number;
+  name: string;
+  is_expense: boolean;
+  icon: string;
+  color: string;
+  order: number;
+}
+
 export interface Transaction {
   id: number;
   user: number;
@@ -62,8 +71,6 @@ export interface CreateCategoryPayload {
   is_expense?: boolean; // Opcional, tiene un default en el backend
   icon?: string; // Opcional, tiene un default en el backend
   color?: string; // Opcional, tiene un default en el backend
-  order?: number; // Opcional, tiene un default en el backend
-  is_active?: boolean; // Opcional, tiene un default en el backend
 }
 
 export interface CreateTransactionPayload {

@@ -1,5 +1,5 @@
 // services/categories.ts
-import { Category, CreateCategoryPayload } from "../interfaces/api_interfaces";
+import { Category, CreateCategoryPayload, DefaultCategory } from "../interfaces/api_interfaces";
 import api from "./api";
 
 export const getCategories = async (): Promise<Category[]> => {
@@ -11,6 +11,18 @@ export const getCategories = async (): Promise<Category[]> => {
     throw error;
   }
 };
+
+
+export const getDefaultCategories = async (): Promise<DefaultCategory[]> => {
+  try {
+    const response = await api.get<DefaultCategory[]>("/categories/default/");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    throw error;
+  }
+};
+
 
 export const createCategory = async (category: CreateCategoryPayload): Promise<Category> => {
   try {

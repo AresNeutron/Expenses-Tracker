@@ -4,7 +4,6 @@ import "./globals.css";
 import ExpenseProvider from "./components/Context";
 import ThemeToggle from "./components/ThemeToggle";
 import GlobalBackground from "./components/GlobalBackground";
-import Navbar from "./components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +29,6 @@ export default function RootLayout({
      <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <GlobalBackground />
-        <Navbar/>
         <div className="relative flex flex-col min-h-screen">
           <ExpenseProvider>
             <ThemeToggle />

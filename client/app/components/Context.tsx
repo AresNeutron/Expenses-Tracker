@@ -9,6 +9,7 @@ import React, {
   useContext,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { isTokenValid, setupTokenRefresh } from "../utils/tokens";
 import {
@@ -18,6 +19,7 @@ import {
   CreateAccountPayload,
   CreateTransactionPayload,
   CreateCategoryPayload,
+  DefaultCategory,
 } from "../interfaces/api_interfaces"; // Asegúrate de que todas las interfaces están importadas
 
 // Importar funciones API
@@ -33,10 +35,12 @@ import {
 } from "../services/accounts";
 import {
   getCategories,
+  getDefaultCategories,
   createCategory as apiCreateCategory,
   deleteCategory as apiDeleteCategory,
 } from "../services/categories";
 import { ExpenseContextProps } from "../interfaces/interfaces";
+import Navbar from "./Navbar";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
   undefined
@@ -54,6 +58,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const [expenses, setExpenses] = useState<Transaction[]>([]); // Renombrado a `expenses` pero almacena `Transaction`
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [defaultCategories, setDefaultCategories] = useState<DefaultCategory[]>([]);
 
   const router = useRouter();
 
@@ -179,6 +184,23 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     initializeAuthAndData();
   }, [router, setIsAuth, fetchTransactions, fetchAccounts, fetchCategories]); // Asegúrate de incluir todas las dependencias
 
+  useEffect(()=> {
+    const fetchCategories = async () => {
+      try {
+        const data = await getDefaultCategories();
+        setDefaultCategories(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCategories();
+  })
+
+  const memorizedCategories = useMemo(() => {
+    return defaultCategories;
+  }, [defaultCategories]);
+
   return (
     <ExpenseContext.Provider
       value={{
@@ -201,8 +223,10 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         fetchCategories,
         createCategory,
         deleteCategory,
+        memorizedCategories,
       }}
     >
+      {isAuth && <Navbar/>}
       {children}
     </ExpenseContext.Provider>
   );
