@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ExpenseProvider from "./components/Context";
-import Navbar from "./components/Navbar";
 import ThemeToggle from "./components/ThemeToggle";
 import GlobalBackground from "./components/GlobalBackground";
 
@@ -32,7 +31,6 @@ export default function RootLayout({
         <GlobalBackground />
         <div className="relative flex flex-col min-h-screen">
           <ExpenseProvider>
-            <Navbar />
             <ThemeToggle />
             <main className="flex-1">{children}</main>
           </ExpenseProvider>

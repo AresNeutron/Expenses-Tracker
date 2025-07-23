@@ -15,8 +15,10 @@ import {
   Transaction, // Importar Transaction
   Account,
   Category,
-  ExpenseContextProps,
-} from "../interfaces/interfaces"; // Asegúrate de que todas las interfaces están importadas
+  CreateAccountPayload,
+  CreateTransactionPayload,
+  CreateCategoryPayload,
+} from "../interfaces/api_interfaces"; // Asegúrate de que todas las interfaces están importadas
 
 // Importar funciones API
 import {
@@ -34,6 +36,7 @@ import {
   createCategory as apiCreateCategory,
   deleteCategory as apiDeleteCategory,
 } from "../services/categories";
+import { ExpenseContextProps } from "../interfaces/interfaces";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
   undefined
@@ -64,7 +67,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const createTransaction = useCallback(async (newTransaction: Omit<Transaction, 'id' | 'user'>) => {
+  const createTransaction = useCallback(async (newTransaction: CreateTransactionPayload) => {
     try {
       const created = await apiCreateTransaction(newTransaction);
       setExpenses((prev) => [...prev, created]);
@@ -94,7 +97,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const createAccount = useCallback(async (newAccount: Omit<Account, 'id' | 'user' | 'balance' | 'initial_balance' | 'is_active'>) => {
+  const createAccount = useCallback(async (newAccount: CreateAccountPayload) => {
     try {
       const created = await apiCreateAccount(newAccount);
       setAccounts((prev) => [...prev, created]);
@@ -124,7 +127,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const createCategory = useCallback(async (newCategory: Omit<Category, 'id' | 'user'>) => {
+  const createCategory = useCallback(async (newCategory: CreateCategoryPayload) => {
     try {
       const created = await apiCreateCategory(newCategory);
       setCategories((prev) => [...prev, created]);

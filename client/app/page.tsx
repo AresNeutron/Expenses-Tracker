@@ -20,7 +20,7 @@ export default function Login() {
     setErrors([]) // Clear any previous errors
     try {
       console.log("Payload:", { identifier, password })
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/logout/`, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/login/`, {
         identifier,
         password,
       })
