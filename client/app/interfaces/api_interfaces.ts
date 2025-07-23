@@ -51,8 +51,9 @@ export interface Transaction {
 
 export interface CreateAccountPayload {
   name: string;
-  acc_type: string;
+  acc_type: AccountType;
   currency: string;
+  initial_balance: string;
 }
 
 export interface CreateCategoryPayload {
@@ -67,9 +68,9 @@ export interface CreateCategoryPayload {
 
 export interface CreateTransactionPayload {
   account: number;
-  transaction_type: string;
+  transaction_type: TransactionType;
   linked_transaction?: number | null; // Opcional, puede ser null
-  status?: string; // Opcional, tiene un default en el backend
+  status?: TransactionStatus; // Opcional, tiene un default en el backend
   category: number;
   amount: string;
   notes?: string; // Opcional

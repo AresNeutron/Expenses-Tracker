@@ -1,4 +1,4 @@
-import { Transaction, Account, Category } from "./api_interfaces";
+import { Transaction, Account, Category, CreateAccountPayload, CreateTransactionPayload, CreateCategoryPayload } from "./api_interfaces";
 
 // Interfaz para las propiedades del contexto (lo que provee el ExpenseProvider)
 export interface ExpenseContextProps {
@@ -19,16 +19,16 @@ export interface ExpenseContextProps {
 
   // Funciones API para Transacciones
   fetchTransactions: () => Promise<void>; // Renombrado de fetchExpenses
-  createTransaction: (newTransaction: Omit<Transaction, 'id' | 'user'>) => Promise<Transaction | undefined>;
+  createTransaction: (newTransaction: CreateTransactionPayload) => Promise<Transaction | undefined>;
   deleteTransaction: (id: number) => Promise<void>;
 
   // Funciones API para Cuentas
   fetchAccounts: () => Promise<void>;
-  createAccount: (newAccount: Omit<Account, 'id' | 'user' | 'balance' | 'initial_balance' | 'is_active'>) => Promise<Account | undefined>;
+  createAccount: (newAccount: CreateAccountPayload) => Promise<Account | undefined>;
   deleteAccount: (id: number) => Promise<void>;
 
   // Funciones API para Categorías
   fetchCategories: () => Promise<void>;
-  createCategory: (newCategory: Omit<Category, 'id' | 'user'>) => Promise<Category | undefined>;
+  createCategory: (newCategory: CreateCategoryPayload) => Promise<Category | undefined>;
   deleteCategory: (id: number) => Promise<void>;
 }
