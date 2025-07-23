@@ -1,6 +1,6 @@
 // services/transactions.ts
+import { CreateTransactionPayload, Transaction } from "../interfaces/api_interfaces";
 import api from "./api";
-import { Transaction } from "../interfaces/interfaces"; // Importar Transaction
 
 export const getTransactions = async (): Promise<Transaction[]> => {
   try {
@@ -12,7 +12,7 @@ export const getTransactions = async (): Promise<Transaction[]> => {
   }
 };
 
-export const createTransaction = async (transaction: Omit<Transaction, 'id' | 'user'>): Promise<Transaction> => {
+export const createTransaction = async (transaction: CreateTransactionPayload): Promise<Transaction> => {
   try {
     const response = await api.post<Transaction>("/transactions/", transaction);
     return response.data;

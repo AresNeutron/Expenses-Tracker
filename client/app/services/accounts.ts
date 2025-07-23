@@ -1,6 +1,6 @@
 // services/accounts.ts
+import { Account, CreateAccountPayload } from "../interfaces/api_interfaces";
 import api from "./api";
-import { Account } from "../interfaces/interfaces";
 
 export const getAccounts = async (): Promise<Account[]> => {
   try {
@@ -12,7 +12,7 @@ export const getAccounts = async (): Promise<Account[]> => {
   }
 };
 
-export const createAccount = async (account: Omit<Account, 'id' | 'user' | 'balance' | 'initial_balance' | 'is_active'>): Promise<Account> => {
+export const createAccount = async (account: CreateAccountPayload): Promise<Account> => {
   try {
     // Cuando creas una cuenta, el backend probablemente calculará 'balance', 'initial_balance' y 'is_active'.
     // Por eso los omitimos en el tipo de entrada. Si tu API espera un `initial_balance` explícito, ajústalo.
