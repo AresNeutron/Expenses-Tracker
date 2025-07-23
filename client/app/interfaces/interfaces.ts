@@ -56,17 +56,14 @@ export interface ExpenseContextProps {
   fetchTransactions: () => Promise<void>; // Renombrado de fetchExpenses
   createTransaction: (newTransaction: Omit<Transaction, 'id' | 'user'>) => Promise<Transaction | undefined>;
   deleteTransaction: (id: number) => Promise<void>;
-  updateTransaction: (id: number, updatedTransaction: Transaction) => Promise<Transaction | undefined>;
 
   // Funciones API para Cuentas
   fetchAccounts: () => Promise<void>;
   createAccount: (newAccount: Omit<Account, 'id' | 'user' | 'balance' | 'initial_balance' | 'is_active'>) => Promise<Account | undefined>;
   deleteAccount: (id: number) => Promise<void>;
-  updateAccount: (id: number, updatedAccount: Account) => Promise<Account | undefined>;
 
   // Funciones API para Categorías
   fetchCategories: () => Promise<void>;
   createCategory: (newCategory: Omit<Category, 'id' | 'user'>) => Promise<Category | undefined>;
   deleteCategory: (id: number) => Promise<void>;
-  updateCategory: (id: number, updatedCategory: Category) => Promise<Category | undefined>;
 }

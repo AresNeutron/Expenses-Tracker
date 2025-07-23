@@ -23,19 +23,16 @@ import {
   getTransactions, // Renombrado
   createTransaction as apiCreateTransaction, // Renombrado y aliased
   deleteTransaction as apiDeleteTransaction, // Renombrado y aliased
-  updateTransaction as apiUpdateTransaction, // Renombrado y aliased
 } from "../services/transactions"; // Ruta y nombre de archivo actualizado
 import {
   getAccounts,
   createAccount as apiCreateAccount,
   deleteAccount as apiDeleteAccount,
-  updateAccount as apiUpdateAccount,
 } from "../services/accounts";
 import {
   getCategories,
   createCategory as apiCreateCategory,
   deleteCategory as apiDeleteCategory,
-  updateCategory as apiUpdateCategory,
 } from "../services/categories";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
@@ -87,19 +84,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const updateTransaction = useCallback(async (id: number, updatedTransaction: Transaction) => {
-    try {
-      const updated = await apiUpdateTransaction(id, updatedTransaction);
-      setExpenses((prev) =>
-        prev.map((exp) => (exp.id === id ? updated : exp))
-      );
-      return updated;
-    } catch (error) {
-      console.error("Failed to update transaction:", error);
-      return undefined;
-    }
-  }, []);
-
   // --- Funciones API para Cuentas ---
   const fetchAccounts = useCallback(async () => {
     try {
@@ -127,19 +111,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       setAccounts((prev) => prev.filter((acc) => acc.id !== id));
     } catch (error) {
       console.error("Failed to delete account:", error);
-    }
-  }, []);
-
-  const updateAccount = useCallback(async (id: number, updatedAccount: Account) => {
-    try {
-      const updated = await apiUpdateAccount(id, updatedAccount);
-      setAccounts((prev) =>
-        prev.map((acc) => (acc.id === id ? updated : acc))
-      );
-      return updated;
-    } catch (error) {
-      console.error("Failed to update account:", error);
-      return undefined;
     }
   }, []);
 
@@ -173,18 +144,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const updateCategory = useCallback(async (id: number, updatedCategory: Category) => {
-    try {
-      const updated = await apiUpdateCategory(id, updatedCategory);
-      setCategories((prev) =>
-        prev.map((cat) => (cat.id === id ? updated : cat))
-      );
-      return updated;
-    } catch (error) {
-      console.error("Failed to update category:", error);
-      return undefined;
-    }
-  }, []);
 
   // Configuración del refresco de token e inicio de carga de datos al montar el componente
   useEffect(() => {
@@ -200,7 +159,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
             fetchAccounts(),
             fetchCategories(),
           ]);
-          router.push("/pages/dashboard"); // Redirigir al dashboard SOLO después de cargar datos
         } else {
           console.log("Your session expired. Please log in again.");
           setIsAuth(false);
@@ -234,15 +192,12 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         fetchTransactions, // Función para transacciones
         createTransaction,
         deleteTransaction,
-        updateTransaction,
         fetchAccounts,
         createAccount,
         deleteAccount,
-        updateAccount,
         fetchCategories,
         createCategory,
         deleteCategory,
-        updateCategory,
       }}
     >
       {children}
