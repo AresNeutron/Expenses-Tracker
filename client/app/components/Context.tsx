@@ -195,7 +195,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     };
 
     fetchCategories();
-  })
+  }, [])
 
   const memorizedCategories = useMemo(() => {
     return defaultCategories;

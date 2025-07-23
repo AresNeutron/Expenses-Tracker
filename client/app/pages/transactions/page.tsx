@@ -10,7 +10,7 @@ const TransactionsPage: React.FC = () => {
   const {
     expenses,
     accounts,
-    categories,
+    categories, // Estas son las categorías creadas por el usuario (y posiblemente algunas por defecto si el backend las retorna aquí también)
     fetchTransactions,
     fetchAccounts,
     fetchCategories,
@@ -24,7 +24,6 @@ const TransactionsPage: React.FC = () => {
 
   // Estados para el formulario de nueva transacción
   const [newTransactionAmount, setNewTransactionAmount] = useState("");
-  const [newTransactionDate, setNewTransactionDate] = useState(new Date().toISOString().split('T')[0]); // Formato YYYY-MM-DD
   const [newTransactionAccount, setNewTransactionAccount] = useState("");
   const [newTransactionCategory, setNewTransactionCategory] = useState("");
   const [newTransactionType, setNewTransactionType] = useState<TransactionType>("expense"); // "expense" EN MINÚSCULAS
@@ -49,18 +48,18 @@ const TransactionsPage: React.FC = () => {
 
     const payload: CreateTransactionPayload = {
       amount: newTransactionAmount,
-      date: newTransactionDate + "T00:00:00Z", // Añadir hora y Z para UTC si el backend lo espera
       account: parseInt(newTransactionAccount),
       category: parseInt(newTransactionCategory),
       transaction_type: newTransactionType,
       notes: newTransactionNotes,
     };
 
+    console.log(payload);
+
     const created = await createTransaction(payload);
     if (created) {
       // Reset form fields
       setNewTransactionAmount("");
-      setNewTransactionDate(new Date().toISOString().split('T')[0]);
       setNewTransactionAccount("");
       setNewTransactionCategory("");
       setNewTransactionType("expense");
@@ -111,9 +110,6 @@ const TransactionsPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {expenses.map((transaction) => (
                   <tr key={transaction.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(transaction.date).toLocaleDateString()}
-                    </td>
                     <td
                       className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
                         transaction.transaction_type === "expense"
@@ -189,18 +185,6 @@ const TransactionsPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label htmlFor="transactionDate" className="block text-gray-700 text-sm font-bold mb-2">
-                    Date:
-                  </label>
-                  <input
-                    type="date"
-                    id="transactionDate"
-                    value={newTransactionDate}
-                    onChange={(e) => setNewTransactionDate(e.target.value)}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div>
                   <label htmlFor="transactionAccount" className="block text-gray-700 text-sm font-bold mb-2">
                     Account:
                   </label>
@@ -231,11 +215,26 @@ const TransactionsPage: React.FC = () => {
                     className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
                     <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
+                    {/* Opciones para categorías por defecto */}
+                    {memorizedCategories && memorizedCategories.length > 0 && (
+                      <optgroup label="Default Categories">
+                        {memorizedCategories.map((cat) => (
+                          <option key={`default-${cat.id}`} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {/* Opciones para categorías de usuario */}
+                    {categories && categories.length > 0 && (
+                      <optgroup label="Your Categories">
+                        {categories.map((cat) => (
+                          <option key={`user-${cat.id}`} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                   <button
                     onClick={() => setShowManageCategoriesModal(true)}

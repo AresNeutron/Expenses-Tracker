@@ -51,7 +51,6 @@ export interface Transaction {
   category: number; // El ID de la categoría asociada
   amount: string; // DecimalField en Django se mapea a string en TS
   notes: string;
-  date: string; // La fecha de la transacción
   created_at: string; // Las fechas se reciben del backend
   updated_at: string; // Las fechas se reciben del backend
 }
@@ -81,5 +80,4 @@ export interface CreateTransactionPayload {
   category: number;
   amount: string;
   notes?: string; // Opcional
-  date: string; // La fecha de la transacción
 }
