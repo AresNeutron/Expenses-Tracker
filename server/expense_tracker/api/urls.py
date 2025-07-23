@@ -4,6 +4,7 @@ from .views.authentication import RegisterUserView, LoginUserView, LogoutUserVie
 from .views.transaction import TransactionListCreateAPIView, TransactionRetrieveUpdateDestroyAPIView
 from .views.account import AccountListCreateAPIView, AccountRetrieveDestroyAPIView
 from .views.category import CategoryListCreateAPIView, CategoryRetrieveUpdateDestroyAPIView
+from .views.default_category import DefaultCategoryListView
 
 urlpatterns = [
     # --- Authentication & User Management URLs ---
@@ -24,4 +25,7 @@ urlpatterns = [
     # --- Category URLs ---
     path('categories/', CategoryListCreateAPIView.as_view(), name='category-list-create'),
     path('categories/<int:pk>/', CategoryRetrieveUpdateDestroyAPIView.as_view(), name='category-detail'),
+
+    # --- Default Categories URL
+    path('categories/default/', DefaultCategoryListView.as_view(), name='category-default-list'),
 ]

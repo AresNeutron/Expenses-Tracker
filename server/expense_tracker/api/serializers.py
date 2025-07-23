@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from .default_categories import DefaultCategory
 from django.core.validators import RegexValidator
 from .models import Account, Category, Transaction
 from decimal import Decimal
@@ -130,3 +131,9 @@ class TransactionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'linked_transaction': 'A transaction cannot be linked to itself.'})
 
         return data
+    
+
+class DefaultCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DefaultCategory
+        fields = '__all__'
