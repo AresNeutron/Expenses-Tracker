@@ -22,16 +22,6 @@ export const createCategory = async (category: Omit<Category, 'id' | 'user'>): P
   }
 };
 
-export const updateCategory = async (id: number, category: Category): Promise<Category> => {
-  try {
-    const response = await api.put<Category>(`/categories/${id}/`, category);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating category:", error);
-    throw error;
-  }
-};
-
 export const deleteCategory = async (id: number): Promise<void> => {
   try {
     await api.delete(`/categories/${id}/`);

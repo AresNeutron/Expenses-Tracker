@@ -24,16 +24,6 @@ export const createAccount = async (account: Omit<Account, 'id' | 'user' | 'bala
   }
 };
 
-export const updateAccount = async (id: number, account: Account): Promise<Account> => {
-  try {
-    const response = await api.put<Account>(`/accounts/${id}/`, account);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating account:", error);
-    throw error;
-  }
-};
-
 export const deleteAccount = async (id: number): Promise<void> => {
   try {
     await api.delete(`/accounts/${id}/`);

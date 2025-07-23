@@ -22,16 +22,6 @@ export const createTransaction = async (transaction: Omit<Transaction, 'id' | 'u
   }
 };
 
-export const updateTransaction = async (id: number, transaction: Transaction): Promise<Transaction> => {
-  try {
-    const response = await api.put<Transaction>(`/transactions/${id}/`, transaction);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating transaction:", error);
-    throw error;
-  }
-};
-
 export const deleteTransaction = async (id: number): Promise<void> => {
   try {
     await api.delete(`/transactions/${id}/`);
