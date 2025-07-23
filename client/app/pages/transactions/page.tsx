@@ -16,6 +16,7 @@ const TransactionsPage: React.FC = () => {
     fetchCategories,
     createTransaction,
     deleteTransaction,
+    memorizedCategories // las categorías por defecto están ya importadas en este archivo, sólo hay que usarlas
   } = useExpenseContext();
 
   const [showCreateTransactionModal, setShowCreateTransactionModal] = useState(false);
@@ -166,9 +167,9 @@ const TransactionsPage: React.FC = () => {
                     onChange={(e) => setNewTransactionType(e.target.value as TransactionType)}
                     className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
-                    <option value="EXPENSE">Expense</option>
-                    <option value="INCOME">Income</option>
-                    <option value="TRANSFER">Transfer</option>
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                    <option value="transfer">Transfer</option>
                   </select>
                 </div>
                 <div>

@@ -1,7 +1,5 @@
 from django.db import models
-# from django.db.models import Q
 
-# --- DefaultCategory Model for System Categories ---
 class DefaultCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
     is_expense = models.BooleanField(default=True)
@@ -9,10 +7,6 @@ class DefaultCategory(models.Model):
     color = models.CharField(max_length=7, default='#6B7280')  # Hex color
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
-    
-    # Optional parent for hierarchical default categories (if needed, otherwise remove)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
-                              related_name='children')
     
     class Meta:
         ordering = ['order', 'name']

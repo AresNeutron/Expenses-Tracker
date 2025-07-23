@@ -155,25 +155,24 @@ class Transaction(models.Model):
     category           = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="transactions", db_index=True)
     amount             = models.DecimalField(max_digits=10, decimal_places=2)
     notes              = models.TextField(blank=True)
-    date               = models.DateTimeField(db_index=True)
     
     created_at         = models.DateTimeField(auto_now_add=True, db_index=True)
     deleted_at         = models.DateTimeField(null=True, blank=True, db_index=True)
     
     class Meta:
         indexes = [
-            models.Index(fields=['user', '-date']),
-            models.Index(fields=['user', 'account', '-date']),
-            models.Index(fields=['user', 'category', '-date']),
-            models.Index(fields=['user', 'transaction_type', '-date']),
+            models.Index(fields=['user']),
+            models.Index(fields=['user', 'account']),
+            models.Index(fields=['user', 'category']),
+            models.Index(fields=['user', 'transaction_type']),
             models.Index(fields=['status', 'transaction_type']),
-            models.Index(fields=['user', 'status', '-date']),
-            models.Index(fields=['account', 'status', '-date']),
-            models.Index(fields=['category', '-date']),
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['account', 'status']),
+            models.Index(fields=['category']),
             models.Index(fields=['user', '-created_at']),
         ]
         
-        ordering = ['-date', '-id']
+        ordering = ['-id']
 
     def clean(self):
         if self.amount <= 0:

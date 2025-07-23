@@ -28,7 +28,7 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         if category:
             queryset = queryset.filter(category=category)
 
-        return queryset.order_by('-date', '-id')
+        return queryset.order_by('-id')
     
     def get_serializer_context(self):
         """
@@ -42,7 +42,6 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         source_account = serializer.validated_data.get('account')
         category = serializer.validated_data.get('category')
         notes = serializer.validated_data.get('notes')
-        date = serializer.validated_data.get('date')
         status_val = serializer.validated_data.get('status', Transaction.CLEARED)
 
         with db_transaction.atomic():
@@ -88,7 +87,6 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
                     amount=amount, # El monto positivo para la entrada
                     category=category,
                     notes=notes,
-                    date=date,
                     status=status_val,
                     linked_transaction=outgoing_transaction # Enlazar la entrada con la salida
                 )
@@ -98,9 +96,6 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
 
                 source_account.balance = source_new_balance
                 destination_account.balance = dest_new_balance
-                
-                source_account.last_transaction_date = date
-                destination_account.last_transaction_date = date
 
                 source_account.save(update_fields=['balance', 'last_transaction_date'])
                 destination_account.save(update_fields=['balance', 'last_transaction_date'])
@@ -127,7 +122,6 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
                 instance = serializer.save(user=self.request.user)
                 
                 current_account.balance = calculated_balance
-                current_account.last_transaction_date = instance.date
                 current_account.save(update_fields=['balance', 'last_transaction_date'])
 
 
@@ -151,13 +145,13 @@ class TransactionRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpda
 
         # Deshabilitar actualización de transferencias que afecten balances directamente
         if old_type == Transaction.TRANSFER or serializer.validated_data.get('transaction_type') == Transaction.TRANSFER:
-            # Puedes permitir actualizar solo 'notes', 'category', 'date', 'status'
+            # Puedes permitir actualizar solo 'notes', 'category', '', 'status'
             # Si se intenta cambiar monto, tipo o cuentas, se podría levantar un error
             if serializer.validated_data.get('amount') != old_amount or \
                serializer.validated_data.get('account') != old_account or \
                serializer.validated_data.get('transaction_type') != old_type:
                 raise DRFValidationError("Direct modification of amount, account, or type for transfer transactions is not allowed. Please delete and recreate.")
-            # Si solo se modifican campos que no afectan el balance (e.g., notes, category, date, status)
+            # Si solo se modifican campos que no afectan el balance (e.g., notes, category, , status)
             instance = serializer.save(user=self.request.user)
             # No se actualiza el balance de la cuenta, se asume que solo son metadatos.
             return
@@ -202,7 +196,6 @@ class TransactionRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpda
                 raise DRFValidationError({"amount": f"Credit card account '{new_account.name}' cannot have a positive balance after this update."})
 
             new_account.balance = calculated_balance
-            new_account.last_transaction_date = instance.date
             new_account.save(update_fields=['balance', 'last_transaction_date'])
 
     def perform_destroy(self, instance):

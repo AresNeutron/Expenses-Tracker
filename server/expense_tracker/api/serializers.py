@@ -99,7 +99,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['id', 'user', 'account', 'transaction_type', 'linked_transaction', 'status', 'category', 
-                  'amount', 'notes', 'date', 'destination_account_id']
+                  'amount', 'notes', 'destination_account_id']
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
 
     def __init__(self, *args, **kwargs):
@@ -137,3 +137,4 @@ class DefaultCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = DefaultCategory
         fields = '__all__'
+        

@@ -167,7 +167,6 @@ class TransactionAPITestCase(BaseAPITestCase):
             'amount': '25.00', # Sent as string, serializer should handle
             'transaction_type': 'expense',
             'notes': 'Coffee',
-            'date': self.today.isoformat() # Format date as 'YYYY-MM-DD'
         }
         initial_balance = self.bank_account.balance
         response = self.client.post(url, data, format='json')
