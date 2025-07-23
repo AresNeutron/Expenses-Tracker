@@ -1,8 +1,13 @@
+// Enums o tipos literales para las opciones
+export type AccountType = "bank" | "cash" | "card" | "other";
+export type TransactionType = "expense" | "income" | "transfer" | "adjust";
+export type TransactionStatus = "pending" | "cleared" | "reconciled" | "void";
+
 export interface Account {
   id: number; 
   user: number; // El ID del usuario, aunque el backend lo asigne, lo recibimos en las respuestas.
   name: string;
-  acc_type: string; // 'BANK', 'CASH', 'CREDIT_CARD', etc.
+  acc_type: AccountType // 'BANK', 'CASH', 'CREDIT_CARD', etc.
   balance: string; // DecimalField en Django se mapea comúnmente a string en TS para precisión
   initial_balance: string; // Como el balance, string para precisión
   is_active: boolean;
@@ -31,9 +36,9 @@ export interface Transaction {
   id: number;
   user: number;
   account: number; // El ID de la cuenta asociada
-  transaction_type: string; // 'EXPENSE', 'INCOME', 'TRANSFER'
+  transaction_type: TransactionType; // 'EXPENSE', 'INCOME', 'TRANSFER'
   linked_transaction: number | null; // El ID de la transacción vinculada, puede ser null
-  status: string; // 'PENDING', 'CLEARED', 'RECONCILED'
+  status: TransactionStatus; // 'PENDING', 'CLEARED', 'RECONCILED'
   category: number; // El ID de la categoría asociada
   amount: string; // DecimalField en Django se mapea a string en TS
   notes: string;
