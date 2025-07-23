@@ -1,5 +1,5 @@
 // services/categories.ts
-import { Category, CreateAccountPayload } from "../interfaces/api_interfaces";
+import { Category, CreateCategoryPayload } from "../interfaces/api_interfaces";
 import api from "./api";
 
 export const getCategories = async (): Promise<Category[]> => {
@@ -12,7 +12,7 @@ export const getCategories = async (): Promise<Category[]> => {
   }
 };
 
-export const createCategory = async (category: CreateAccountPayload): Promise<Category> => {
+export const createCategory = async (category: CreateCategoryPayload): Promise<Category> => {
   try {
     const response = await api.post<Category>("/categories/", category);
     return response.data;
