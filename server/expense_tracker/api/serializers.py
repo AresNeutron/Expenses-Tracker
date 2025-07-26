@@ -102,7 +102,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['id', 'user', 'account', 'transaction_type', 'linked_transaction', 'status', 
-                  'content_type', 'object_id','amount', 'notes', 'destination_account_id']
+                  'category_type_model', 'category_id','amount', 'notes', 'destination_account_id']
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
 
     def __init__(self, *args, **kwargs):
@@ -140,8 +140,8 @@ class TransactionSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError({"category_type_model": "Invalid category type specified. Must be 'Category' or 'DefaultCategory'."})
 
-        data['content_type'] = ContentType.objects.get_for_model(category_instance)
-        data['object_id'] = category_instance.id
+        data['category_type_model'] = ContentType.objects.get_for_model(category_instance)
+        data['category_id'] = category_instance.id
 
         # Validar que destination_account_id exista y no sea la misma cuenta de origen si es una transferencia
         if transaction_type == Transaction.TRANSFER:

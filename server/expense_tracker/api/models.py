@@ -155,9 +155,9 @@ class Transaction(models.Model):
     linked_transaction = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
     status             = models.CharField(max_length=10, choices=TRANSACTION_STATUSES, default=CLEARED, db_index=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    category = GenericForeignKey('content_type', 'object_id')    
+    category_type_model = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    category_id = models.PositiveIntegerField()
+    category = GenericForeignKey('category_type_model', 'category_id')    
 
     amount             = models.DecimalField(max_digits=10, decimal_places=2)
     notes              = models.TextField(blank=True)

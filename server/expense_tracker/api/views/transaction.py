@@ -31,7 +31,7 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
             try:
                 # Obtén el ContentType para el modelo especificado
                 content_type_obj = ContentType.objects.get(app_label='api', model=category_type.lower()) 
-                queryset = queryset.filter(content_type=content_type_obj, object_id=category_id)
+                queryset = queryset.filter(category_type_model=content_type_obj, category_id=category_id)
             except ContentType.DoesNotExist:
                 print("Something wrong in Transaction List by categories")
                 pass
@@ -55,7 +55,7 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         
         serializer.is_valid(raise_exception=True) # Esto lanza el 400 con los errores del serializer
         
-        # perform_create recibirá validated_data con content_type y object_id listos
+        # perform_create recibirá validated_data con category_type_model y category_id listos
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -64,8 +64,8 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         transaction_type = serializer.validated_data.get('transaction_type')
         amount = serializer.validated_data.get('amount')
         source_account = serializer.validated_data.get('account')
-        category_content_type: ContentType = serializer.validated_data.get('content_type')
-        category_object_id = serializer.validated_data.get('object_id')
+        category_content_type: ContentType = serializer.validated_data.get('category_type_model')
+        category_id = serializer.validated_data.get('category_id')
         notes = serializer.validated_data.get('notes')
         status_val = serializer.validated_data.get('status', Transaction.CLEARED)
 
@@ -110,8 +110,8 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
                     account=destination_account,
                     transaction_type=Transaction.INCOME,
                     amount=amount, # El monto positivo para la entrada
-                    content_type=category_content_type,
-                    object_id=category_object_id,
+                    category_type_model=category_content_type,
+                    category_id=category_id,
                     notes=notes,
                     status=status_val,
                     linked_transaction=outgoing_transaction # Enlazar la entrada con la salida
