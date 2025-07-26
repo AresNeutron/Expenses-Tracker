@@ -2,6 +2,7 @@
 export type AccountType = "bank" | "cash" | "card" | "other";
 export type TransactionType = "expense" | "income" | "transfer" | "adjust";
 export type TransactionStatus = "pending" | "cleared" | "reconciled" | "void";
+export type CategoryTypeModel = "category" | "defaultcategory";
 
 export interface Account {
   id: number; 
@@ -44,15 +45,16 @@ export interface DefaultCategory {
 export interface Transaction {
   id: number;
   user: number;
-  account: number; // El ID de la cuenta asociada
-  transaction_type: TransactionType; // 'EXPENSE', 'INCOME', 'TRANSFER'
-  linked_transaction: number | null; // El ID de la transacción vinculada, puede ser null
-  status: TransactionStatus; // 'PENDING', 'CLEARED', 'RECONCILED'
-  category: number; // El ID de la categoría asociada
-  amount: string; // DecimalField en Django se mapea a string en TS
+  account: number;
+  transaction_type: TransactionType; 
+  linked_transaction: number | null;
+  status: TransactionStatus;
+  category_id: number 
+  category_type_model: CategoryTypeModel;
+  amount: string; 
   notes: string;
-  created_at: string; // Las fechas se reciben del backend
-  updated_at: string; // Las fechas se reciben del backend
+  created_at: string;
+  updated_at: string;
 }
 
 // Interfaces para los datos que se ENVÍAN al crear (sin ID, user, ni campos auto-generados)
@@ -77,7 +79,8 @@ export interface CreateTransactionPayload {
   transaction_type: TransactionType;
   linked_transaction?: number | null; // Opcional, puede ser null
   status?: TransactionStatus; // Opcional, tiene un default en el backend
-  category: number;
+  category_id: number;
+  category_type_model: CategoryTypeModel; 
   amount: string;
   notes?: string; // Opcional
 }

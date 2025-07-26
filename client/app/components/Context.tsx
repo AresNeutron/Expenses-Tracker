@@ -55,7 +55,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const [isAuth, setIsAuth] = useState<boolean>(false);
 
   // Estados para cada tipo de dato
-  const [expenses, setExpenses] = useState<Transaction[]>([]); // Renombrado a `expenses` pero almacena `Transaction`
+  const [expenses, setExpenses] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [defaultCategories, setDefaultCategories] = useState<DefaultCategory[]>([]);

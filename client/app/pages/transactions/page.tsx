@@ -1,8 +1,12 @@
 // pages/transactions/index.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { CreateTransactionPayload, TransactionType } from "../../interfaces/api_interfaces"; // Importamos la interfaz de payload
+import React, { useState } from "react";
+import {
+  CategoryTypeModel,
+  CreateTransactionPayload,
+  TransactionType,
+} from "../../interfaces/api_interfaces"; // Importamos la interfaz de payload
 import { useExpenseContext } from "@/app/components/Context";
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal";
 
@@ -10,48 +14,46 @@ const TransactionsPage: React.FC = () => {
   const {
     expenses,
     accounts,
-    categories, // Estas son las categorías creadas por el usuario (y posiblemente algunas por defecto si el backend las retorna aquí también)
-    fetchTransactions,
-    fetchAccounts,
-    fetchCategories,
+    categories,
     createTransaction,
     deleteTransaction,
-    memorizedCategories // las categorías por defecto están ya importadas en este archivo, sólo hay que usarlas
+    memorizedCategories, // las categorías por defecto están ya importadas en este archivo, sólo hay que usarlas
   } = useExpenseContext();
 
-  const [showCreateTransactionModal, setShowCreateTransactionModal] = useState(false);
-  const [showManageCategoriesModal, setShowManageCategoriesModal] = useState(false);
+  const [showCreateTransactionModal, setShowCreateTransactionModal] =
+    useState(false);
+  const [showManageCategoriesModal, setShowManageCategoriesModal] =
+    useState(false);
 
   // Estados para el formulario de nueva transacción
-  const [newTransactionAmount, setNewTransactionAmount] = useState("");
-  const [newTransactionAccount, setNewTransactionAccount] = useState("");
-  const [newTransactionCategory, setNewTransactionCategory] = useState("");
-  const [newTransactionType, setNewTransactionType] = useState<TransactionType>("expense"); // "expense" EN MINÚSCULAS
-  const [newTransactionNotes, setNewTransactionNotes] = useState("");
-
-  useEffect(() => {
-    fetchTransactions();
-    fetchAccounts(); // Necesario para el selector de cuentas
-    fetchCategories(); // Necesario para el selector de categorías
-  }, [fetchTransactions, fetchAccounts, fetchCategories]);
+  const [amount, setAmount] = useState("");
+  const [accountID, setAccountID] = useState("");
+  const [categoryID, setCategoryID] = useState("");
+  const [categoryTypeModel, setCategoryTypeModel] =
+    useState<CategoryTypeModel>("defaultcategory");
+  const [type, setType] = useState<TransactionType>("expense");
+  const [notes, setNotes] = useState("");
 
   const handleCreateTransaction = async () => {
     if (
-      newTransactionAmount.trim() === "" ||
-      isNaN(parseFloat(newTransactionAmount)) ||
-      newTransactionAccount === "" ||
-      newTransactionCategory === ""
+      amount.trim() === "" ||
+      isNaN(parseFloat(amount)) ||
+      accountID === "" ||
+      categoryID === ""
     ) {
-      alert("Please fill in all required fields: Amount, Account, and Category.");
+      alert(
+        "Please fill in all required fields: Amount, Account, and Category."
+      );
       return;
     }
 
     const payload: CreateTransactionPayload = {
-      amount: newTransactionAmount,
-      account: parseInt(newTransactionAccount),
-      category: parseInt(newTransactionCategory),
-      transaction_type: newTransactionType,
-      notes: newTransactionNotes,
+      amount: amount,
+      account: parseInt(accountID),
+      category_id: parseInt(categoryID),
+      category_type_model: categoryTypeModel,
+      transaction_type: type,
+      notes: notes,
     };
 
     console.log(payload);
@@ -59,11 +61,11 @@ const TransactionsPage: React.FC = () => {
     const created = await createTransaction(payload);
     if (created) {
       // Reset form fields
-      setNewTransactionAmount("");
-      setNewTransactionAccount("");
-      setNewTransactionCategory("");
-      setNewTransactionType("expense");
-      setNewTransactionNotes("");
+      setAmount("");
+      setAccountID("");
+      setCategoryID("");
+      setType("expense");
+      setNotes("");
       setShowCreateTransactionModal(false);
       // fetchTransactions(); // El contexto ya actualiza el estado
     }
@@ -98,13 +100,27 @@ const TransactionsPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Account
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -124,10 +140,13 @@ const TransactionsPage: React.FC = () => {
                       {transaction.transaction_type}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {accounts.find((acc) => acc.id === transaction.account)?.name || "N/A"}
+                      {accounts.find((acc) => acc.id === transaction.account)
+                        ?.name || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {categories.find((cat) => cat.id === transaction.category)?.name || "N/A"}
+                      {categories.find(
+                        (cat) => cat.id === transaction.category_id
+                      )?.name || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs overflow-hidden text-ellipsis">
                       {transaction.notes || "-"}
@@ -151,16 +170,21 @@ const TransactionsPage: React.FC = () => {
         {showCreateTransactionModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Record New Transaction</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                Record New Transaction
+              </h2>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label htmlFor="transactionType" className="block text-gray-700 text-sm font-bold mb-2">
+                  <label
+                    htmlFor="transactionType"
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                  >
                     Type:
                   </label>
                   <select
                     id="transactionType"
-                    value={newTransactionType}
-                    onChange={(e) => setNewTransactionType(e.target.value as TransactionType)}
+                    value={type}
+                    onChange={(e) => setType(e.target.value as TransactionType)}
                     className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
                     <option value="expense">Expense</option>
@@ -169,14 +193,17 @@ const TransactionsPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="transactionAmount" className="block text-gray-700 text-sm font-bold mb-2">
+                  <label
+                    htmlFor="transactionAmount"
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                  >
                     Amount:
                   </label>
                   <input
                     type="number"
                     id="transactionAmount"
-                    value={newTransactionAmount}
-                    onChange={(e) => setNewTransactionAmount(e.target.value)}
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder="e.g., 50.00"
                     step="0.01"
@@ -185,13 +212,16 @@ const TransactionsPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label htmlFor="transactionAccount" className="block text-gray-700 text-sm font-bold mb-2">
+                  <label
+                    htmlFor="transactionAccount"
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                  >
                     Account:
                   </label>
                   <select
                     id="transactionAccount"
-                    value={newTransactionAccount}
-                    onChange={(e) => setNewTransactionAccount(e.target.value)}
+                    value={accountID}
+                    onChange={(e) => setAccountID(e.target.value)}
                     className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
                     <option value="">Select Account</option>
@@ -204,17 +234,27 @@ const TransactionsPage: React.FC = () => {
                 </div>
               </div>
               <div className="mb-4">
-                <label htmlFor="transactionCategory" className="block text-gray-700 text-sm font-bold mb-2">
+                <label
+                  htmlFor="transactionCategory"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
                   Category:
                 </label>
                 <div className="flex gap-2">
                   <select
                     id="transactionCategory"
-                    value={newTransactionCategory}
-                    onChange={(e) => setNewTransactionCategory(e.target.value)}
+                    value={categoryID}
+                    onChange={(e) => setCategoryID(e.target.value)}
                     className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
-                    <option value="">Select Category</option>
+                    <option
+                      onSelect={() => {
+                        setCategoryTypeModel("defaultcategory");
+                      }}
+                      value=""
+                    >
+                      Select Category
+                    </option>
                     {/* Opciones para categorías por defecto */}
                     {memorizedCategories && memorizedCategories.length > 0 && (
                       <optgroup label="Default Categories">
@@ -229,7 +269,13 @@ const TransactionsPage: React.FC = () => {
                     {categories && categories.length > 0 && (
                       <optgroup label="Your Categories">
                         {categories.map((cat) => (
-                          <option key={`user-${cat.id}`} value={cat.id}>
+                          <option
+                            onSelect={() => {
+                              setCategoryTypeModel("category");
+                            }}
+                            key={`user-${cat.id}`}
+                            value={cat.id}
+                          >
                             {cat.name}
                           </option>
                         ))}
@@ -245,13 +291,16 @@ const TransactionsPage: React.FC = () => {
                 </div>
               </div>
               <div className="mb-6">
-                <label htmlFor="transactionNotes" className="block text-gray-700 text-sm font-bold mb-2">
+                <label
+                  htmlFor="transactionNotes"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
                   Notes:
                 </label>
                 <textarea
                   id="transactionNotes"
-                  value={newTransactionNotes}
-                  onChange={(e) => setNewTransactionNotes(e.target.value)}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-20"
                   placeholder="Optional notes about the transaction"
                 ></textarea>
@@ -276,7 +325,9 @@ const TransactionsPage: React.FC = () => {
 
         {/* Modal de Gestión de Categorías */}
         {showManageCategoriesModal && (
-          <ManageCategoriesModal onClose={() => setShowManageCategoriesModal(false)} />
+          <ManageCategoriesModal
+            onClose={() => setShowManageCategoriesModal(false)}
+          />
         )}
       </main>
     </div>
