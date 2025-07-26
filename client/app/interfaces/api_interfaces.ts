@@ -69,9 +69,9 @@ export interface CreateAccountPayload {
 export interface CreateCategoryPayload {
   name: string;
   parent_category?: number | null; // Opcional, puede ser null
-  is_expense?: boolean; // Opcional, tiene un default en el backend
-  icon?: string; // Opcional, tiene un default en el backend
-  color?: string; // Opcional, tiene un default en el backend
+  is_expense?: boolean; // si no se provee, se considera gasto por defecto
+  icon?: string; // Opcional, es para mejorar la UX
+  color?: string; // Opcional, es para mejorar la UX
 }
 
 export interface CreateTransactionPayload {

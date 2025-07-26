@@ -6,6 +6,7 @@ import {
   CategoryTypeModel,
   CreateTransactionPayload,
   TransactionType,
+  Transaction, // Asegúrate de que Transaction esté importada
 } from "../../interfaces/api_interfaces"; // Importamos la interfaz de payload
 import { useExpenseContext } from "@/app/components/Context";
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal";
@@ -67,7 +68,6 @@ const TransactionsPage: React.FC = () => {
       setType("expense");
       setNotes("");
       setShowCreateTransactionModal(false);
-      // fetchTransactions(); // El contexto ya actualiza el estado
     }
   };
 
@@ -76,6 +76,26 @@ const TransactionsPage: React.FC = () => {
       await deleteTransaction(id);
     }
   };
+
+  const getCategoryName = (transaction: Transaction) => {
+    const defaultCategory = memorizedCategories.find(
+      (cat) => cat.id == transaction.category_id && transaction.category_type_model.includes("default")
+    );
+    if (defaultCategory) {
+      return defaultCategory.name;
+    }
+
+    // Luego busca en las categorías de usuario
+    const userCategory = categories.find(
+      (cat) => cat.id == transaction.category_id && transaction.category_type_model.includes("category")
+    );
+    if (userCategory) {
+      return userCategory.name;
+    }
+
+    return "N/A";
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -126,6 +146,9 @@ const TransactionsPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {expenses.map((transaction) => (
                   <tr key={transaction.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(transaction.created_at).toLocaleDateString()}
+                    </td>
                     <td
                       className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
                         transaction.transaction_type === "expense"
@@ -144,9 +167,7 @@ const TransactionsPage: React.FC = () => {
                         ?.name || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {categories.find(
-                        (cat) => cat.id === transaction.category_id
-                      )?.name || "N/A"}
+                      {getCategoryName(transaction)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs overflow-hidden text-ellipsis">
                       {transaction.notes || "-"}
@@ -244,17 +265,23 @@ const TransactionsPage: React.FC = () => {
                   <select
                     id="transactionCategory"
                     value={categoryID}
-                    onChange={(e) => setCategoryID(e.target.value)}
+                    onChange={(e) => {
+                      const selectedCategoryId = parseInt(e.target.value);
+                      setCategoryID(e.target.value);
+
+                      // Determinar el categoryTypeModel basado en si la categoría es por defecto o de usuario
+                      if (memorizedCategories.some(cat => cat.id === selectedCategoryId)) {
+                        setCategoryTypeModel("defaultcategory");
+                      } else if (categories.some(cat => cat.id === selectedCategoryId)) {
+                        setCategoryTypeModel("category");
+                      } else {
+                        // Fallback, aunque con la UI actual no debería ocurrir si siempre se selecciona una categoría válida
+                        setCategoryTypeModel("defaultcategory");
+                      }
+                    }}
                     className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
-                    <option
-                      onSelect={() => {
-                        setCategoryTypeModel("defaultcategory");
-                      }}
-                      value=""
-                    >
-                      Select Category
-                    </option>
+                    <option value="">Select Category</option>
                     {/* Opciones para categorías por defecto */}
                     {memorizedCategories && memorizedCategories.length > 0 && (
                       <optgroup label="Default Categories">
@@ -270,9 +297,6 @@ const TransactionsPage: React.FC = () => {
                       <optgroup label="Your Categories">
                         {categories.map((cat) => (
                           <option
-                            onSelect={() => {
-                              setCategoryTypeModel("category");
-                            }}
                             key={`user-${cat.id}`}
                             value={cat.id}
                           >

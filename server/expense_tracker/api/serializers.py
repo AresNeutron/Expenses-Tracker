@@ -81,7 +81,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             'required': "Category ID is required."
         }
     )
-    category_type_model = serializers.CharField(write_only=True, required=True)
+    category_type_model = serializers.CharField(required=True)
     
     destination_account_id = serializers.PrimaryKeyRelatedField(
         queryset=Account.objects.all(), 
@@ -102,7 +102,8 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['id', 'user', 'account', 'transaction_type', 'linked_transaction', 'status', 
-                  'category_type_model', 'category_id', 'amount', 'notes', 'destination_account_id']
+                  'category_type_model', 'category_id', 'amount', 'notes', 'destination_account_id',
+                  'created_at']
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
 
     def __init__(self, *args, **kwargs):
@@ -123,7 +124,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         if not category_type_model:
             raise serializers.ValidationError({"category_type_model": "Category type (e.g., 'Category' or 'DefaultCategory') is required."})
 
-        model_name = category_type_model.capitalize() # "category" -> "Category", "defaultcategory" -> "DefaultCategory"
+        model_name = category_type_model.capitalize()
 
         category_instance = None
         if model_name == 'Category':
