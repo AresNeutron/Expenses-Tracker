@@ -74,32 +74,32 @@ export default {
   				secondary: 'var(--border-secondary)',
   				focus: 'var(--border-focus)'
 			},
+			platinum: {
+				"50": "#f8fafc",
+				"100": "#f1f5f9",
+				"200": "#e2e8f0",
+				"300": "#cbd5e1",
+				"400": "#94a3b8",
+				"500": "#64748b",
+				"600": "#475569",
+				"700": "#334155",
+				"800": "#1e293b",
+				"900": "#0f172a",
+			},
+			midnight: {
+			"50": "#0f172a",
+			"100": "#1e293b",
+			"200": "#334155",
+			"300": "#475569",
+			"400": "#64748b",
+			"500": "#94a3b8",
+			"600": "#cbd5e1",
+			"700": "#e2e8f0",
+			"800": "#f1f5f9",
+			"900": "#f8fafc",
+				},
   			azul: 'var(--primary-500)',
   			azulClaro: 'var(--primary-400)',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
-  			},
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			chart: {
@@ -111,10 +111,12 @@ export default {
   			}
   		},
   		boxShadow: {
-  			card: 'var(--shadow-card)',
-  			'card-hover': 'var(--shadow-card-hover)',
-  			'input-focus': 'var(--shadow-input-focus)'
-  		},
+        card: "var(--shadow-card)",
+        "card-hover": "var(--shadow-card-hover)",
+        "input-focus": "var(--shadow-input-focus)",
+        "dark-card": "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)",
+        "dark-card-hover": "0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)",
+      },
   		borderRadius: {
   			card: '12px',
   			input: '8px',

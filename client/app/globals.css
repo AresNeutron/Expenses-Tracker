@@ -4,32 +4,32 @@
 
 :root {
   /* Colores base */
-  --background: #fafbfc;
+  --background: #ffffff;
   --foreground: #1a1d21;
 
-  /* Paleta principal - Azules */
-  --primary-50: #eff8ff;
-  --primary-100: #dbeafe;
-  --primary-200: #bfdbfe;
-  --primary-300: #93c5fd;
-  --primary-400: #60a5fa;
-  --primary-500: #3b82f6;
-  --primary-600: #2563eb;
-  --primary-700: #1d4ed8;
-  --primary-800: #1e40af;
-  --primary-900: #1e3a8a;
+  /* Paleta principal - Azules mejorados */
+  --primary-50: #f0f9ff;
+  --primary-100: #e0f2fe;
+  --primary-200: #bae6fd;
+  --primary-300: #7dd3fc;
+  --primary-400: #38bdf8;
+  --primary-500: #0ea5e9;
+  --primary-600: #0284c7;
+  --primary-700: #0369a1;
+  --primary-800: #075985;
+  --primary-900: #0c4a6e;
 
   /* Grises cálidos - Neutrales */
-  --neutral-50: #f9fafb;
-  --neutral-100: #f3f4f6;
-  --neutral-200: #e5e7eb;
-  --neutral-300: #d1d5db;
-  --neutral-400: #9ca3af;
-  --neutral-500: #6b7280;
-  --neutral-600: #4b5563;
-  --neutral-700: #374151;
-  --neutral-800: #1f2937;
-  --neutral-900: #111827;
+  --neutral-50: #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a3a3a3;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-900: #171717;
 
   /* Colores de estado - Éxito (Verde) */
   --success-50: #f0fdf4;
@@ -55,65 +55,86 @@
   /* Colores financieros específicos */
   --income: #22c55e;
   --expense: #ef4444;
-  --balance: #3b82f6;
+  --balance: #0ea5e9;
 
-  /* Superficies */
+  /* Superficies - Modo claro */
   --surface-primary: #ffffff;
   --surface-secondary: #f8fafc;
   --surface-tertiary: #f1f5f9;
 
-  /* Bordes */
+  /* Bordes - Modo claro */
   --border-primary: #e2e8f0;
   --border-secondary: #cbd5e1;
-  --border-focus: #3b82f6;
+  --border-focus: #0ea5e9;
 
-  /* Sombras */
+  /* Sombras - Modo claro */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-input-focus: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  --shadow-input-focus: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
 .dark {
-  /* Colores base oscuros */
-  --background: #0f172a;
-  --foreground: #f1f5f9;
+  /* Colores base oscuros - FUENTES MÁS CLARAS */
+  --background: #0a0a0a;
+  --foreground: #f1f5f9; /* Mucho más claro */
 
-  /* Paleta principal - Azules oscuros */
-  --primary-50: #1e293b;
-  --primary-100: #334155;
-  --primary-200: #475569;
-  --primary-300: #64748b;
-  --primary-400: #94a3b8;
-  --primary-500: #60a5fa;
-  --primary-600: #3b82f6;
-  --primary-700: #2563eb;
-  --primary-800: #1d4ed8;
-  --primary-900: #1e40af;
+  /* Paleta principal - Azules oscuros profundos */
+  --primary-50: #0c1929;
+  --primary-100: #1e293b;
+  --primary-200: #334155;
+  --primary-300: #475569;
+  --primary-400: #64748b;
+  --primary-500: #38bdf8;
+  --primary-600: #0ea5e9;
+  --primary-700: #0284c7;
+  --primary-800: #0369a1;
+  --primary-900: #0c4a6e;
 
-  /* Grises oscuros */
-  --neutral-50: #1e293b;
-  --neutral-100: #334155;
-  --neutral-200: #475569;
-  --neutral-300: #64748b;
-  --neutral-400: #94a3b8;
-  --neutral-500: #cbd5e1;
-  --neutral-600: #e2e8f0;
-  --neutral-700: #f1f5f9;
-  --neutral-800: #f8fafc;
-  --neutral-900: #ffffff;
+  /* Grises muy oscuros - REVERTIDOS PARA MEJOR LEGIBILIDAD */
+  --neutral-50: #f8fafc; /* Muy claro para textos principales */
+  --neutral-100: #f1f5f9; /* Claro para textos secundarios */
+  --neutral-200: #e2e8f0; /* Para textos terciarios */
+  --neutral-300: #cbd5e1; /* Para textos deshabilitados */
+  --neutral-400: #94a3b8; /* Para placeholders */
+  --neutral-500: #64748b; /* Para bordes y separadores */
+  --neutral-600: #475569; /* Para fondos secundarios */
+  --neutral-700: #334155; /* Para fondos primarios */
+  --neutral-800: #1e293b; /* Para fondos oscuros */
+  --neutral-900: #0f172a; /* Para fondos muy oscuros */
+
+  /* Colores de estado ajustados para modo oscuro */
+  --success-50: #0f2415;
+  --success-100: #1a3a2e;
+  --success-500: #10b981;
+  --success-600: #059669;
+  --success-700: #047857;
+
+  --warning-50: #2d1b0e;
+  --warning-100: #451a03;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+
+  --error-50: #2d1b1b;
+  --error-100: #451a1a;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+  --error-700: #b91c1c;
 
   /* Superficies oscuras */
-  --surface-primary: #1e293b;
-  --surface-secondary: #334155;
-  --surface-tertiary: #475569;
+  --surface-primary: #111827; /* Más claro que antes */
+  --surface-secondary: #1f2937; /* Más claro que antes */
+  --surface-tertiary: #374151; /* Más claro que antes */
 
   /* Bordes oscuros */
-  --border-primary: #475569;
-  --border-secondary: #64748b;
+  --border-primary: #374151; /* Más visible */
+  --border-secondary: #4b5563; /* Más visible */
+  --border-focus: #38bdf8;
 
-  /* Sombras oscuras */
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  /* Sombras oscuras más profundas */
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-input-focus: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
 
 body {
@@ -123,6 +144,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer components {
@@ -130,17 +152,19 @@ body {
   .inputElement {
     @apply border-2 border-border-primary rounded-input
            focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus
-           w-full p-3 text-base bg-surface-primary
+           w-full p-3 text-base bg-surface-primary text-neutral-800 dark:text-neutral-100
            transition-all duration-200 ease-in-out
-           placeholder:text-neutral-400
-           hover:border-border-secondary;
+           placeholder:text-neutral-400 dark:placeholder:text-neutral-400
+           hover:border-border-secondary
+           dark:shadow-dark-card;
   }
 
   /* Elementos de autenticación */
   .authElement {
     @apply flex flex-col items-center justify-center p-8 
            border border-border-primary rounded-card
-           bg-surface-primary shadow-card;
+           bg-surface-primary shadow-card
+           dark:shadow-dark-card;
   }
 
   /* Botones principales */
@@ -150,49 +174,52 @@ body {
            hover:bg-primary-600 active:bg-primary-700
            transition-all duration-200 ease-in-out
            focus:outline-none focus:ring-2 focus:ring-primary-200
-           disabled:opacity-50 disabled:cursor-not-allowed;
+           disabled:opacity-50 disabled:cursor-not-allowed
+           dark:shadow-dark-card hover:dark:shadow-dark-card-hover;
   }
 
   /* Botones secundarios */
   .secondaryButton {
     @apply w-full p-4 text-base font-medium
-           bg-surface-secondary text-neutral-700 rounded-button
+           bg-surface-secondary text-neutral-700 dark:text-neutral-200 rounded-button
            border border-border-primary
-           hover:bg-neutral-50 active:bg-neutral-100
+           hover:bg-neutral-50 dark:hover:bg-neutral-700 active:bg-neutral-100 dark:active:bg-neutral-600
            transition-all duration-200 ease-in-out
-           focus:outline-none focus:ring-2 focus:ring-neutral-200;
+           focus:outline-none focus:ring-2 focus:ring-neutral-200
+           dark:shadow-dark-card;
   }
 
-  /* Tarjetas */
+  /* Tarjetas mejoradas */
   .card {
     @apply bg-surface-primary border border-border-primary rounded-card
            shadow-card hover:shadow-card-hover
+           dark:shadow-dark-card dark:hover:shadow-dark-card-hover
            transition-all duration-200 ease-in-out;
   }
 
   /* Elementos financieros */
   .income-text {
-    @apply text-success-600 font-semibold;
+    @apply text-success-600 dark:text-success-400 font-semibold;
   }
 
   .expense-text {
-    @apply text-error-600 font-semibold;
+    @apply text-error-600 dark:text-error-400 font-semibold;
   }
 
   .balance-text {
-    @apply text-primary-600 font-bold;
+    @apply text-primary-600 dark:text-primary-400 font-bold;
   }
 
   /* Estados de transacciones */
   .transaction-positive {
-    @apply bg-success-50 text-success-700 border-success-200;
+    @apply bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 border-success-200 dark:border-success-700/50;
   }
 
   .transaction-negative {
-    @apply bg-error-50 text-error-700 border-error-200;
+    @apply bg-error-50 dark:bg-error-900/20 text-error-700 dark:text-error-300 border-error-200 dark:border-error-700/50;
   }
 
   .transaction-pending {
-    @apply bg-warning-50 text-warning-700 border-warning-200;
+    @apply bg-warning-50 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300 border-warning-200 dark:border-warning-700/50;
   }
 }
