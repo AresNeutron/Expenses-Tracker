@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 class Account(models.Model):
     BANK     = "bank"
@@ -152,7 +154,11 @@ class Transaction(models.Model):
     transaction_type   = models.CharField(max_length=10, choices=TRANSACTION_TYPES, default=EXPENSE, db_index=True)
     linked_transaction = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
     status             = models.CharField(max_length=10, choices=TRANSACTION_STATUSES, default=CLEARED, db_index=True)
-    category           = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="transactions", db_index=True)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    category = GenericForeignKey('content_type', 'object_id')    
+
     amount             = models.DecimalField(max_digits=10, decimal_places=2)
     notes              = models.TextField(blank=True)
     
@@ -163,12 +169,10 @@ class Transaction(models.Model):
         indexes = [
             models.Index(fields=['user']),
             models.Index(fields=['user', 'account']),
-            models.Index(fields=['user', 'category']),
             models.Index(fields=['user', 'transaction_type']),
             models.Index(fields=['status', 'transaction_type']),
             models.Index(fields=['user', 'status']),
             models.Index(fields=['account', 'status']),
-            models.Index(fields=['category']),
             models.Index(fields=['user', '-created_at']),
         ]
         
