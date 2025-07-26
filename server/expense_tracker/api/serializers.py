@@ -75,7 +75,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         error_messages={'does_not_exist': "Account not found or does not belong to you."}
     )
     
-    category = serializers.IntegerField(
+    category_id = serializers.IntegerField(
         error_messages={
             'invalid': "Category ID must be an integer.",
             'required': "Category ID is required."
@@ -102,7 +102,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['id', 'user', 'account', 'transaction_type', 'linked_transaction', 'status', 
-                  'category_type_model', 'category_id','amount', 'notes', 'destination_account_id']
+                  'category_type_model', 'category_id', 'amount', 'notes', 'destination_account_id']
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
 
     def __init__(self, *args, **kwargs):
@@ -157,8 +157,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         
         if linked_id and current_id  == linked_id:
             raise serializers.ValidationError({'linked_transaction': 'A transaction cannot be linked to itself.'})
-
-        del data['category']
 
         return data
     
