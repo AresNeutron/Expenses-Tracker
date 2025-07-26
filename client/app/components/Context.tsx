@@ -167,6 +167,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
             fetchAccounts(),
             fetchCategories(),
           ]);
+          router.push("/pages/dashboard/")
         } else {
           console.log("Your session expired. Please log in again.");
           setIsAuth(false);

@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ExpenseProvider from "./components/Context";
 import ThemeToggle from "./components/ThemeToggle";
-import GlobalBackground from "./components/GlobalBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +27,6 @@ export default function RootLayout({
   return (
      <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <GlobalBackground />
         <div className="relative flex flex-col min-h-screen">
           <ExpenseProvider>
             <ThemeToggle />
