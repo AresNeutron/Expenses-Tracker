@@ -1,12 +1,13 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError, PermissionDenied
 from django.db import transaction as db_transaction
 from django.shortcuts import get_object_or_404
 from ..models import Transaction, Account
 from ..serializers import TransactionSerializer
 from .base import BaseAPIView
 from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
 
 class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
     serializer_class = TransactionSerializer
@@ -24,9 +25,16 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         if account:
             queryset = queryset.filter(account=account)
 
-        category = self.request.query_params.get('category')
-        if category:
-            queryset = queryset.filter(category=category)
+        category_id = self.request.query_params.get('category_id')
+        category_type = self.request.query_params.get('category_type_model') 
+        if category_id and category_type:
+            try:
+                # Obtén el ContentType para el modelo especificado
+                content_type_obj = ContentType.objects.get(app_label='api', model=category_type.lower()) 
+                queryset = queryset.filter(content_type=content_type_obj, object_id=category_id)
+            except ContentType.DoesNotExist:
+                print("Something wrong in Transaction List by categories")
+                pass
 
         return queryset.order_by('-id')
     
@@ -35,12 +43,29 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         Extra context provided to the serializer class for filtering related fields.
         """
         return {'request': self.request}
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        
+        if not serializer.is_valid():
+            print(f"Serializer validation failed. Errors: {serializer.errors}")
+            print(f"Data received: {request.data}")
+            print(f"DEBUG_PRINT: Serializer validation failed. Errors: {serializer.errors}")
+            print(f"DEBUG_PRINT: Data received: {request.data}")
+        
+        serializer.is_valid(raise_exception=True) # Esto lanza el 400 con los errores del serializer
+        
+        # perform_create recibirá validated_data con content_type y object_id listos
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         transaction_type = serializer.validated_data.get('transaction_type')
         amount = serializer.validated_data.get('amount')
         source_account = serializer.validated_data.get('account')
-        category = serializer.validated_data.get('category')
+        category_content_type: ContentType = serializer.validated_data.get('content_type')
+        category_object_id = serializer.validated_data.get('object_id')
         notes = serializer.validated_data.get('notes')
         status_val = serializer.validated_data.get('status', Transaction.CLEARED)
 
@@ -85,7 +110,8 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
                     account=destination_account,
                     transaction_type=Transaction.INCOME,
                     amount=amount, # El monto positivo para la entrada
-                    category=category,
+                    content_type=category_content_type,
+                    object_id=category_object_id,
                     notes=notes,
                     status=status_val,
                     linked_transaction=outgoing_transaction # Enlazar la entrada con la salida
@@ -134,7 +160,7 @@ class TransactionRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpda
     def get_object(self):
         obj = super().get_object()
         if obj.user != self.request.user:
-            raise generics.exceptions.PermissionDenied("You do not have permission to perform this action on this transaction.")
+            raise PermissionDenied("You do not have permission to perform this action on this transaction.")
         return obj
 
     def perform_update(self, serializer):

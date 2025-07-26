@@ -3,6 +3,7 @@ from .default_categories import DefaultCategory
 from django.core.validators import RegexValidator
 from .models import Account, Category, Transaction
 from decimal import Decimal
+from django.contrib.contenttypes.models import ContentType 
 
 class AccountSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
@@ -35,7 +36,7 @@ class AccountSerializer(serializers.ModelSerializer):
     def validate(self, data):
         # No additional cross-field validations needed here if covered by other validators or model's clean()
         return data
-
+    
 
 hex_color_validator = RegexValidator(
     regex=r'^#[0-9A-Fa-f]{6}$',
@@ -73,12 +74,14 @@ class TransactionSerializer(serializers.ModelSerializer):
         queryset=Account.objects.all(),
         error_messages={'does_not_exist': "Account not found or does not belong to you."}
     )
-
-    # Similar para category
-    category = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all(),
-        error_messages={'does_not_exist': "Category not found or does not belong to you."}
+    
+    category = serializers.IntegerField(
+        error_messages={
+            'invalid': "Category ID must be an integer.",
+            'required': "Category ID is required."
+        }
     )
+    category_type_model = serializers.CharField(write_only=True, required=True)
     
     destination_account_id = serializers.PrimaryKeyRelatedField(
         queryset=Account.objects.all(), 
@@ -98,8 +101,8 @@ class TransactionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Transaction
-        fields = ['id', 'user', 'account', 'transaction_type', 'linked_transaction', 'status', 'category', 
-                  'amount', 'notes', 'destination_account_id']
+        fields = ['id', 'user', 'account', 'transaction_type', 'linked_transaction', 'status', 
+                  'content_type', 'object_id','amount', 'notes', 'destination_account_id']
         read_only_fields = ['user', 'created_at', 'updated_at', 'deleted_at'] 
 
     def __init__(self, *args, **kwargs):
@@ -107,13 +110,38 @@ class TransactionSerializer(serializers.ModelSerializer):
         if 'request' in self.context:
             user = self.context['request'].user
             self.fields['account'].queryset = Account.objects.filter(user=user)
-            self.fields['category'].queryset = Category.objects.filter(user=user)
             self.fields['destination_account_id'].queryset = Account.objects.filter(user=user)
 
     def validate(self, data):
         transaction_type = data.get('transaction_type')
         linked_transaction = data.get('linked_transaction')
         account = data.get('account') # Esta es la cuenta de origen
+
+        category_id = data.get('category_id') 
+        category_type_model = data.pop('category_type_model', None)
+
+        if not category_type_model:
+            raise serializers.ValidationError({"category_type_model": "Category type (e.g., 'Category' or 'DefaultCategory') is required."})
+
+        model_name = category_type_model.capitalize() # "category" -> "Category", "defaultcategory" -> "DefaultCategory"
+
+        category_instance = None
+        if model_name == 'Category':
+            try:
+                # Filtra por usuario para Category normal
+                category_instance = Category.objects.get(id=category_id, user=self.context['request'].user)
+            except Category.DoesNotExist:
+                raise serializers.ValidationError({"category": "User category not found or does not belong to you."})
+        elif model_name == 'Defaultcategory': # Django models name is lowercase by default
+             try:
+                category_instance = DefaultCategory.objects.get(id=category_id)
+             except DefaultCategory.DoesNotExist:
+                raise serializers.ValidationError({"category": "Default category not found."})
+        else:
+            raise serializers.ValidationError({"category_type_model": "Invalid category type specified. Must be 'Category' or 'DefaultCategory'."})
+
+        data['content_type'] = ContentType.objects.get_for_model(category_instance)
+        data['object_id'] = category_instance.id
 
         # Validar que destination_account_id exista y no sea la misma cuenta de origen si es una transferencia
         if transaction_type == Transaction.TRANSFER:
@@ -127,10 +155,16 @@ class TransactionSerializer(serializers.ModelSerializer):
         current_id = self.instance.id if self.instance else None
         linked_id = linked_transaction.id if linked_transaction else None
         
-        if linked_id and current_id == linked_id:
+        if linked_id and current_id  == linked_id:
             raise serializers.ValidationError({'linked_transaction': 'A transaction cannot be linked to itself.'})
 
+        del data['category']
+
         return data
+    
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
     
 
 class DefaultCategorySerializer(serializers.ModelSerializer):
