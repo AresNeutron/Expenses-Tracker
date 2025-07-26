@@ -39,7 +39,7 @@ import {
   createCategory as apiCreateCategory,
   deleteCategory as apiDeleteCategory,
 } from "../services/categories";
-import { ExpenseContextProps } from "../interfaces/interfaces";
+import { ExpenseContextProps, FiltersInterface, initialFilters } from "../interfaces/interfaces";
 import Navbar from "./Navbar";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
@@ -55,18 +55,19 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const [isAuth, setIsAuth] = useState<boolean>(false);
 
   // Estados para cada tipo de dato
-  const [expenses, setExpenses] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [defaultCategories, setDefaultCategories] = useState<DefaultCategory[]>([]);
+  const [filters, setFilters] = useState<FiltersInterface>(initialFilters);
 
   const router = useRouter();
 
   // --- Funciones API para Transacciones (anteriormente Gastos) ---
   const fetchTransactions = useCallback(async () => {
     try {
-      const data = await getTransactions(); // Llamar a la función renombrada
-      setExpenses(data); // Actualizar el estado `expenses`
+      const data = await getTransactions(filters); // Llamar a la función renombrada
+      setTransactions(data); // Actualizar el estado `transactions`
     } catch (error) {
       console.error("Failed to fetch transactions:", error);
     }
@@ -75,7 +76,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const createTransaction = useCallback(async (newTransaction: CreateTransactionPayload) => {
     try {
       const created = await apiCreateTransaction(newTransaction);
-      setExpenses((prev) => [...prev, created]);
+      setTransactions((prev) => [...prev, created]);
       return created;
     } catch (error) {
       console.error("Failed to create transaction:", error);
@@ -86,7 +87,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const deleteTransaction = useCallback(async (id: number) => {
     try {
       await apiDeleteTransaction(id);
-      setExpenses((prev) => prev.filter((exp) => exp.id !== id));
+      setTransactions((prev) => prev.filter((exp) => exp.id !== id));
     } catch (error) {
       console.error("Failed to delete transaction:", error);
     }
@@ -198,6 +199,10 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     fetchCategories();
   }, [])
 
+  useEffect(() => {
+    fetchTransactions();
+  }, [filters, fetchTransactions]);
+
   const memorizedCategories = useMemo(() => {
     return defaultCategories;
   }, [defaultCategories]);
@@ -209,22 +214,18 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         isAuth,
         setIsAuth,
         setPassword,
-        expenses, // Estado `expenses` para transacciones
-        setExpenses,
+        transactions, // Estado `transactions` para transacciones
         accounts,
-        setAccounts,
         categories,
-        setCategories,
-        fetchTransactions, // Función para transacciones
         createTransaction,
         deleteTransaction,
-        fetchAccounts,
         createAccount,
         deleteAccount,
-        fetchCategories,
         createCategory,
         deleteCategory,
         memorizedCategories,
+        filters,
+        setFilters,
       }}
     >
       {isAuth && <Navbar/>}

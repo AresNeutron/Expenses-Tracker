@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useExpenseContext } from "@/app/components/Context"
 import type { AccountType } from "@/app/interfaces/api_interfaces"
 import {
@@ -19,17 +19,13 @@ import {
 } from "lucide-react"
 
 const AccountsPage: React.FC = () => {
-  const { accounts, fetchAccounts, createAccount, deleteAccount } = useExpenseContext()
+  const { accounts, createAccount, deleteAccount } = useExpenseContext()
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false)
   const [newAccountName, setNewAccountName] = useState("")
   const [newAccountType, setNewAccountType] = useState<AccountType>("bank")
   const [newAccountCurrency, setNewAccountCurrency] = useState("USD")
   const [newInitialBalance, setNewInitialBalance] = useState<string>("0")
   const [showBalances, setShowBalances] = useState(true)
-
-  useEffect(() => {
-    fetchAccounts()
-  }, [fetchAccounts])
 
   const handleCreateAccount = async () => {
     if (newAccountName.trim() === "") {

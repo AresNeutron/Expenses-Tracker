@@ -33,13 +33,20 @@ import {
 } from "lucide-react"
 
 const TransactionsPage: React.FC = () => {
-  const { expenses, accounts, categories, createTransaction, deleteTransaction, memorizedCategories } =
-    useExpenseContext()
+  const {
+    transactions,
+    accounts,
+    categories,
+    createTransaction,
+    deleteTransaction,
+    memorizedCategories,
+    setFilters,
+    filters,
+  } = useExpenseContext()
 
   const [showCreateTransactionModal, setShowCreateTransactionModal] = useState(false)
   const [showManageCategoriesModal, setShowManageCategoriesModal] = useState(false)
   const [showBalances, setShowBalances] = useState(true)
-  const [filterType, setFilterType] = useState<"all" | TransactionType>("all")
   const [searchTerm, setSearchTerm] = useState("")
 
   // Estados para el formulario de nueva transacción
@@ -82,22 +89,37 @@ const TransactionsPage: React.FC = () => {
     }
   }
 
-  const getCategoryName = (transaction: Transaction) => {
+  const getCategoryInfo = (transaction: Transaction) => {
     const defaultCategory = memorizedCategories.find(
       (cat) => cat.id === transaction.category_id && transaction.category_type_model.includes("default"),
     )
     if (defaultCategory) {
-      return defaultCategory.name
+      return {
+        name: defaultCategory.name,
+        icon: defaultCategory.icon,
+        color: defaultCategory.color,
+        isDefault: true,
+      }
     }
 
     const userCategory = categories.find(
       (cat) => cat.id === transaction.category_id && transaction.category_type_model.includes("category"),
     )
     if (userCategory) {
-      return userCategory.name
+      return {
+        name: userCategory.name,
+        icon: userCategory.icon,
+        color: userCategory.color,
+        isDefault: false,
+      }
     }
 
-    return "N/A"
+    return {
+      name: "N/A",
+      icon: "📦",
+      color: "#6B7280",
+      isDefault: false,
+    }
   }
 
   const getAccountIcon = (accountId: number) => {
@@ -130,30 +152,61 @@ const TransactionsPage: React.FC = () => {
   }
 
   // Filtrar transacciones
-  const filteredTransactions = expenses.filter((transaction) => {
-    const matchesType = filterType === "all" || transaction.transaction_type === filterType
+  const filteredTransactions = transactions.filter((transaction) => {
+    const categoryInfo = getCategoryInfo(transaction)
     const matchesSearch =
       searchTerm === "" ||
-      getCategoryName(transaction).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      categoryInfo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
       accounts
         .find((acc) => acc.id === transaction.account)
         ?.name.toLowerCase()
         .includes(searchTerm.toLowerCase())
 
-    return matchesType && matchesSearch
+    return matchesSearch
   })
 
   // Calcular estadísticas
-  const totalIncome = expenses
+  const totalIncome = transactions
     .filter((t) => t.transaction_type === "income")
     .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0)
 
-  const totalExpenses = expenses
+  const totalExpenses = transactions
     .filter((t) => t.transaction_type === "expense")
     .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0)
 
   const netBalance = totalIncome - totalExpenses
+
+  // Manejadores para los filtros
+  const handleTransactionTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters((prev) => ({
+      ...prev,
+      transactionType: e.target.value as "all" | TransactionType,
+    }))
+  }
+
+  const handleAccountFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters((prev) => ({ ...prev, accountID: e.target.value }))
+  }
+
+  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCategoryId = e.target.value
+    let selectedCategoryTypeModel: CategoryTypeModel | "all" = "all"
+
+    if (selectedCategoryId !== "all") {
+      if (memorizedCategories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))) {
+        selectedCategoryTypeModel = "defaultcategory"
+      } else if (categories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))) {
+        selectedCategoryTypeModel = "category"
+      }
+    }
+
+    setFilters((prev) => ({
+      ...prev,
+      categoryID: selectedCategoryId,
+      categoryTypeModel: selectedCategoryTypeModel,
+    }))
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -163,7 +216,7 @@ const TransactionsPage: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">My Transactions</h1>
-              <p className="text-neutral-600 dark:text-neutral-300">Track your income, expenses, and transfers</p>
+              <p className="text-neutral-600 dark:text-neutral-300">Track your income, transactions, and transfers</p>
             </div>
             <button
               onClick={() => setShowCreateTransactionModal(true)}
@@ -226,7 +279,11 @@ const TransactionsPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     {showBalances ? (
                       <p
-                        className={`text-2xl font-bold ${netBalance >= 0 ? "text-success-600 dark:text-success-400" : "text-error-600 dark:text-error-400"}`}
+                        className={`text-2xl font-bold ${
+                          netBalance >= 0
+                            ? "text-success-600 dark:text-success-400"
+                            : "text-error-600 dark:text-error-400"
+                        }`}
                       >
                         ${netBalance.toFixed(2)}
                       </p>
@@ -252,7 +309,7 @@ const TransactionsPage: React.FC = () => {
           {/* Filters and Search */}
           <div className="card p-6 mb-6">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="flex items-center gap-4 w-full md:w-auto flex-wrap">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
                   <input
@@ -265,14 +322,57 @@ const TransactionsPage: React.FC = () => {
                 </div>
                 <div className="relative">
                   <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value as "all" | TransactionType)}
+                    value={filters.transactionType}
+                    onChange={handleTransactionTypeChange}
                     className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
                   >
                     <option value="all">All Types</option>
                     <option value="income">Income</option>
                     <option value="expense">Expense</option>
                     <option value="transfer">Transfer</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={filters.accountID}
+                    onChange={handleAccountFilterChange}
+                    className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                  >
+                    <option value="all">All Accounts</option>
+                    {accounts.map((acc) => (
+                      <option key={`filter-acc-${acc.id}`} value={acc.id}>
+                        {acc.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={filters.categoryID}
+                    onChange={handleCategoryFilterChange}
+                    className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                  >
+                    <option value="all">All Categories</option>
+                    {memorizedCategories && memorizedCategories.length > 0 && (
+                      <optgroup label="Default Categories">
+                        {memorizedCategories.map((cat) => (
+                          <option key={`filter-default-${cat.id}`} value={cat.id}>
+                            {cat.icon} {cat.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {categories && categories.length > 0 && (
+                      <optgroup label="Your Categories">
+                        {categories.map((cat) => (
+                          <option key={`filter-user-${cat.id}`} value={cat.id}>
+                            {cat.icon} {cat.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                 </div>
@@ -301,14 +401,14 @@ const TransactionsPage: React.FC = () => {
                 <FileText className="w-10 h-10 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-3">
-                {expenses.length === 0 ? "No transactions yet" : "No matching transactions"}
+                {transactions.length === 0 ? "No transactions yet" : "No matching transactions"}
               </h3>
               <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
-                {expenses.length === 0
+                {transactions.length === 0
                   ? "Start by recording your first transaction to track your finances."
                   : "Try adjusting your search or filter criteria."}
               </p>
-              {expenses.length === 0 && (
+              {transactions.length === 0 && (
                 <button
                   onClick={() => setShowCreateTransactionModal(true)}
                   className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
@@ -346,70 +446,89 @@ const TransactionsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-surface-primary divide-y divide-border-primary">
-                  {filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id} className="hover:bg-surface-secondary transition-colors duration-150">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {getTransactionIcon(transaction.transaction_type)}
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200 capitalize">
-                                {transaction.transaction_type}
-                              </span>
+                  {filteredTransactions.map((transaction) => {
+                    const categoryInfo = getCategoryInfo(transaction)
+                    return (
+                      <tr key={transaction.id} className="hover:bg-surface-secondary transition-colors duration-150">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            {getTransactionIcon(transaction.transaction_type)}
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200 capitalize">
+                                  {transaction.transaction_type}
+                                </span>
+                              </div>
+                              {transaction.notes && (
+                                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs truncate">
+                                  {transaction.notes}
+                                </p>
+                              )}
                             </div>
-                            {transaction.notes && (
-                              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs truncate">
-                                {transaction.notes}
-                              </p>
-                            )}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`text-lg font-semibold ${
-                            transaction.transaction_type === "expense"
-                              ? "text-error-600 dark:text-error-400"
-                              : transaction.transaction_type === "income"
-                                ? "text-success-600 dark:text-success-400"
-                                : "text-primary-600 dark:text-primary-400"
-                          }`}
-                        >
-                          {transaction.transaction_type === "expense" ? "-" : ""}$
-                          {Number.parseFloat(transaction.amount).toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1 bg-neutral-100 dark:bg-neutral-700 rounded text-neutral-600 dark:text-neutral-300">
-                            {getAccountIcon(transaction.account)}
-                          </div>
-                          <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                            {accounts.find((acc) => acc.id === transaction.account)?.name || "N/A"}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`text-lg font-semibold ${
+                              transaction.transaction_type === "expense"
+                                ? "text-error-600 dark:text-error-400"
+                                : transaction.transaction_type === "income"
+                                  ? "text-success-600 dark:text-success-400"
+                                  : "text-primary-600 dark:text-primary-400"
+                            }`}
+                          >
+                            {transaction.transaction_type === "expense" ? "-" : ""}$
+                            {Number.parseFloat(transaction.amount).toFixed(2)}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                          {getCategoryName(transaction)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(transaction.created_at).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleDeleteTransaction(transaction.id)}
-                          className="p-2 hover:bg-error-50 dark:hover:bg-error-900/20 text-error-500 hover:text-error-600 rounded-input transition-all duration-200"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1 bg-neutral-100 dark:bg-neutral-700 rounded text-neutral-600 dark:text-neutral-300">
+                              {getAccountIcon(transaction.account)}
+                            </div>
+                            <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                              {accounts.find((acc) => acc.id === transaction.account)?.name || "N/A"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-8 h-8 rounded-input flex items-center justify-center text-sm border"
+                              style={{
+                                backgroundColor: `${categoryInfo.color}20`,
+                                borderColor: `${categoryInfo.color}40`,
+                              }}
+                            >
+                              {categoryInfo.icon}
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                                {categoryInfo.name}
+                              </span>
+                              {categoryInfo.isDefault && (
+                                <div className="text-xs text-neutral-500 dark:text-neutral-400">Default</div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(transaction.created_at).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => handleDeleteTransaction(transaction.id)}
+                            className="p-2 hover:bg-error-50 dark:hover:bg-error-900/20 text-error-500 hover:text-error-600 rounded-input transition-all duration-200"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -511,7 +630,7 @@ const TransactionsPage: React.FC = () => {
                         <optgroup label="Default Categories">
                           {memorizedCategories.map((cat) => (
                             <option key={`default-${cat.id}`} value={cat.id}>
-                              {cat.name}
+                              {cat.icon} {cat.name}
                             </option>
                           ))}
                         </optgroup>
@@ -520,7 +639,7 @@ const TransactionsPage: React.FC = () => {
                         <optgroup label="Your Categories">
                           {categories.map((cat) => (
                             <option key={`user-${cat.id}`} value={cat.id}>
-                              {cat.name}
+                              {cat.icon} {cat.name}
                             </option>
                           ))}
                         </optgroup>
