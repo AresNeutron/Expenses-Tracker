@@ -149,8 +149,8 @@ class Transaction(models.Model):
         (VOID, "Void"),
     ]
 
-    user               = models.ForeignKey(User, on_delete=models.PROTECT, related_name="transactions", db_index=True)
-    account            = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="transactions", db_index=True)
+    user               = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions", db_index=True)
+    account            = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="transactions", db_index=True)
     transaction_type   = models.CharField(max_length=10, choices=TRANSACTION_TYPES, default=EXPENSE, db_index=True)
     linked_transaction = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
     status             = models.CharField(max_length=10, choices=TRANSACTION_STATUSES, default=CLEARED, db_index=True)
