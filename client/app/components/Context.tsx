@@ -9,9 +9,8 @@ import React, {
   useContext,
   useEffect,
   useCallback,
-  useMemo,
 } from "react";
-import { isTokenValid, setupTokenRefresh } from "../utils/tokens";
+import { isTokenValid, refreshToken, setupTokenRefresh } from "../utils/tokens";
 import {
   Transaction, // Importar Transaction
   Account,
@@ -20,9 +19,8 @@ import {
   CreateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
-} from "../interfaces/api_interfaces"; // Asegúrate de que todas las interfaces están importadas
+} from "../interfaces/api_interfaces";
 
-// Importar funciones API
 import {
   getTransactions, // Renombrado
   createTransaction as apiCreateTransaction, // Renombrado y aliased
@@ -39,7 +37,11 @@ import {
   createCategory as apiCreateCategory,
   deleteCategory as apiDeleteCategory,
 } from "../services/categories";
-import { ExpenseContextProps, FiltersInterface, initialFilters } from "../interfaces/interfaces";
+import {
+  ExpenseContextProps,
+  FiltersInterface,
+  initialFilters,
+} from "../interfaces/interfaces";
 import Navbar from "./Navbar";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
@@ -53,12 +55,14 @@ interface ExpenseProviderProps {
 const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const [password, setPassword] = useState<string>("");
   const [isAuth, setIsAuth] = useState<boolean>(false);
+  // const [errors, setErrors] = useState<string[]>([]);
 
-  // Estados para cada tipo de dato
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [defaultCategories, setDefaultCategories] = useState<DefaultCategory[]>([]);
+  const [defaultCategories, setDefaultCategories] = useState<DefaultCategory[]>(
+    []
+  );
   const [filters, setFilters] = useState<FiltersInterface>(initialFilters);
 
   const router = useRouter();
@@ -71,18 +75,21 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Failed to fetch transactions:", error);
     }
-  }, []);
+  }, [filters]);
 
-  const createTransaction = useCallback(async (newTransaction: CreateTransactionPayload) => {
-    try {
-      const created = await apiCreateTransaction(newTransaction);
-      setTransactions((prev) => [...prev, created]);
-      return created;
-    } catch (error) {
-      console.error("Failed to create transaction:", error);
-      return undefined;
-    }
-  }, []);
+  const createTransaction = useCallback(
+    async (newTransaction: CreateTransactionPayload) => {
+      try {
+        const created = await apiCreateTransaction(newTransaction);
+        setTransactions((prev) => [...prev, created]);
+        return created;
+      } catch (error) {
+        console.error("Failed to create transaction:", error);
+        return undefined;
+      }
+    },
+    []
+  );
 
   const deleteTransaction = useCallback(async (id: number) => {
     try {
@@ -103,16 +110,19 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const createAccount = useCallback(async (newAccount: CreateAccountPayload) => {
-    try {
-      const created = await apiCreateAccount(newAccount);
-      setAccounts((prev) => [...prev, created]);
-      return created;
-    } catch (error) {
-      console.error("Failed to create account:", error);
-      return undefined;
-    }
-  }, []);
+  const createAccount = useCallback(
+    async (newAccount: CreateAccountPayload) => {
+      try {
+        const created = await apiCreateAccount(newAccount);
+        setAccounts((prev) => [...prev, created]);
+        return created;
+      } catch (error) {
+        console.error("Failed to create account:", error);
+        return undefined;
+      }
+    },
+    []
+  );
 
   const deleteAccount = useCallback(async (id: number) => {
     try {
@@ -133,16 +143,19 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const createCategory = useCallback(async (newCategory: CreateCategoryPayload) => {
-    try {
-      const created = await apiCreateCategory(newCategory);
-      setCategories((prev) => [...prev, created]);
-      return created;
-    } catch (error) {
-      console.error("Failed to create category:", error);
-      return undefined;
-    }
-  }, []);
+  const createCategory = useCallback(
+    async (newCategory: CreateCategoryPayload) => {
+      try {
+        const created = await apiCreateCategory(newCategory);
+        setCategories((prev) => [...prev, created]);
+        return created;
+      } catch (error) {
+        console.error("Failed to create category:", error);
+        return undefined;
+      }
+    },
+    []
+  );
 
   const deleteCategory = useCallback(async (id: number) => {
     try {
@@ -153,57 +166,71 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, []);
 
+  const fetchDefaultCategories = useCallback(async () => {
+    try {
+      const data = await getDefaultCategories();
+      setDefaultCategories(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
+  const initializeAuthAndData = useCallback(async () => {
+    const refresh = localStorage.getItem("refresh_token")
+
+    // case for a new user, there is no refresh token, redirect to register page without messages
+    if (!refresh) {
+      setIsAuth(false);
+      router.push("/pages/register/");
+    }
+
+    try {
+      await refreshToken();
+    } catch (error) {
+      // this catch block will work under the hood every time the user token is wrong
+      console.log("Error refreshing token:", error);
+
+      setIsAuth(false);
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      router.push("/");
+      return;
+    }
+
+    // this other block works if the token is still valid, and automatically redirects to dashboard
+    if (isTokenValid()) {
+      setIsAuth(true);
+      setupTokenRefresh();
+
+      await Promise.all([
+        fetchTransactions(),
+        fetchAccounts(),
+        fetchCategories(),
+        fetchDefaultCategories(),
+      ]);
+      router.push("/pages/dashboard/");
+    } else {
+      // in case the token exist but isn't valid, redirects to login page
+      setIsAuth(false);
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+
+      // we must show a message in UI, something like "your session expire, log in again"
+      router.push("/");
+    }
+  }, [
+    router,
+    setIsAuth,
+    fetchTransactions,
+    fetchAccounts,
+    fetchCategories,
+    fetchDefaultCategories,
+  ]);
 
   useEffect(() => {
-    const initializeAuthAndData = async () => {
-      const accessToken = localStorage.getItem("access_token");
-      if (accessToken) {
-        if (isTokenValid()) {
-          setIsAuth(true);
-          setupTokenRefresh(); // Configura el refresco de token si es válido
-          // Cargar datos iniciales para todas las entidades
-          await Promise.all([
-            fetchTransactions(), // Llamar a la función renombrada
-            fetchAccounts(),
-            fetchCategories(),
-          ]);
-          router.push("/pages/dashboard/")
-        } else {
-          setIsAuth(false);
-          // Opcional: limpiar tokens si expiró y redirigir al login
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          router.push("/"); // O tu página de login
-        }
-      } else {
-        setIsAuth(false);
-        router.push("/");
-      }
-    };
-
     initializeAuthAndData();
-  }, [router, setIsAuth, fetchTransactions, fetchAccounts, fetchCategories]);
-
-  useEffect(()=> {
-    const fetchCategories = async () => {
-      try {
-        const data = await getDefaultCategories();
-        setDefaultCategories(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchCategories();
-  }, [])
-
-  useEffect(() => {
-    fetchTransactions();
-  }, [filters, fetchTransactions]);
-
-  const memorizedCategories = useMemo(() => {
-    return defaultCategories;
-  }, [defaultCategories]);
+  }, [initializeAuthAndData]);
 
   return (
     <ExpenseContext.Provider
@@ -221,12 +248,12 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         deleteAccount,
         createCategory,
         deleteCategory,
-        memorizedCategories,
+        defaultCategories,
         filters,
         setFilters,
       }}
     >
-      {isAuth && <Navbar/>}
+      {isAuth && <Navbar />}
       {children}
     </ExpenseContext.Provider>
   );

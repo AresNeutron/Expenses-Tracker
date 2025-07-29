@@ -40,7 +40,7 @@ export interface ExpenseContextProps {
   ) => Promise<Category | undefined>;
   deleteCategory: (id: number) => Promise<void>;
 
-  memorizedCategories: DefaultCategory[];
+  defaultCategories: DefaultCategory[];
 
   filters: FiltersInterface;
   setFilters: React.Dispatch<React.SetStateAction<FiltersInterface>>;
