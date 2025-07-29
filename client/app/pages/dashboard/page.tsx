@@ -15,7 +15,6 @@ import {
   TrendingUp,
   Eye,
   EyeOff,
-  ChevronRight,
   PiggyBank,
 } from "lucide-react"
 
@@ -252,10 +251,16 @@ const AccountsPage: React.FC = () => {
                   </div>
 
                   <div className="pt-3 border-t border-border-primary">
-                    <button className="w-full flex items-center justify-between text-sm text-primary-600 hover:text-primary-700 font-medium group/button">
-                      <span>View Details</span>
-                      <ChevronRight className="w-4 h-4 group-hover/button:translate-x-1 transition-transform duration-200" />
-                    </button>
+                    <div className="flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400">
+                      <span>Created</span>
+                      <span className="font-medium">
+                        {new Date(account.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
