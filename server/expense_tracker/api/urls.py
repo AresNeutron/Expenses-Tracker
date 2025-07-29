@@ -1,6 +1,5 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from .views.authentication import RegisterUserView, LoginUserView, LogoutUserView, UserDetailView
+from .views.authentication import RegisterUserView, LoginUserView, LogoutUserView, UserDetailView, CustomTokenRefreshView
 from .views.transaction import TransactionListCreateAPIView, TransactionRetrieveUpdateDestroyAPIView
 from .views.account import AccountListCreateAPIView, AccountRetrieveDestroyAPIView
 from .views.category import CategoryListCreateAPIView, CategoryRetrieveUpdateDestroyAPIView
@@ -12,7 +11,7 @@ urlpatterns = [
     path('auth/login/', LoginUserView.as_view(), name='login'),
     path('auth/logout/', LogoutUserView.as_view(), name='logout'),
     path('auth/me/', UserDetailView.as_view(), name='user_detail'), # Endpoint for current authenticated user
-    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # For refreshing JWT tokens
+    path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'), # For refreshing JWT tokens
 
     # --- Transaction URLs ---
     path('transactions/', TransactionListCreateAPIView.as_view(), name='transaction-list-create'),

@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from .base import BaseAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
@@ -109,9 +111,8 @@ class UserDetailView(BaseAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user  # Get the current logged-in user
-        # You might want to use a UserSerializer here if User model has more fields you want to expose.
-        # For now, a simple dictionary is fine.
+        user = request.user 
+        
         user_data = {
             'id': user.id,
             'username': user.username,
@@ -122,3 +123,28 @@ class UserDetailView(BaseAPIView):
             'last_login': user.last_login.isoformat() if user.last_login else None,
         }
         return Response(user_data)
+    
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        try:
+            response = super().post(request, *args, **kwargs)
+            return response
+        except TokenError as e:
+            print(f"TokenError: {e.detail}")
+            return Response(
+                {"detail": e.detail},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except User.DoesNotExist:
+            print("User associated with refresh token does not exist.")
+            return Response(
+                {"detail": "User associated with refresh token does not exist. Please log in again."},
+                status=status.HTTP_404_NOT_FOUND # O status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            print(f"Unexpected error during token refresh: {e}")
+            return Response(
+                {"detail": "An unexpected error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
