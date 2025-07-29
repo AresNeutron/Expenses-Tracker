@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
+import Link from "next/link"
 import type {
   CategoryTypeModel,
   CreateTransactionPayload,
@@ -10,6 +11,7 @@ import type {
 } from "../../interfaces/api_interfaces"
 import { useExpenseContext } from "@/app/components/Context"
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal"
+import MessageModal from "@/app/components/MessageModal"
 import {
   Plus,
   ArrowUpCircle,
@@ -30,6 +32,7 @@ import {
   PiggyBank,
   FileText,
   ChevronDown,
+  ExternalLink,
 } from "lucide-react"
 
 const TransactionsPage: React.FC = () => {
@@ -49,6 +52,15 @@ const TransactionsPage: React.FC = () => {
   const [showBalances, setShowBalances] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
 
+  // Estados para el MessageModal
+  const [messageModal, setMessageModal] = useState({
+    isOpen: false,
+    type: "info" as "success" | "error" | "warning" | "info" | "confirm",
+    title: "",
+    message: "",
+    onConfirm: undefined as (() => void) | undefined,
+  })
+
   // Estados para el formulario de nueva transacción
   const [amount, setAmount] = useState("")
   const [accountID, setAccountID] = useState("")
@@ -57,9 +69,24 @@ const TransactionsPage: React.FC = () => {
   const [type, setType] = useState<TransactionType>("expense")
   const [notes, setNotes] = useState("")
 
+  const showMessage = (
+    type: "success" | "error" | "warning" | "info" | "confirm",
+    title: string,
+    message: string,
+    onConfirm?: () => void,
+  ) => {
+    setMessageModal({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm,
+    })
+  }
+
   const handleCreateTransaction = async () => {
     if (amount.trim() === "" || Number.isNaN(Number.parseFloat(amount)) || accountID === "" || categoryID === "") {
-      alert("Please fill in all required fields: Amount, Account, and Category.")
+      showMessage("error", "Validation Error", "Please fill in all required fields: Amount, Account, and Category.")
       return
     }
 
@@ -80,13 +107,22 @@ const TransactionsPage: React.FC = () => {
       setType("expense")
       setNotes("")
       setShowCreateTransactionModal(false)
+      showMessage("success", "Transaction Recorded", `Your ${type} transaction has been recorded successfully!`)
+    } else {
+      showMessage("error", "Transaction Failed", "Failed to record transaction. Please try again.")
     }
   }
 
   const handleDeleteTransaction = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this transaction?")) {
-      await deleteTransaction(id)
-    }
+    showMessage(
+      "confirm",
+      "Delete Transaction",
+      "Are you sure you want to delete this transaction? This action cannot be undone.",
+      async () => {
+        await deleteTransaction(id)
+        showMessage("success", "Transaction Deleted", "The transaction has been deleted successfully.")
+      },
+    )
   }
 
   const getCategoryInfo = (transaction: Transaction) => {
@@ -216,185 +252,216 @@ const TransactionsPage: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">My Transactions</h1>
-              <p className="text-neutral-600 dark:text-neutral-300">Track your income, transactions, and transfers</p>
+              <p className="text-neutral-600 dark:text-neutral-300">Track your income, expenses, and transfers</p>
             </div>
-            <button
-              onClick={() => setShowCreateTransactionModal(true)}
-              className="group flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
-            >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-              Add Transaction
-            </button>
+            {/* Solo mostrar el botón superior si hay transacciones Y hay cuentas */}
+            {transactions.length > 0 && accounts.length > 0 && (
+              <button
+                onClick={() => setShowCreateTransactionModal(true)}
+                className="group flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+              >
+                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
+                Add Transaction
+              </button>
+            )}
           </div>
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="card p-6 bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-success-200 dark:border-success-700/50">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success-500 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-success-700 dark:text-success-300 mb-1">Total Income</p>
-                  <div className="flex items-center gap-2">
-                    {showBalances ? (
-                      <p className="text-2xl font-bold text-success-600 dark:text-success-400">
-                        ${totalIncome.toFixed(2)}
-                      </p>
-                    ) : (
-                      <p className="text-2xl font-bold text-neutral-400">••••••</p>
-                    )}
+          {/* Statistics Cards - Solo mostrar si hay transacciones */}
+          {transactions.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="card p-6 bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-success-200 dark:border-success-700/50">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-success-500 rounded-full">
+                    <TrendingUp className="w-6 h-6 text-white" />
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="card p-6 bg-gradient-to-r from-error-50 to-error-100 dark:from-error-900/20 dark:to-error-800/20 border-error-200 dark:border-error-700/50">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-error-500 rounded-full">
-                  <TrendingDown className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-error-700 dark:text-error-300 mb-1">Total Expenses</p>
-                  <div className="flex items-center gap-2">
-                    {showBalances ? (
-                      <p className="text-2xl font-bold text-error-600 dark:text-error-400">
-                        ${totalExpenses.toFixed(2)}
-                      </p>
-                    ) : (
-                      <p className="text-2xl font-bold text-neutral-400">••••••</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="card p-6 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-primary-200 dark:border-primary-700/50">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary-500 rounded-full">
-                  <DollarSign className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">Net Balance</p>
-                  <div className="flex items-center gap-3">
-                    {showBalances ? (
-                      <p
-                        className={`text-2xl font-bold ${
-                          netBalance >= 0
-                            ? "text-success-600 dark:text-success-400"
-                            : "text-error-600 dark:text-error-400"
-                        }`}
-                      >
-                        ${netBalance.toFixed(2)}
-                      </p>
-                    ) : (
-                      <p className="text-2xl font-bold text-neutral-400">••••••</p>
-                    )}
-                    <button
-                      onClick={() => setShowBalances(!showBalances)}
-                      className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-input transition-colors duration-200"
-                    >
+                  <div>
+                    <p className="text-sm font-medium text-success-700 dark:text-success-300 mb-1">Total Income</p>
+                    <div className="flex items-center gap-2">
                       {showBalances ? (
-                        <EyeOff className="w-4 h-4 text-neutral-500" />
+                        <p className="text-2xl font-bold text-success-600 dark:text-success-400">
+                          ${totalIncome.toFixed(2)}
+                        </p>
                       ) : (
-                        <Eye className="w-4 h-4 text-neutral-500" />
+                        <p className="text-2xl font-bold text-neutral-400">••••••</p>
                       )}
-                    </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card p-6 bg-gradient-to-r from-error-50 to-error-100 dark:from-error-900/20 dark:to-error-800/20 border-error-200 dark:border-error-700/50">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-error-500 rounded-full">
+                    <TrendingDown className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-error-700 dark:text-error-300 mb-1">Total Expenses</p>
+                    <div className="flex items-center gap-2">
+                      {showBalances ? (
+                        <p className="text-2xl font-bold text-error-600 dark:text-error-400">
+                          ${totalExpenses.toFixed(2)}
+                        </p>
+                      ) : (
+                        <p className="text-2xl font-bold text-neutral-400">••••••</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card p-6 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-primary-200 dark:border-primary-700/50">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-primary-500 rounded-full">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">Net Balance</p>
+                    <div className="flex items-center gap-3">
+                      {showBalances ? (
+                        <p
+                          className={`text-2xl font-bold ${
+                            netBalance >= 0
+                              ? "text-success-600 dark:text-success-400"
+                              : "text-error-600 dark:text-error-400"
+                          }`}
+                        >
+                          ${netBalance.toFixed(2)}
+                        </p>
+                      ) : (
+                        <p className="text-2xl font-bold text-neutral-400">••••••</p>
+                      )}
+                      <button
+                        onClick={() => setShowBalances(!showBalances)}
+                        className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-input transition-colors duration-200"
+                      >
+                        {showBalances ? (
+                          <EyeOff className="w-4 h-4 text-neutral-500" />
+                        ) : (
+                          <Eye className="w-4 h-4 text-neutral-500" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Filters and Search */}
-          <div className="card p-6 mb-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-4 w-full md:w-auto flex-wrap">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="text"
-                    placeholder="Search transactions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-border-primary rounded-input bg-surface-primary text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
-                  />
+          {/* Filters and Search - Solo mostrar si hay transacciones */}
+          {transactions.length > 0 && (
+            <div className="card p-6 mb-6">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="flex items-center gap-4 w-full md:w-auto flex-wrap">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <input
+                      type="text"
+                      placeholder="Search transactions..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-border-primary rounded-input bg-surface-primary text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                    />
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={filters.transactionType}
+                      onChange={handleTransactionTypeChange}
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                    >
+                      <option value="all">All Types</option>
+                      <option value="income">Income</option>
+                      <option value="expense">Expense</option>
+                      <option value="transfer">Transfer</option>
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={filters.accountID}
+                      onChange={handleAccountFilterChange}
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                    >
+                      <option value="all">All Accounts</option>
+                      {accounts.map((acc) => (
+                        <option key={`filter-acc-${acc.id}`} value={acc.id}>
+                          {acc.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={filters.categoryID}
+                      onChange={handleCategoryFilterChange}
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                    >
+                      <option value="all">All Categories</option>
+                      {defaultCategories && defaultCategories.length > 0 && (
+                        <optgroup label="Default Categories">
+                          {defaultCategories.map((cat) => (
+                            <option key={`filter-default-${cat.id}`} value={cat.id}>
+                              {cat.icon} {cat.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {categories && categories.length > 0 && (
+                        <optgroup label="Your Categories">
+                          {categories.map((cat) => (
+                            <option key={`filter-user-${cat.id}`} value={cat.id}>
+                              {cat.icon} {cat.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  </div>
                 </div>
-                <div className="relative">
-                  <select
-                    value={filters.transactionType}
-                    onChange={handleTransactionTypeChange}
-                    className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                    {filteredTransactions.length} transactions
+                  </span>
+                  <button
+                    onClick={() => setShowManageCategoriesModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm bg-surface-secondary hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-border-primary rounded-input transition-colors duration-200"
                   >
-                    <option value="all">All Types</option>
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
-                    <option value="transfer">Transfer</option>
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                    <Settings className="w-4 h-4" />
+                    Manage Categories
+                  </button>
                 </div>
-                <div className="relative">
-                  <select
-                    value={filters.accountID}
-                    onChange={handleAccountFilterChange}
-                    className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
-                  >
-                    <option value="all">All Accounts</option>
-                    {accounts.map((acc) => (
-                      <option key={`filter-acc-${acc.id}`} value={acc.id}>
-                        {acc.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                </div>
-                <div className="relative">
-                  <select
-                    value={filters.categoryID}
-                    onChange={handleCategoryFilterChange}
-                    className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
-                  >
-                    <option value="all">All Categories</option>
-                    {defaultCategories && defaultCategories.length > 0 && (
-                      <optgroup label="Default Categories">
-                        {defaultCategories.map((cat) => (
-                          <option key={`filter-default-${cat.id}`} value={cat.id}>
-                            {cat.icon} {cat.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                    {categories && categories.length > 0 && (
-                      <optgroup label="Your Categories">
-                        {categories.map((cat) => (
-                          <option key={`filter-user-${cat.id}`} value={cat.id}>
-                            {cat.icon} {cat.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-neutral-600 dark:text-neutral-400">
-                  {filteredTransactions.length} transactions
-                </span>
-                <button
-                  onClick={() => setShowManageCategoriesModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm bg-surface-secondary hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-border-primary rounded-input transition-colors duration-200"
-                >
-                  <Settings className="w-4 h-4" />
-                  Manage Categories
-                </button>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Transactions List */}
-        {filteredTransactions.length === 0 ? (
+        {accounts.length === 0 ? (
+          // Mensaje cuando no hay cuentas
+          <div className="card p-12 text-center">
+            <div className="max-w-lg mx-auto">
+              <div className="p-4 bg-warning-100 dark:bg-warning-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <Building2 className="w-10 h-10 text-warning-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-3">
+                No accounts available
+              </h3>
+              <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
+                You cannot record transactions without having any accounts first. Accounts are required to track where
+                your money comes from and goes to.
+              </p>
+              <Link
+                href="/pages/dashboard"
+                className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+              >
+                <Building2 className="w-5 h-5" />
+                Go to Accounts Page
+                <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+              </Link>
+            </div>
+          </div>
+        ) : filteredTransactions.length === 0 ? (
           <div className="card p-12 text-center">
             <div className="max-w-md mx-auto">
               <div className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -408,10 +475,11 @@ const TransactionsPage: React.FC = () => {
                   ? "Start by recording your first transaction to track your finances."
                   : "Try adjusting your search or filter criteria."}
               </p>
+              {/* Botón con animación llamativa solo cuando no hay transacciones */}
               {transactions.length === 0 && (
                 <button
                   onClick={() => setShowCreateTransactionModal(true)}
-                  className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+                  className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none"
                 >
                   <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
                   Record First Transaction
@@ -535,8 +603,8 @@ const TransactionsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Create Transaction Modal */}
-        {showCreateTransactionModal && (
+        {/* Create Transaction Modal - Solo mostrar si hay cuentas */}
+        {showCreateTransactionModal && accounts.length > 0 && (
           <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="card w-full max-w-2xl bg-surface-primary max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-border-primary">
@@ -679,6 +747,18 @@ const TransactionsPage: React.FC = () => {
 
         {/* Manage Categories Modal */}
         {showManageCategoriesModal && <ManageCategoriesModal onClose={() => setShowManageCategoriesModal(false)} />}
+
+        {/* Message Modal */}
+        <MessageModal
+          isOpen={messageModal.isOpen}
+          onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
+          type={messageModal.type}
+          title={messageModal.title}
+          message={messageModal.message}
+          onConfirm={messageModal.onConfirm}
+          confirmText="Delete Transaction"
+          cancelText="Keep Transaction"
+        />
       </main>
     </div>
   )

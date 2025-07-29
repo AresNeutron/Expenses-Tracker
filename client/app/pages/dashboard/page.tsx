@@ -4,6 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { useExpenseContext } from "@/app/components/Context"
 import type { AccountType } from "@/app/interfaces/api_interfaces"
+import MessageModal from "@/app/components/MessageModal"
 import {
   Plus,
   CreditCard,
@@ -27,13 +28,37 @@ const AccountsPage: React.FC = () => {
   const [newInitialBalance, setNewInitialBalance] = useState<string>("0")
   const [showBalances, setShowBalances] = useState(true)
 
+  // Estados para el MessageModal
+  const [messageModal, setMessageModal] = useState({
+    isOpen: false,
+    type: "info" as "success" | "error" | "warning" | "info" | "confirm",
+    title: "",
+    message: "",
+    onConfirm: undefined as (() => void) | undefined,
+  })
+
+  const showMessage = (
+    type: "success" | "error" | "warning" | "info" | "confirm",
+    title: string,
+    message: string,
+    onConfirm?: () => void,
+  ) => {
+    setMessageModal({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm,
+    })
+  }
+
   const handleCreateAccount = async () => {
     if (newAccountName.trim() === "") {
-      alert("Please enter an account name.")
+      showMessage("error", "Validation Error", "Please enter an account name.")
       return
     }
     if (isNaN(Number.parseFloat(newInitialBalance))) {
-      alert("Please enter a valid number for initial balance.")
+      showMessage("error", "Validation Error", "Please enter a valid number for initial balance.")
       return
     }
 
@@ -43,19 +68,33 @@ const AccountsPage: React.FC = () => {
       currency: newAccountCurrency,
       initial_balance: newInitialBalance,
     })
+
     if (created) {
       setNewAccountName("")
       setNewAccountType("bank")
       setNewAccountCurrency("USD")
       setNewInitialBalance("0")
       setShowCreateAccountModal(false)
+      showMessage("success", "Account Created", `Your account "${created.name}" has been created successfully!`)
+    } else {
+      showMessage("error", "Creation Failed", "Failed to create account. Please try again.")
     }
   }
 
   const handleDeleteAccount = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this account?")) {
-      await deleteAccount(id)
-    }
+    showMessage(
+      "confirm",
+      "Delete Account",
+      "Are you sure you want to delete this account? All related transactions will be deleted too.",
+      async () => {
+        await deleteAccount(id)
+        showMessage(
+          "success",
+          "Account Deleted",
+          "The account and all related transactions have been deleted successfully.",
+        )
+      },
+    )
   }
 
   const totalBalance = accounts.reduce((sum, account) => sum + Number.parseFloat(account.balance), 0)
@@ -98,49 +137,54 @@ const AccountsPage: React.FC = () => {
                 Manage your financial accounts and track your balances
               </p>
             </div>
-            <button
-              onClick={() => setShowCreateAccountModal(true)}
-              className="group flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
-            >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-              Add Account
-            </button>
+            {/* Solo mostrar el botón superior si hay cuentas */}
+            {accounts.length > 0 && (
+              <button
+                onClick={() => setShowCreateAccountModal(true)}
+                className="group flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+              >
+                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
+                Add Account
+              </button>
+            )}
           </div>
 
-          {/* Summary Card */}
-          <div className="card p-6 mb-8 bg-gradient-to-r from-primary-50 to-success-50 dark:from-primary-900/20 dark:to-success-900/20 border-primary-200 dark:border-primary-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary-500 rounded-full">
-                  <DollarSign className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Total Balance</p>
-                  <div className="flex items-center gap-3">
-                    {showBalances ? (
-                      <p className="text-3xl font-bold balance-text">${totalBalance.toFixed(2)}</p>
-                    ) : (
-                      <p className="text-3xl font-bold text-neutral-400">••••••</p>
-                    )}
-                    <button
-                      onClick={() => setShowBalances(!showBalances)}
-                      className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-input transition-colors duration-200"
-                    >
+          {/* Summary Card - Solo mostrar si hay cuentas */}
+          {accounts.length > 0 && (
+            <div className="card p-6 mb-8 bg-gradient-to-r from-primary-50 to-success-50 dark:from-primary-900/20 dark:to-success-900/20 border-primary-200 dark:border-primary-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-primary-500 rounded-full">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Total Balance</p>
+                    <div className="flex items-center gap-3">
                       {showBalances ? (
-                        <EyeOff className="w-4 h-4 text-neutral-500" />
+                        <p className="text-3xl font-bold balance-text">${totalBalance.toFixed(2)}</p>
                       ) : (
-                        <Eye className="w-4 h-4 text-neutral-500" />
+                        <p className="text-3xl font-bold text-neutral-400">••••••</p>
                       )}
-                    </button>
+                      <button
+                        onClick={() => setShowBalances(!showBalances)}
+                        className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-input transition-colors duration-200"
+                      >
+                        {showBalances ? (
+                          <EyeOff className="w-4 h-4 text-neutral-500" />
+                        ) : (
+                          <Eye className="w-4 h-4 text-neutral-500" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 text-success-600">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-medium">{accounts.length} accounts</span>
+                <div className="flex items-center gap-2 text-success-600">
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="text-sm font-medium">{accounts.length} accounts</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Accounts Grid */}
@@ -154,9 +198,10 @@ const AccountsPage: React.FC = () => {
               <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
                 Get started by creating your first account to begin tracking your finances effectively.
               </p>
+              {/* Botón con animación llamativa solo cuando no hay cuentas */}
               <button
                 onClick={() => setShowCreateAccountModal(true)}
-                className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+                className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none"
               >
                 <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
                 Create My First Account
@@ -299,6 +344,18 @@ const AccountsPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Message Modal */}
+        <MessageModal
+          isOpen={messageModal.isOpen}
+          onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
+          type={messageModal.type}
+          title={messageModal.title}
+          message={messageModal.message}
+          onConfirm={messageModal.onConfirm}
+          confirmText="Delete Account"
+          cancelText="Keep Account"
+        />
       </main>
     </div>
   )
