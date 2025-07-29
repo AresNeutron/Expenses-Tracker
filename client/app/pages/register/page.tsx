@@ -9,7 +9,7 @@ import { useState } from "react"
 import type React from "react"
 
 function Register() {
-  const { password } = useExpenseContext()
+  const { password, setIsAuth } = useExpenseContext()
   const [username, setUsername] = useState<string>("")
   const [email, setEmail] = useState<string>("")
   const [errors, setErrors] = useState<string[]>([])
@@ -49,6 +49,8 @@ function Register() {
       // Store the tokens in localStorage
       localStorage.setItem("access_token", response.data.access)
       localStorage.setItem("refresh_token", response.data.refresh)
+
+      setIsAuth(true);
 
       // Redirect to dashboard
       router.push("/pages/dashboard")
