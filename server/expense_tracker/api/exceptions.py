@@ -1,70 +1,51 @@
-"""
-Custom exception handlers for the API.
-"""
-
 from rest_framework.views import exception_handler
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ValidationError, NotAuthenticated, PermissionDenied, NotFound, MethodNotAllowed
 
 def custom_exception_handler(exc, context):
     """
-    Custom exception handler for REST framework that formats errors into a standard structure.
+    Custom exception handler for REST framework that formats errors into a standard structure,
+    providing more specific and user-friendly messages.
     """
-    # Call REST framework's default exception handler first,
-    # to get the standard error response.
     response = exception_handler(exc, context)
 
     if response is not None:
-        # Standardize the error response format
         custom_response_data = {
             'success': False,
             'error': {
                 'code': response.status_code,
-                'message': 'An error occurred.',
-                'details': response.data
+                'message': 'An unexpected error occurred. Please try again later.', # Default message
+                'details': None
             }
         }
-        
-        # Customize the message for known exception types
-        if response.status_code == status.HTTP_400_BAD_REQUEST:
-            custom_response_data['error']['message'] = "Validation error. Please check your inputs."
-        elif response.status_code == status.HTTP_401_UNAUTHORIZED:
-            custom_response_data['error']['message'] = "Authentication credentials were not provided or are invalid."
-        elif response.status_code == status.HTTP_403_FORBIDDEN:
-            custom_response_data['error']['message'] = "You do not have permission to perform this action."
-        elif response.status_code == status.HTTP_404_NOT_FOUND:
-            custom_response_data['error']['message'] = "The requested resource was not found."
-        elif response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED:
-             custom_response_data['error']['message'] = "This method is not allowed for the requested resource."
-        elif status.is_server_error(response.status_code):
-            # For 5xx errors, we might want to hide detailed errors in production
-            custom_response_data['error']['message'] = "A server error occurred. Please try again later."
-            # In a real production environment, you would log the full exception here
-            # and not expose internal details to the client.
-            del custom_response_data['error']['details']
 
+        if isinstance(exc, ValidationError):
+            custom_response_data['error']['message'] = "There was a problem with your input. Please check the provided data."
+            if response.data:
+                custom_response_data['error']['details'] = response.data
+
+        elif isinstance(exc, NotAuthenticated):
+            custom_response_data['error']['message'] = "Authentication is required to access this resource. Please log in."
+        
+        elif isinstance(exc, PermissionDenied):
+            custom_response_data['error']['message'] = "You don't have the necessary permissions to perform this action."
+        
+        elif isinstance(exc, NotFound):
+            custom_response_data['error']['message'] = "The requested resource could not be found."
+        
+        elif isinstance(exc, MethodNotAllowed):
+             custom_response_data['error']['message'] = "This action is not allowed for the requested resource."
+        
+        elif status.is_server_error(response.status_code):
+            custom_response_data['error']['message'] = "A server error occurred. We're working to fix it. Please try again later."
+            custom_response_data['error']['details'] = None # Ensure no internal details are exposed
+        
+        else:
+            if response.data and 'detail' in response.data:
+                custom_response_data['error']['message'] = str(response.data['detail'])
+
+        if custom_response_data['error']['details'] is None and response.data and not status.is_server_error(response.status_code):
+            custom_response_data['error']['details'] = response.data
 
         response.data = custom_response_data
-
     return response
-
-class ServiceValidationError(Exception):
-    """Custom exception for service layer validation errors."""
-    def __init__(self, message, status_code=status.HTTP_400_BAD_REQUEST):
-        self.message = message
-        self.status_code = status_code
-        super().__init__(self.message)
-
-    def as_response(self):
-        """Return a DRF Response object for this exception."""
-        return Response(
-            {
-                'success': False,
-                'error': {
-                    'code': self.status_code,
-                    'message': "A business logic error occurred.",
-                    'details': self.message
-                }
-            },
-            status=self.status_code
-        )
