@@ -67,6 +67,9 @@ class Account(models.Model):
         self.is_active = False
         self.save(update_fields=['deleted_at', 'is_active'])
 
+        # Soft-delete related transactions
+        for transaction in self.transactions.all(): # 'transactions' is your related_name
+            transaction.soft_delete()
 
 class Category(models.Model):
     user            = models.ForeignKey(User, on_delete=models.CASCADE, related_name="categories", db_index=True)
@@ -195,6 +198,10 @@ class Transaction(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def soft_delete(self):
+        self.deleted_at = timezone.now()
+        self.save(update_fields=['deleted_at'])
 
     @property
     def is_active(self):
