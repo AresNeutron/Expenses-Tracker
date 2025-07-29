@@ -25,21 +25,20 @@ export default function Login() {
         password,
       })
       const { access, refresh } = response.data
-      // Save tokens to local storage or cookies
+
       localStorage.setItem("access_token", access)
       localStorage.setItem("refresh_token", refresh)
-      setupTokenRefresh() // Refresh token setup
-      // Redirect or notify success
-      router.push("/pages/dashboard")
+      setupTokenRefresh() 
+      
       setPassword("") // Clear password fields
-      setIsAuth(true) // Set authentication status
+      setIsAuth(true)
+      
+      router.push("/pages/dashboard")
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        // Handle Axios-specific error
         if (err.response && err.response.status === 401) {
           setErrors(["Invalid username/email or password. Please try again."])
         } else if (err.response && err.response.status === 400) {
-          // Other error from the backend
           setErrors(["Invalid request. User does not exist."])
         }
       } else {

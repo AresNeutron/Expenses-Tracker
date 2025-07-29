@@ -154,7 +154,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   }, []);
 
 
-  // Configuración del refresco de token e inicio de carga de datos al montar el componente
   useEffect(() => {
     const initializeAuthAndData = async () => {
       const accessToken = localStorage.getItem("access_token");
@@ -170,7 +169,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
           ]);
           router.push("/pages/dashboard/")
         } else {
-          console.log("Your session expired. Please log in again.");
           setIsAuth(false);
           // Opcional: limpiar tokens si expiró y redirigir al login
           localStorage.removeItem("access_token");
@@ -179,12 +177,12 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         }
       } else {
         setIsAuth(false);
-        router.push("/"); // Redirigir al login si no hay token
+        router.push("/");
       }
     };
 
     initializeAuthAndData();
-  }, [router, setIsAuth, fetchTransactions, fetchAccounts, fetchCategories]); // Asegúrate de incluir todas las dependencias
+  }, [router, setIsAuth, fetchTransactions, fetchAccounts, fetchCategories]);
 
   useEffect(()=> {
     const fetchCategories = async () => {
