@@ -39,7 +39,7 @@ const TransactionsPage: React.FC = () => {
     categories,
     createTransaction,
     deleteTransaction,
-    memorizedCategories,
+    defaultCategories,
     setFilters,
     filters,
   } = useExpenseContext()
@@ -90,7 +90,7 @@ const TransactionsPage: React.FC = () => {
   }
 
   const getCategoryInfo = (transaction: Transaction) => {
-    const defaultCategory = memorizedCategories.find(
+    const defaultCategory = defaultCategories.find(
       (cat) => cat.id === transaction.category_id && transaction.category_type_model.includes("default"),
     )
     if (defaultCategory) {
@@ -194,7 +194,7 @@ const TransactionsPage: React.FC = () => {
     let selectedCategoryTypeModel: CategoryTypeModel | "all" = "all"
 
     if (selectedCategoryId !== "all") {
-      if (memorizedCategories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))) {
+      if (defaultCategories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))) {
         selectedCategoryTypeModel = "defaultcategory"
       } else if (categories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))) {
         selectedCategoryTypeModel = "category"
@@ -355,9 +355,9 @@ const TransactionsPage: React.FC = () => {
                     className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
                   >
                     <option value="all">All Categories</option>
-                    {memorizedCategories && memorizedCategories.length > 0 && (
+                    {defaultCategories && defaultCategories.length > 0 && (
                       <optgroup label="Default Categories">
-                        {memorizedCategories.map((cat) => (
+                        {defaultCategories.map((cat) => (
                           <option key={`filter-default-${cat.id}`} value={cat.id}>
                             {cat.icon} {cat.name}
                           </option>
@@ -615,7 +615,7 @@ const TransactionsPage: React.FC = () => {
                         const selectedCategoryId = Number.parseInt(e.target.value)
                         setCategoryID(e.target.value)
 
-                        if (memorizedCategories.some((cat) => cat.id === selectedCategoryId)) {
+                        if (defaultCategories.some((cat) => cat.id === selectedCategoryId)) {
                           setCategoryTypeModel("defaultcategory")
                         } else if (categories.some((cat) => cat.id === selectedCategoryId)) {
                           setCategoryTypeModel("category")
@@ -626,9 +626,9 @@ const TransactionsPage: React.FC = () => {
                       className="inputElement appearance-none pr-8"
                     >
                       <option value="">Select Category</option>
-                      {memorizedCategories && memorizedCategories.length > 0 && (
+                      {defaultCategories && defaultCategories.length > 0 && (
                         <optgroup label="Default Categories">
-                          {memorizedCategories.map((cat) => (
+                          {defaultCategories.map((cat) => (
                             <option key={`default-${cat.id}`} value={cat.id}>
                               {cat.icon} {cat.name}
                             </option>

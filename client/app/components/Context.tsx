@@ -206,7 +206,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         fetchTransactions(),
         fetchAccounts(),
         fetchCategories(),
-        fetchDefaultCategories(),
       ]);
       router.push("/pages/dashboard/");
     } else {
@@ -225,12 +224,15 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     fetchTransactions,
     fetchAccounts,
     fetchCategories,
-    fetchDefaultCategories,
   ]);
 
   useEffect(() => {
     initializeAuthAndData();
   }, [initializeAuthAndData]);
+
+  useEffect(()=> {
+    fetchDefaultCategories();
+  }, [fetchDefaultCategories])
 
   return (
     <ExpenseContext.Provider
