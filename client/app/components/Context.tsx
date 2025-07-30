@@ -1,7 +1,7 @@
 // context/ExpenseContext.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, {
   createContext,
   useState,
@@ -66,15 +66,12 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const [filters, setFilters] = useState<FiltersInterface>(initialFilters);
 
   const router = useRouter();
+  const currentPath = usePathname();
 
   // --- Funciones API para Transacciones (anteriormente Gastos) ---
   const fetchTransactions = useCallback(async () => {
-    try {
-      const data = await getTransactions(filters); // Llamar a la función renombrada
-      setTransactions(data); // Actualizar el estado `transactions`
-    } catch (error) {
-      console.error("Failed to fetch transactions:", error);
-    }
+    const data = await getTransactions(filters);
+    setTransactions(data);
   }, [filters]);
 
   const createTransaction = useCallback(
@@ -103,19 +100,21 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     setAccounts(data);
   }, []);
 
-  const createAccount = useCallback(async (newAccount: CreateAccountPayload) => {
-    const custom_response = await apiCreateAccount(newAccount);
-    if (custom_response.success) {
+  const createAccount = useCallback(
+    async (newAccount: CreateAccountPayload) => {
+      const custom_response = await apiCreateAccount(newAccount);
+      if (custom_response.success) {
         setAccounts((prev) => [...prev, custom_response.data]);
       }
       return custom_response;
-  }, [])
+    },
+    []
+  );
 
   const deleteAccount = useCallback(async (id: number) => {
     await apiDeleteAccount(id);
     setAccounts((prev) => prev.filter((acc) => acc.id !== id));
-  }, [])
-
+  }, []);
 
   // --- Funciones API para Categorías ---
   const fetchCategories = useCallback(async () => {
@@ -147,12 +146,12 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   }, []);
 
   const fetchDefaultCategories = useCallback(async () => {
-      const data = await getDefaultCategories();
-      setDefaultCategories(data);
+    const data = await getDefaultCategories();
+    setDefaultCategories(data);
   }, []);
 
   const initializeAuthAndData = useCallback(async () => {
-    const refresh = localStorage.getItem("refresh_token")
+    const refresh = localStorage.getItem("refresh_token");
 
     // case for a new user, there is no refresh token, redirect to register page without messages
     if (!refresh) {
@@ -183,7 +182,10 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         fetchAccounts(),
         fetchCategories(),
       ]);
-      router.push("/pages/dashboard/");
+
+      if (currentPath === "/" || currentPath === "/pages/register/") {
+        router.push("/pages/dashboard/");
+      }
     } else {
       // in case the token exist but isn't valid, redirects to login page
       setIsAuth(false);
@@ -196,6 +198,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     }
   }, [
     router,
+    currentPath,
     setIsAuth,
     fetchTransactions,
     fetchAccounts,
@@ -206,9 +209,9 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     initializeAuthAndData();
   }, [initializeAuthAndData]);
 
-  useEffect(()=> {
+  useEffect(() => {
     fetchDefaultCategories();
-  }, [fetchDefaultCategories])
+  }, [fetchDefaultCategories]);
 
   return (
     <ExpenseContext.Provider

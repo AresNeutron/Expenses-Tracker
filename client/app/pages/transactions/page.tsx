@@ -10,6 +10,7 @@ import type {
   Transaction,
 } from "../../interfaces/api_interfaces"
 import { useExpenseContext } from "@/app/components/Context"
+import { initialFilters } from "@/app/interfaces/interfaces"
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal"
 import MessageModal from "@/app/components/MessageModal"
 import {
@@ -18,7 +19,6 @@ import {
   ArrowDownCircle,
   Calendar,
   DollarSign,
-  Search,
   Settings,
   Trash2,
   Eye,
@@ -49,7 +49,6 @@ const TransactionsPage: React.FC = () => {
   const [showCreateTransactionModal, setShowCreateTransactionModal] = useState(false)
   const [showManageCategoriesModal, setShowManageCategoriesModal] = useState(false)
   const [showBalances, setShowBalances] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
 
   // Estados para el MessageModal
   const [messageModal, setMessageModal] = useState({
@@ -67,6 +66,16 @@ const TransactionsPage: React.FC = () => {
   const [categoryTypeModel, setCategoryTypeModel] = useState<CategoryTypeModel>("defaultcategory")
   const [type, setType] = useState<TransactionType>("expense")
   const [notes, setNotes] = useState("")
+
+  // Función para verificar si los filtros están en su estado inicial
+  const isFiltersAtInitialState = () => {
+    return (
+      filters.transactionType === initialFilters.transactionType &&
+      filters.accountID === initialFilters.accountID &&
+      filters.categoryID === initialFilters.categoryID &&
+      filters.categoryTypeModel === initialFilters.categoryTypeModel
+    )
+  }
 
   const showMessage = (
     type: "success" | "error" | "warning" | "info" | "confirm",
@@ -189,21 +198,6 @@ const TransactionsPage: React.FC = () => {
     }
   }
 
-  // Filtrar transacciones
-  const filteredTransactions = transactions.filter((transaction) => {
-    const categoryInfo = getCategoryInfo(transaction)
-    const matchesSearch =
-      searchTerm === "" ||
-      categoryInfo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      accounts
-        .find((acc) => acc.id === transaction.account)
-        ?.name.toLowerCase()
-        .includes(searchTerm.toLowerCase())
-
-    return matchesSearch
-  })
-
   // Calcular estadísticas
   const totalIncome = transactions
     .filter((t) => t.transaction_type === "income")
@@ -246,6 +240,9 @@ const TransactionsPage: React.FC = () => {
     }))
   }
 
+  // Condición para mostrar estadísticas y filtros
+  const shouldShowStatsAndFilters = accounts.length > 0 && (transactions.length > 0 || !isFiltersAtInitialState())
+
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 p-6 container mx-auto max-w-7xl">
@@ -256,8 +253,8 @@ const TransactionsPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">My Transactions</h1>
               <p className="text-neutral-600 dark:text-neutral-300">Track your income and expenses</p>
             </div>
-            {/* Solo mostrar el botón superior si hay transacciones Y hay cuentas */}
-            {transactions.length > 0 && accounts.length > 0 && (
+            {/* Solo mostrar el botón superior si hay cuentas y (hay transacciones O hay filtros aplicados) */}
+            {shouldShowStatsAndFilters && (
               <button
                 onClick={() => setShowCreateTransactionModal(true)}
                 className="group flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
@@ -268,8 +265,8 @@ const TransactionsPage: React.FC = () => {
             )}
           </div>
 
-          {/* Statistics Cards - Solo mostrar si hay transacciones Y hay cuentas */}
-          {transactions.length > 0 && accounts.length > 0 && (
+          {/* Statistics Cards - Solo mostrar si hay cuentas y (hay transacciones O hay filtros aplicados) */}
+          {shouldShowStatsAndFilters && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="card p-6 bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-success-200 dark:border-success-700/50">
                 <div className="flex items-center gap-4">
@@ -349,21 +346,11 @@ const TransactionsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Filters and Search - Solo mostrar si hay transacciones Y hay cuentas */}
-          {transactions.length > 0 && accounts.length > 0 && (
+          {/* Filters - Solo mostrar si hay cuentas y (hay transacciones O hay filtros aplicados) */}
+          {shouldShowStatsAndFilters && (
             <div className="card p-6 mb-6">
               <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="flex items-center gap-4 w-full md:w-auto flex-wrap">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                    <input
-                      type="text"
-                      placeholder="Search transactions..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-border-primary rounded-input bg-surface-primary text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
-                    />
-                  </div>
                   <div className="relative">
                     <select
                       value={filters.transactionType}
@@ -422,7 +409,7 @@ const TransactionsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-neutral-600 dark:text-neutral-400">
-                    {filteredTransactions.length} transactions
+                    {transactions.length} transactions
                   </span>
                   <button
                     onClick={() => setShowManageCategoriesModal(true)}
@@ -462,22 +449,22 @@ const TransactionsPage: React.FC = () => {
               </Link>
             </div>
           </div>
-        ) : filteredTransactions.length === 0 ? (
+        ) : transactions.length === 0 ? (
           <div className="card p-12 text-center">
             <div className="max-w-md mx-auto">
               <div className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                 <FileText className="w-10 h-10 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-3">
-                {transactions.length === 0 ? "No transactions yet" : "No matching transactions"}
+                {isFiltersAtInitialState() ? "No transactions yet" : "No matching transactions"}
               </h3>
               <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
-                {transactions.length === 0
+                {isFiltersAtInitialState()
                   ? "Start by recording your first transaction to track your finances."
-                  : "Try adjusting your search or filter criteria."}
+                  : "No transactions match your current filter criteria. Try adjusting your filters or create a new transaction."}
               </p>
-              {/* Botón con animación llamativa solo cuando no hay transacciones */}
-              {transactions.length === 0 && (
+              {/* Botón con animación llamativa solo cuando no hay transacciones y filtros están en estado inicial */}
+              {isFiltersAtInitialState() && (
                 <button
                   onClick={() => setShowCreateTransactionModal(true)}
                   className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none"
@@ -515,7 +502,7 @@ const TransactionsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-surface-primary divide-y divide-border-primary">
-                  {filteredTransactions.map((transaction) => {
+                  {transactions.map((transaction) => {
                     const categoryInfo = getCategoryInfo(transaction)
                     return (
                       <tr key={transaction.id} className="hover:bg-surface-secondary transition-colors duration-150">
