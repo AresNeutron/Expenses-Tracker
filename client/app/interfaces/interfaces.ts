@@ -8,6 +8,8 @@ import {
   DefaultCategory,
   TransactionType,
   CategoryTypeModel,
+  CustomTransacctionResponse,
+  CustomAccountResponse,
 } from "./api_interfaces";
 
 // Interfaz para las propiedades del contexto (lo que provee el ExpenseProvider)
@@ -18,20 +20,20 @@ export interface ExpenseContextProps {
   setPassword: React.Dispatch<React.SetStateAction<string>>;
 
   // Estados para los datos
-  transactions: Transaction[]; // Renombrado de Expense[] a Transaction[] para mayor claridad
+  transactions: Transaction[];
   accounts: Account[];
   categories: Category[];
 
   // Funciones API para Transacciones
   createTransaction: (
     newTransaction: CreateTransactionPayload
-  ) => Promise<Transaction | undefined>;
+  ) => Promise<CustomTransacctionResponse>;
   deleteTransaction: (id: number) => Promise<void>;
 
   // Funciones API para Cuentas
   createAccount: (
     newAccount: CreateAccountPayload
-  ) => Promise<Account | undefined>;
+  ) => Promise<CustomAccountResponse>;
   deleteAccount: (id: number) => Promise<void>;
 
   // Funciones API para Categorías

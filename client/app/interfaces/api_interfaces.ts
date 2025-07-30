@@ -84,3 +84,20 @@ export interface CreateTransactionPayload {
   amount: string;
   notes?: string; // Opcional
 }
+
+
+export interface CustomAccountResponse {
+  success: boolean;
+  data: Account;
+  error_details: ErrorDetail;
+};
+
+export interface CustomTransacctionResponse {
+  success: boolean;
+  data: Transaction;
+  error_details: ErrorDetail;
+}
+
+type ErrorDetail = {
+  [key: string]: string[]
+}
