@@ -156,7 +156,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     // case for a new user, there is no refresh token, redirect to register page without messages
     if (!refresh) {
       setIsAuth(false);
-      router.push("/pages/register/");
     }
 
     try {
@@ -168,7 +167,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       setIsAuth(false);
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      router.push("/");
+
       return;
     }
 
@@ -192,9 +191,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
 
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-
-      // we must show a message in UI, something like "your session expire, log in again"
-      router.push("/");
     }
   }, [
     router,
