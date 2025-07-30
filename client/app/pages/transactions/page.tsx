@@ -16,7 +16,6 @@ import {
   Plus,
   ArrowUpCircle,
   ArrowDownCircle,
-  ArrowRightLeft,
   Calendar,
   DollarSign,
   Search,
@@ -111,10 +110,10 @@ const TransactionsPage: React.FC = () => {
       showMessage("success", "Transaction Recorded", `Your ${type} transaction has been recorded successfully!`)
     } else {
       const error_details = custom_response.error_details
-      let fieldError = Object.keys(error_details)[0];
-      fieldError = fieldError.split('_').join(" ")
+      let fieldError = Object.keys(error_details)[0]
+      fieldError = fieldError.split("_").join(" ")
       const messageToUser = Object.values(error_details)[0][0]
-      showMessage("error", "Error in input" + fieldError, messageToUser)
+      showMessage("error", "Error in input " + fieldError, messageToUser)
     }
   }
 
@@ -185,8 +184,6 @@ const TransactionsPage: React.FC = () => {
         return <ArrowUpCircle className="w-5 h-5 text-success-500" />
       case "expense":
         return <ArrowDownCircle className="w-5 h-5 text-error-500" />
-      case "transfer":
-        return <ArrowRightLeft className="w-5 h-5 text-primary-500" />
       default:
         return <DollarSign className="w-5 h-5 text-neutral-500" />
     }
@@ -257,7 +254,7 @@ const TransactionsPage: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">My Transactions</h1>
-              <p className="text-neutral-600 dark:text-neutral-300">Track your income, expenses, and transfers</p>
+              <p className="text-neutral-600 dark:text-neutral-300">Track your income and expenses</p>
             </div>
             {/* Solo mostrar el botón superior si hay transacciones Y hay cuentas */}
             {transactions.length > 0 && accounts.length > 0 && (
@@ -376,7 +373,6 @@ const TransactionsPage: React.FC = () => {
                       <option value="all">All Types</option>
                       <option value="income">Income</option>
                       <option value="expense">Expense</option>
-                      <option value="transfer">Transfer</option>
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                   </div>
@@ -545,12 +541,10 @@ const TransactionsPage: React.FC = () => {
                             className={`text-lg font-semibold ${
                               transaction.transaction_type === "expense"
                                 ? "text-error-600 dark:text-error-400"
-                                : transaction.transaction_type === "income"
-                                  ? "text-success-600 dark:text-success-400"
-                                  : "text-primary-600 dark:text-primary-400"
+                                : "text-success-600 dark:text-success-400"
                             }`}
                           >
-                            {transaction.transaction_type === "expense" ? "-" : ""}$
+                            {transaction.transaction_type === "expense" ? "-" : "+"}$
                             {Number.parseFloat(transaction.amount).toFixed(2)}
                           </span>
                         </td>
@@ -614,9 +608,7 @@ const TransactionsPage: React.FC = () => {
             <div className="card w-full max-w-2xl bg-surface-primary max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-border-primary">
                 <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100">Record New Transaction</h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-                  Add a new income, expense, or transfer
-                </p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Add a new income or expense</p>
               </div>
 
               <div className="p-6 space-y-6">
@@ -633,7 +625,6 @@ const TransactionsPage: React.FC = () => {
                       >
                         <option value="expense">Expense</option>
                         <option value="income">Income</option>
-                        <option value="transfer">Transfer</option>
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                     </div>

@@ -1,36 +1,36 @@
 // Enums o tipos literales para las opciones
 export type AccountType = "bank" | "cash" | "card" | "other";
-export type TransactionType = "expense" | "income" | "transfer" | "adjust";
+export type TransactionType = "expense" | "income";
 export type TransactionStatus = "pending" | "cleared" | "reconciled" | "void";
 export type CategoryTypeModel = "category" | "defaultcategory";
 
 export interface Account {
   id: number; 
-  user: number; // El ID del usuario, aunque el backend lo asigne, lo recibimos en las respuestas.
+  user: number;
   name: string;
-  acc_type: AccountType // 'BANK', 'CASH', 'CREDIT_CARD', etc.
-  balance: string; // DecimalField en Django se mapea comúnmente a string en TS para precisión
-  initial_balance: string; // Como el balance, string para precisión
+  acc_type: AccountType 
+  balance: string;
+  initial_balance: string;
   is_active: boolean;
   currency: string;
-  created_at: string; // Las fechas se reciben del backend
-  updated_at: string; // Las fechas se reciben del backend
-  deleted_at: string | null; // Puede ser null
-  last_transaction_date: string | null; // Puede ser null
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null; 
+  last_transaction_date: string | null; 
 }
 
 export interface Category {
   id: number;
   user: number;
   name: string;
-  parent_category: number | null; // El ID de la categoría padre, puede ser null
+  parent_category: number | null;
   is_expense: boolean;
   icon: string;
   color: string;
   order: number;
   is_active: boolean;
-  created_at: string; // Las fechas se reciben del backend
-  updated_at: string; // Las fechas se reciben del backend
+  created_at: string; 
+  updated_at: string; 
 }
 
 export interface DefaultCategory {
@@ -57,7 +57,6 @@ export interface Transaction {
   updated_at: string;
 }
 
-// Interfaces para los datos que se ENVÍAN al crear (sin ID, user, ni campos auto-generados)
 
 export interface CreateAccountPayload {
   name: string;
