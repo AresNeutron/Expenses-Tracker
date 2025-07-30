@@ -9,15 +9,16 @@ from ..models import Transaction, Account
 from ..serializers import TransactionSerializer
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
+from ..renderer import CustomResponseRenderer
 
-class TransactionListCreateAPIView(generics.ListCreateAPIView):
+
+class TransactionListAPIView(generics.ListAPIView):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = Transaction.objects.filter(user=self.request.user, deleted_at__isnull=True)
 
-        # --- Lógica de filtrado manual (si no usas DjangoFilterBackend) ---
         transaction_type = self.request.query_params.get('transaction_type')
         if transaction_type:
             queryset = queryset.filter(transaction_type=transaction_type)
@@ -30,7 +31,6 @@ class TransactionListCreateAPIView(generics.ListCreateAPIView):
         category_type = self.request.query_params.get('category_type_model') 
         if category_id and category_type:
             try:
-                # Obtén el ContentType para el modelo especificado
                 content_type_obj = ContentType.objects.get(app_label='api', model=category_type.lower()) 
                 queryset = queryset.filter(category_type_model=content_type_obj, category_id=category_id)
             except ContentType.DoesNotExist:
@@ -40,26 +40,31 @@ class TransactionListCreateAPIView(generics.ListCreateAPIView):
         return queryset.order_by('-id')
     
     def get_serializer_context(self):
-        """
-        Extra context provided to the serializer class for filtering related fields.
-        """
         return {'request': self.request}
+
+
+class TransactionCreateAPIView(generics.CreateAPIView):
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [CustomResponseRenderer]
     
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    # def get_serializer_context(self):
+    #     return {'request': self.request}
+    
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
         
-        if not serializer.is_valid():
-            print(f"Serializer validation failed. Errors: {serializer.errors}")
-            print(f"Data received: {request.data}")
-            print(f"DEBUG_PRINT: Serializer validation failed. Errors: {serializer.errors}")
-            print(f"DEBUG_PRINT: Data received: {request.data}")
+    #     if not serializer.is_valid():
+    #         print(f"Serializer validation failed. Errors: {serializer.errors}")
+    #         print(f"Data received: {request.data}")
+    #         print(f"DEBUG_PRINT: Serializer validation failed. Errors: {serializer.errors}")
+    #         print(f"DEBUG_PRINT: Data received: {request.data}")
         
-        serializer.is_valid(raise_exception=True) # Esto lanza el 400 con los errores del serializer
+    #     serializer.is_valid(raise_exception=True)
         
-        # perform_create recibirá validated_data con category_type_model y category_id listos
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         transaction_type = serializer.validated_data.get('transaction_type')

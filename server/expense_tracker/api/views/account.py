@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework import exceptions
 from ..models import Account
 from ..serializers import AccountSerializer
+from ..renderer import CustomResponseRenderer
 
-
-class AccountListCreateAPIView(generics.ListCreateAPIView):
+class AccountListAPIView(generics.ListAPIView):
     serializer_class = AccountSerializer
     permission_classes = [IsAuthenticated]
 
@@ -17,6 +17,12 @@ class AccountListCreateAPIView(generics.ListCreateAPIView):
         if is_active_param is not None:
             queryset = Account.objects.filter(user=self.request.user, is_active=(is_active_param.lower() == 'true'))
         return queryset.order_by('name')
+    
+
+class AccountCreateAPIView(generics.CreateAPIView):
+    serializer_class = AccountSerializer
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [CustomResponseRenderer]
 
     def perform_create(self, serializer):
         initial_balance_value = serializer.validated_data.get('initial_balance', 0)
