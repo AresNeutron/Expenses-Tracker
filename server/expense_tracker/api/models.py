@@ -26,7 +26,7 @@ class Account(models.Model):
     is_active       = models.BooleanField(default=True, db_index=True)
     currency        = models.CharField(max_length=3, default="USD", db_index=True)
     created_at      = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at      = models.DateTimeField(auto_now=True)
+    updated_at      = models.DateTimeField(auto_now=True)   
     deleted_at      = models.DateTimeField(null=True, blank=True, db_index=True)
     last_transaction_date = models.DateTimeField(null=True, blank=True)
 

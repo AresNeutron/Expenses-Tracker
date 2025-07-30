@@ -143,13 +143,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': [
-        'api.renderers.CustomResponseRenderer',
-    ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
 }
 
 from datetime import timedelta
