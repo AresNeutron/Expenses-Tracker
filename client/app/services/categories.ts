@@ -1,4 +1,5 @@
 // services/categories.ts
+import axios from "axios";
 import { Category, CreateCategoryPayload, DefaultCategory } from "../interfaces/api_interfaces";
 import api from "./api";
 
@@ -14,8 +15,10 @@ export const getCategories = async (): Promise<Category[]> => {
 
 
 export const getDefaultCategories = async (): Promise<DefaultCategory[]> => {
+  const url = process.env.NEXT_PUBLIC_BACKEND_URL;
   try {
-    const response = await api.get<DefaultCategory[]>("categories/default/");
+    // call to endpoint without authentication headers
+    const response = await axios.get<DefaultCategory[]>(url + "api/categories/default/");
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
