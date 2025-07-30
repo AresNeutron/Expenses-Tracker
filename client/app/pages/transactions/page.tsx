@@ -99,8 +99,9 @@ const TransactionsPage: React.FC = () => {
       notes: notes,
     }
 
-    const created = await createTransaction(payload)
-    if (created) {
+    const custom_response = await createTransaction(payload)
+
+    if (custom_response.success) {
       setAmount("")
       setAccountID("")
       setCategoryID("")
@@ -109,7 +110,11 @@ const TransactionsPage: React.FC = () => {
       setShowCreateTransactionModal(false)
       showMessage("success", "Transaction Recorded", `Your ${type} transaction has been recorded successfully!`)
     } else {
-      showMessage("error", "Transaction Failed", "Failed to record transaction. Please try again.")
+      const error_details = custom_response.error_details
+      let fieldError = Object.keys(error_details)[0];
+      fieldError = fieldError.split('_').join(" ")
+      const messageToUser = Object.values(error_details)[0][0]
+      showMessage("error", "Error in input" + fieldError, messageToUser)
     }
   }
 

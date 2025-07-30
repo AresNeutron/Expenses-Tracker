@@ -1,6 +1,8 @@
 // services/transactions.ts
+import axios from "axios";
 import {
   CreateTransactionPayload,
+  CustomTransacctionResponse,
   Transaction,
 } from "../interfaces/api_interfaces";
 import { FiltersInterface } from "../interfaces/interfaces";
@@ -38,12 +40,15 @@ export const getTransactions = async (
 
 export const createTransaction = async (
   transaction: CreateTransactionPayload
-): Promise<Transaction> => {
+): Promise<CustomTransacctionResponse> => {
   try {
-    const response = await api.post<Transaction>("transactions/", transaction);
+    const response = await api.post("transactions/create/", transaction);
     return response.data;
   } catch (error) {
-    console.error("Error creating transaction:", error);
+    if (axios.isAxiosError(error) && error.response && error.response.status === 400) {
+      console.log(error.response.data)
+      return error.response.data;
+    }
     throw error;
   }
 };

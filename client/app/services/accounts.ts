@@ -1,5 +1,6 @@
 // services/accounts.ts
-import { Account, CreateAccountPayload } from "../interfaces/api_interfaces";
+import axios from "axios";
+import { Account, CreateAccountPayload, CustomAccountResponse } from "../interfaces/api_interfaces";
 import api from "./api";
 
 export const getAccounts = async (): Promise<Account[]> => {
@@ -12,12 +13,16 @@ export const getAccounts = async (): Promise<Account[]> => {
   }
 };
 
-export const createAccount = async (account: CreateAccountPayload): Promise<Account> => {
+export const createAccount = async (account: CreateAccountPayload): Promise<CustomAccountResponse> => {
   try {
-    const response = await api.post<Account>("accounts/", account);
+    const response = await api.post("accounts/create/", account);
+    console.log(response.data)
     return response.data;
   } catch (error) {
-    console.error("Error creating account:", error);
+    if (axios.isAxiosError(error) && error.response && error.response.status === 400) {
+      console.log(error.response.data)
+      return error.response.data;
+    }
     throw error;
   }
 };

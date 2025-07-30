@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { useExpenseContext } from "@/app/components/Context"
-import type { AccountType } from "@/app/interfaces/api_interfaces"
-import MessageModal from "@/app/components/MessageModal"
+import type React from "react";
+import { useState } from "react";
+import { useExpenseContext } from "@/app/components/Context";
+import type { AccountType } from "@/app/interfaces/api_interfaces";
+import MessageModal from "@/app/components/MessageModal";
 import {
   Plus,
   CreditCard,
@@ -16,16 +16,16 @@ import {
   Eye,
   EyeOff,
   PiggyBank,
-} from "lucide-react"
+} from "lucide-react";
 
 const AccountsPage: React.FC = () => {
-  const { accounts, createAccount, deleteAccount } = useExpenseContext()
-  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false)
-  const [newAccountName, setNewAccountName] = useState("")
-  const [newAccountType, setNewAccountType] = useState<AccountType>("bank")
-  const [newAccountCurrency, setNewAccountCurrency] = useState("USD")
-  const [newInitialBalance, setNewInitialBalance] = useState<string>("0")
-  const [showBalances, setShowBalances] = useState(true)
+  const { accounts, createAccount, deleteAccount } = useExpenseContext();
+  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+  const [newAccountName, setNewAccountName] = useState("");
+  const [newAccountType, setNewAccountType] = useState<AccountType>("bank");
+  const [newAccountCurrency, setNewAccountCurrency] = useState("USD");
+  const [newInitialBalance, setNewInitialBalance] = useState<string>("0");
+  const [showBalances, setShowBalances] = useState(true);
 
   // Estados para el MessageModal
   const [messageModal, setMessageModal] = useState({
@@ -34,13 +34,13 @@ const AccountsPage: React.FC = () => {
     title: "",
     message: "",
     onConfirm: undefined as (() => void) | undefined,
-  })
+  });
 
   const showMessage = (
     type: "success" | "error" | "warning" | "info" | "confirm",
     title: string,
     message: string,
-    onConfirm?: () => void,
+    onConfirm?: () => void
   ) => {
     setMessageModal({
       isOpen: true,
@@ -48,37 +48,39 @@ const AccountsPage: React.FC = () => {
       title,
       message,
       onConfirm,
-    })
-  }
+    });
+  };
 
   const handleCreateAccount = async () => {
-    if (newAccountName.trim() === "") {
-      showMessage("error", "Validation Error", "Please enter an account name.")
-      return
-    }
-    if (isNaN(Number.parseFloat(newInitialBalance))) {
-      showMessage("error", "Validation Error", "Please enter a valid number for initial balance.")
-      return
-    }
-
-    const created = await createAccount({
+    const newAccount = {
       name: newAccountName,
       acc_type: newAccountType,
       currency: newAccountCurrency,
       initial_balance: newInitialBalance,
-    })
+    };
 
-    if (created) {
-      setNewAccountName("")
-      setNewAccountType("bank")
-      setNewAccountCurrency("USD")
-      setNewInitialBalance("0")
-      setShowCreateAccountModal(false)
-      showMessage("success", "Account Created", `Your account "${created.name}" has been created successfully!`)
+    const custom_response = await createAccount(newAccount);
+
+    if (custom_response.success) {
+      const created = custom_response.data;
+      setNewAccountName("");
+      setNewAccountType("bank");
+      setNewAccountCurrency("USD");
+      setNewInitialBalance("0");
+      setShowCreateAccountModal(false);
+      showMessage(
+        "success",
+        "Account Created",
+        `Your account "${created.name}" has been created successfully!`
+      );
     } else {
-      showMessage("error", "Creation Failed", "Failed to create account. Please try again.")
+      const error_details = custom_response.error_details
+      let fieldError = Object.keys(error_details)[0];
+      fieldError = fieldError.split('_').join(" ")
+      const messageToUser = Object.values(error_details)[0][0]
+      showMessage("error", "Error in input " + fieldError, messageToUser)
     }
-  }
+  };
 
   const handleDeleteAccount = async (id: number) => {
     showMessage(
@@ -96,33 +98,36 @@ const AccountsPage: React.FC = () => {
     )
   }
 
-  const totalBalance = accounts.reduce((sum, account) => sum + Number.parseFloat(account.balance), 0)
+  const totalBalance = accounts.reduce(
+    (sum, account) => sum + Number.parseFloat(account.balance),
+    0
+  );
 
   const getAccountIcon = (type: AccountType) => {
     switch (type) {
       case "bank":
-        return <Building2 className="w-6 h-6" />
+        return <Building2 className="w-6 h-6" />;
       case "cash":
-        return <Wallet className="w-6 h-6" />
+        return <Wallet className="w-6 h-6" />;
       case "card":
-        return <CreditCard className="w-6 h-6" />
+        return <CreditCard className="w-6 h-6" />;
       default:
-        return <PiggyBank className="w-6 h-6" />
+        return <PiggyBank className="w-6 h-6" />;
     }
-  }
+  };
 
   const getAccountTypeLabel = (type: AccountType) => {
     switch (type) {
       case "bank":
-        return "Bank Account"
+        return "Bank Account";
       case "cash":
-        return "Cash"
+        return "Cash";
       case "card":
-        return "Credit Card"
+        return "Credit Card";
       default:
-        return "Other"
+        return "Other";
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -131,7 +136,9 @@ const AccountsPage: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">My Accounts</h1>
+              <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
+                My Accounts
+              </h1>
               <p className="text-neutral-600 dark:text-neutral-400">
                 Manage your financial accounts and track your balances
               </p>
@@ -157,12 +164,18 @@ const AccountsPage: React.FC = () => {
                     <DollarSign className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">Total Balance</p>
+                    <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-1">
+                      Total Balance
+                    </p>
                     <div className="flex items-center gap-3">
                       {showBalances ? (
-                        <p className="text-3xl font-bold balance-text">${totalBalance.toFixed(2)}</p>
+                        <p className="text-3xl font-bold balance-text">
+                          ${totalBalance.toFixed(2)}
+                        </p>
                       ) : (
-                        <p className="text-3xl font-bold text-neutral-400">••••••</p>
+                        <p className="text-3xl font-bold text-neutral-400">
+                          ••••••
+                        </p>
                       )}
                       <button
                         onClick={() => setShowBalances(!showBalances)}
@@ -179,7 +192,9 @@ const AccountsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 text-success-600">
                   <TrendingUp className="w-5 h-5" />
-                  <span className="text-sm font-medium">{accounts.length} accounts</span>
+                  <span className="text-sm font-medium">
+                    {accounts.length} accounts
+                  </span>
                 </div>
               </div>
             </div>
@@ -193,9 +208,12 @@ const AccountsPage: React.FC = () => {
               <div className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                 <PiggyBank className="w-10 h-10 text-primary-600" />
               </div>
-              <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-3">No accounts yet</h3>
+              <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-3">
+                No accounts yet
+              </h3>
               <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
-                Get started by creating your first account to begin tracking your finances effectively.
+                Get started by creating your first account to begin tracking
+                your finances effectively.
               </p>
               {/* Botón con animación llamativa solo cuando no hay cuentas */}
               <button
@@ -238,14 +256,19 @@ const AccountsPage: React.FC = () => {
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Current Balance</span>
+                    <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                      Current Balance
+                    </span>
                     <div className="flex items-center gap-2">
                       {showBalances ? (
                         <span className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
-                          {Number.parseFloat(account.balance).toFixed(2)} {account.currency}
+                          {Number.parseFloat(account.balance).toFixed(2)}{" "}
+                          {account.currency}
                         </span>
                       ) : (
-                        <span className="text-xl font-bold text-neutral-400">••••••</span>
+                        <span className="text-xl font-bold text-neutral-400">
+                          ••••••
+                        </span>
                       )}
                     </div>
                   </div>
@@ -254,11 +277,14 @@ const AccountsPage: React.FC = () => {
                     <div className="flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400">
                       <span>Created</span>
                       <span className="font-medium">
-                        {new Date(account.created_at).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {new Date(account.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )}
                       </span>
                     </div>
                   </div>
@@ -273,7 +299,9 @@ const AccountsPage: React.FC = () => {
           <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="card w-full max-w-md bg-surface-primary">
               <div className="p-6 border-b border-border-primary">
-                <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100">Create New Account</h2>
+                <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100">
+                  Create New Account
+                </h2>
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
                   Add a new account to track your finances
                 </p>
@@ -299,7 +327,9 @@ const AccountsPage: React.FC = () => {
                   </label>
                   <select
                     value={newAccountType}
-                    onChange={(e) => setNewAccountType(e.target.value as AccountType)}
+                    onChange={(e) =>
+                      setNewAccountType(e.target.value as AccountType)
+                    }
                     className="inputElement"
                   >
                     <option value="bank">Bank Account</option>
@@ -339,10 +369,16 @@ const AccountsPage: React.FC = () => {
               </div>
 
               <div className="p-6 border-t border-border-primary flex gap-3 justify-end">
-                <button onClick={() => setShowCreateAccountModal(false)} className="secondaryButton px-6 py-2">
+                <button
+                  onClick={() => setShowCreateAccountModal(false)}
+                  className="secondaryButton px-6 py-2"
+                >
                   Cancel
                 </button>
-                <button onClick={handleCreateAccount} className="submitButton px-6 py-2">
+                <button
+                  onClick={handleCreateAccount}
+                  className="submitButton px-6 py-2"
+                >
                   Create Account
                 </button>
               </div>
@@ -363,7 +399,7 @@ const AccountsPage: React.FC = () => {
         />
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default AccountsPage
+export default AccountsPage;

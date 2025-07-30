@@ -15,10 +15,10 @@ import {
   Transaction, // Importar Transaction
   Account,
   Category,
-  CreateAccountPayload,
   CreateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
+  CreateAccountPayload,
 } from "../interfaces/api_interfaces";
 
 import {
@@ -79,14 +79,11 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
 
   const createTransaction = useCallback(
     async (newTransaction: CreateTransactionPayload) => {
-      try {
-        const created = await apiCreateTransaction(newTransaction);
-        setTransactions((prev) => [...prev, created]);
-        return created;
-      } catch (error) {
-        console.error("Failed to create transaction:", error);
-        return undefined;
+      const custom_response = await apiCreateTransaction(newTransaction);
+      if (custom_response.success) {
+        setTransactions((prev) => [...prev, custom_response.data]);
       }
+      return custom_response;
     },
     []
   );
@@ -102,45 +99,28 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
 
   // --- Funciones API para Cuentas ---
   const fetchAccounts = useCallback(async () => {
-    try {
-      const data = await getAccounts();
-      setAccounts(data);
-    } catch (error) {
-      console.error("Failed to fetch accounts:", error);
-    }
+    const data = await getAccounts();
+    setAccounts(data);
   }, []);
 
-  const createAccount = useCallback(
-    async (newAccount: CreateAccountPayload) => {
-      try {
-        const created = await apiCreateAccount(newAccount);
-        setAccounts((prev) => [...prev, created]);
-        return created;
-      } catch (error) {
-        console.error("Failed to create account:", error);
-        return undefined;
+  const createAccount = useCallback(async (newAccount: CreateAccountPayload) => {
+    const custom_response = await apiCreateAccount(newAccount);
+    if (custom_response.success) {
+        setAccounts((prev) => [...prev, custom_response.data]);
       }
-    },
-    []
-  );
+      return custom_response;
+  }, [])
 
   const deleteAccount = useCallback(async (id: number) => {
-    try {
-      await apiDeleteAccount(id);
-      setAccounts((prev) => prev.filter((acc) => acc.id !== id));
-    } catch (error) {
-      console.error("Failed to delete account:", error);
-    }
-  }, []);
+    await apiDeleteAccount(id);
+    setAccounts((prev) => prev.filter((acc) => acc.id !== id));
+  }, [])
+
 
   // --- Funciones API para Categorías ---
   const fetchCategories = useCallback(async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
+    const data = await getCategories();
+    setCategories(data);
   }, []);
 
   const createCategory = useCallback(
@@ -167,12 +147,8 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   }, []);
 
   const fetchDefaultCategories = useCallback(async () => {
-    try {
       const data = await getDefaultCategories();
       setDefaultCategories(data);
-    } catch (err) {
-      console.error(err);
-    }
   }, []);
 
   const initializeAuthAndData = useCallback(async () => {
@@ -243,11 +219,11 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         setPassword,
         transactions, // Estado `transactions` para transacciones
         accounts,
+        createAccount,
+        deleteAccount,
         categories,
         createTransaction,
         deleteTransaction,
-        createAccount,
-        deleteAccount,
         createCategory,
         deleteCategory,
         defaultCategories,
