@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,11 @@ SECRET_KEY = "django-insecure-dx7ja(jwpr6_zy-#hf$gv1=1_7-wq3mjb59**isxsk2_%!eh-3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    config('RENDER_EXTERNAL_HOSTNAME', default='127.0.0.1'), # Para Render
+    'localhost', # Para desarrollo local
+    '127.0.0.1', # Para desarrollo local
+]
 
 
 # Application definition
