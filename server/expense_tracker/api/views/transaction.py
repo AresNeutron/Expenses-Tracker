@@ -7,11 +7,10 @@ from django.db import transaction as db_transaction
 from django.shortcuts import get_object_or_404
 from ..models import Transaction, Account
 from ..serializers import TransactionSerializer
-from .base import BaseAPIView
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 
-class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
+class TransactionListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -153,7 +152,7 @@ class TransactionListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
                 current_account.save(update_fields=['balance', 'last_transaction_date'])
 
 
-class TransactionRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateDestroyAPIView):
+class TransactionRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]

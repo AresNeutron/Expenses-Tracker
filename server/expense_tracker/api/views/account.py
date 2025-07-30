@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework import exceptions
 from ..models import Account
 from ..serializers import AccountSerializer
-from .base import BaseAPIView
 
-class AccountListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
+
+class AccountListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = AccountSerializer
     permission_classes = [IsAuthenticated]
 
@@ -25,7 +25,7 @@ class AccountListCreateAPIView(BaseAPIView, generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class AccountRetrieveDestroyAPIView(BaseAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
+class AccountRetrieveDestroyAPIView(generics.RetrieveAPIView, generics.DestroyAPIView):
     # Heredamos de RetrieveAPIView para GET (lectura) y DestroyAPIView para DELETE (destrucción)
     queryset = Account.objects.all()
     serializer_class = AccountSerializer

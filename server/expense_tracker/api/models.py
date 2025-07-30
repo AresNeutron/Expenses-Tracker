@@ -47,6 +47,10 @@ class Account(models.Model):
         
         if self.acc_type != self.CARD and self.initial_balance < 0:
             raise ValidationError({'initial_balance': 'Initial balance cannot be negative for this account type.'})
+        
+        if self.currency and len(self.currency.strip()) != 3:
+            # corrige este mensaje de abajo, no se expresa bien
+            raise ValidationError({'currency': "Currency must be in the format 'USD' or 'EUR' "})
 
 
     def save(self, *args, **kwargs):

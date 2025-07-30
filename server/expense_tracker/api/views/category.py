@@ -5,11 +5,10 @@ from ..models import Category
 from ..serializers import CategorySerializer
 from django.db import models
 from rest_framework import serializers
-from .base import BaseAPIView
 
 # --- Category CRUD Views ---
 
-class CategoryListCreateAPIView(BaseAPIView, generics.ListCreateAPIView): # BaseAPIView eliminada si no es necesaria
+class CategoryListCreateAPIView(generics.ListCreateAPIView):
     """
     Handles listing all categories for the authenticated user and creating new categories.
     """
@@ -29,7 +28,7 @@ class CategoryListCreateAPIView(BaseAPIView, generics.ListCreateAPIView): # Base
         serializer.save(user=self.request.user)
 
 
-class CategoryRetrieveUpdateDestroyAPIView(BaseAPIView, generics.RetrieveUpdateDestroyAPIView):
+class CategoryRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
     Handles retrieving, updating, and deleting a specific category by ID.
     Ensures users can only interact with their own categories.
