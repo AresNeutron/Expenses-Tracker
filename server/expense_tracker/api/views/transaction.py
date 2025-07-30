@@ -48,24 +48,6 @@ class TransactionCreateAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     renderer_classes = [CustomResponseRenderer]
     
-    # def get_serializer_context(self):
-    #     return {'request': self.request}
-    
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-        
-    #     if not serializer.is_valid():
-    #         print(f"Serializer validation failed. Errors: {serializer.errors}")
-    #         print(f"Data received: {request.data}")
-    #         print(f"DEBUG_PRINT: Serializer validation failed. Errors: {serializer.errors}")
-    #         print(f"DEBUG_PRINT: Data received: {request.data}")
-        
-    #     serializer.is_valid(raise_exception=True)
-        
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
     def perform_create(self, serializer):
         transaction_type = serializer.validated_data.get('transaction_type')
         amount = serializer.validated_data.get('amount')
