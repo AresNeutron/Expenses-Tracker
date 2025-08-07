@@ -1,4 +1,3 @@
-README: Personal Finance Manager
 This is a personal finance management application designed to provide users with a simple and effective way to track and manage their finances. The app focuses on helping users gain a clear understanding of their spending habits, income sources, and overall financial health through a clean and intuitive user interface.
 
 Frontend: User-Centric Design
