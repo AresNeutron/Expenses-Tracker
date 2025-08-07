@@ -1,27 +1,28 @@
-This is a personal finance management application designed to provide users with a simple and effective way to track and manage their finances. The app focuses on helping users gain a clear understanding of their spending habits, income sources, and overall financial health through a clean and intuitive user interface.
+📊 Personal Finance Manager
+A user-centric application designed to simplify personal finance tracking and management. This tool helps users visualize their financial health, understand their spending habits, and effectively manage their accounts and transactions.
 
-Frontend: User-Centric Design
-The frontend is built with a strong emphasis on User Experience (UX). The design is intuitive, ensuring that users can easily navigate the application without a steep learning curve. Key features of the frontend include:
+✨ Key Features
+Our app is built with a strong focus on a seamless user experience and intuitive design.
 
-Clean and Modern Interface: A visually appealing and clutter-free design that makes financial management less intimidating.
+User-Centric Interface: A clean, modern, and uncluttered design that makes financial management less intimidating.
 
-Intuitive Navigation: A straightforward layout allows users to quickly access different sections of the app, such as dashboards, transaction lists, and reports.
+Responsive Layout: Fully optimized for all devices, from desktop monitors to mobile phones.
 
-Responsive Design: The application is fully responsive, providing a seamless experience whether accessed on a desktop, tablet, or mobile device.
+Interactive Data Visualization: Gain instant insights into your finances with easy-to-read charts and graphs.
 
-Data Visualization: Interactive charts and graphs are used to present financial data in an easy-to-understand format, helping users visualize their financial trends at a glance.
+Comprehensive Financial Tracking: Manage multiple accounts and track all income and expenses in one place.
 
-Backend: Data Models and Operations
-The backend is structured around three core data models that manage all financial information.
+🏗️ Backend Architecture
+The backend is structured around three essential data models that power the entire application.
 
 Data Models
 User Model:
 
 id: Unique identifier for each user.
 
-name: The user's full name.
+name: User's full name.
 
-email: The user's unique email address, used for authentication.
+email: Unique email address for authentication.
 
 password: Hashed password for secure access.
 
@@ -31,13 +32,13 @@ Account Model:
 
 id: Unique identifier for each account.
 
-user_id: Foreign key linking the account to a specific user.
+user_id: Foreign key linking to the User model.
 
-name: A descriptive name for the account (e.g., "Checking Account," "Savings").
+name: A descriptive name (e.g., "Checking," "Savings").
 
 balance: The current balance of the account.
 
-currency: The currency of the account (e.g., USD, EUR).
+currency: Currency of the account (e.g., USD, EUR).
 
 created_at: Timestamp of account creation.
 
@@ -45,62 +46,108 @@ Transaction Model:
 
 id: Unique identifier for each transaction.
 
-account_id: Foreign key linking the transaction to a specific account.
+account_id: Foreign key linking to the Account model.
 
-type: The type of transaction (e.g., 'income', 'expense').
+type: Type of transaction (income or expense).
 
-category: A category for the transaction (e.g., "Groceries," "Salary," "Utilities").
+category: A specific category (e.g., "Salary," "Groceries").
 
-amount: The monetary value of the transaction.
+amount: The monetary value.
 
 date: The date the transaction occurred.
 
-description: A brief description of the transaction.
+description: A brief description.
 
 created_at: Timestamp of transaction creation.
 
-Available Operations
-The application provides a comprehensive set of CRUD (Create, Read, Update, Delete) operations for each of the core models.
+API Endpoints
+The following operations are available for interacting with the application.
 
-User Operations:
+Endpoint
 
-POST /users/register: Creates a new user account.
+Method
 
-POST /users/login: Authenticates a user and returns a token.
+Description
 
-GET /users/me: Retrieves the details of the authenticated user.
+/users/register
 
-DELETE /users/me: Deletes the user account.
+POST
 
-Account Operations:
+Creates a new user account.
 
-POST /accounts: Creates a new financial account for the authenticated user.
+/users/login
 
-GET /accounts: Retrieves a list of all accounts for the authenticated user.
+POST
 
-GET /accounts/{id}: Retrieves details for a specific account.
+Authenticates a user and returns a token.
 
-DELETE /accounts/{id}: Deletes a specific account.
+/users/me
 
-Transaction Operations:
+GET
 
-POST /transactions: Creates a new transaction for a specified account.
+Retrieves the details of the authenticated user.
 
-GET /transactions: Retrieves a list of all transactions for the authenticated user.
+/users/me
 
-GET /transactions/{id}: Retrieves details for a specific transaction.
+DELETE
 
-DELETE /transactions/{id}: Deletes a specific transaction.
+Deletes the user account.
 
-Application Workflow
-The general workflow for a user interacting with the application is as follows:
+/accounts
 
-Registration and Login: A new user first registers an account. They then log in to gain access to their personal dashboard.
+POST
 
-Account Creation: Upon logging in, the user creates one or more financial accounts (e.g., a "Checking" or "Savings" account) to represent their real-world financial accounts.
+Creates a new financial account for the authenticated user.
 
-Transaction Management: The user begins adding transactions, categorizing them as either 'income' or 'expense' and linking them to a specific account.
+/accounts
 
-Financial Overview: The dashboard provides a visual summary of the user's finances, including total balances, spending trends over time, and a breakdown of transactions by category.
+GET
 
-Note: The feature for "transfer" transactions (moving money between two of the user's accounts) is currently not implemented but is planned for future updates.
+Retrieves a list of all user accounts.
+
+/accounts/{id}
+
+GET
+
+Retrieves details for a specific account.
+
+/accounts/{id}
+
+DELETE
+
+Deletes a specific account.
+
+/transactions
+
+POST
+
+Creates a new transaction for a specified account.
+
+/transactions
+
+GET
+
+Retrieves a list of all user transactions.
+
+/transactions/{id}
+
+GET
+
+Retrieves details for a specific transaction.
+
+/transactions/{id}
+
+DELETE
+
+Deletes a specific transaction.
+
+➡️ Application Workflow
+Registration & Login: Users register to create a new account, then log in to access their dashboard.
+
+Account Creation: Users set up their financial accounts, like a "Checking" or "Savings" account.
+
+Transaction Management: Transactions are added and categorized, linking them to a specific account.
+
+Financial Overview: The dashboard provides a visual summary of balances and spending patterns.
+
+Note: The feature for "transfer" transactions (moving funds between accounts) is currently under development and will be implemented in a future update.
