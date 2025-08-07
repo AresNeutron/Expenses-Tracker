@@ -1,30 +1,107 @@
-Expenses Tracker
-This is a prototype full-stack application that allows users to securely manage and record their financial transactions. 
-It provides a clean and intuitive interface, built with Next.js and Tailwind CSS on the frontend, while the backend is implemented using Python and Django REST Framework (DRF).
+README: Personal Finance Manager
+This is a personal finance management application designed to provide users with a simple and effective way to track and manage their finances. The app focuses on helping users gain a clear understanding of their spending habits, income sources, and overall financial health through a clean and intuitive user interface.
 
-Features
-User Authentication: Managed with DRF Simple JWT, supporting secure login, logout, and user data protection.
-Financial Record Management: Users can add, update, and manage personal financial records.
-Categories: Transactions can be categorized (e.g., Food, Rent, Salary, Utilities, Entertainment).
-Date Tracking: Each record includes the transaction date.
+Frontend: User-Centric Design
+The frontend is built with a strong emphasis on User Experience (UX). The design is intuitive, ensuring that users can easily navigate the application without a steep learning curve. Key features of the frontend include:
 
-Backend Overview
-Authentication: Handles registration, login, logout, and user profile retrieval using JWT tokens.
-Expense Management: Authenticated users can create, view, update, and delete their financial records securely.
-Permissions: Ensures users can only access or modify their own data.
-Error Handling: Provides clear feedback for invalid inputs or unauthorized actions.
+Clean and Modern Interface: A visually appealing and clutter-free design that makes financial management less intimidating.
 
-Frontend Overview
-Next.js Framework: Provides server-side rendering and improved performance.
-Tailwind CSS: Used for a modern, responsive, and clean design.
-State Management: Manages the state of financial records across components.
-Design: Inspired by a tutorial by PedroTech but adapted for Next.js and Tailwind CSS, diverging from the original React and Vite implementation.
+Intuitive Navigation: A straightforward layout allows users to quickly access different sections of the app, such as dashboards, transaction lists, and reports.
 
-How to Use
-Login/Sign Up: Users must register and log in using their credentials.
-Add Records: Authenticated users can add new financial records by specifying details like description, amount, category, and date.
-View Records: Users can view a summary of their transactions on the dashboard.
-Edit/Delete Records: Modify or remove records as needed, with secure handling of user permissions.
+Responsive Design: The application is fully responsive, providing a seamless experience whether accessed on a desktop, tablet, or mobile device.
 
-Acknowledgments
-This project’s frontend design was influenced by PedroTech's tutorial on building finance tracking applications, adapted and reimplemented with Next.js and Tailwind CSS.
+Data Visualization: Interactive charts and graphs are used to present financial data in an easy-to-understand format, helping users visualize their financial trends at a glance.
+
+Backend: Data Models and Operations
+The backend is structured around three core data models that manage all financial information.
+
+Data Models
+User Model:
+
+id: Unique identifier for each user.
+
+name: The user's full name.
+
+email: The user's unique email address, used for authentication.
+
+password: Hashed password for secure access.
+
+created_at: Timestamp of user creation.
+
+Account Model:
+
+id: Unique identifier for each account.
+
+user_id: Foreign key linking the account to a specific user.
+
+name: A descriptive name for the account (e.g., "Checking Account," "Savings").
+
+balance: The current balance of the account.
+
+currency: The currency of the account (e.g., USD, EUR).
+
+created_at: Timestamp of account creation.
+
+Transaction Model:
+
+id: Unique identifier for each transaction.
+
+account_id: Foreign key linking the transaction to a specific account.
+
+type: The type of transaction (e.g., 'income', 'expense').
+
+category: A category for the transaction (e.g., "Groceries," "Salary," "Utilities").
+
+amount: The monetary value of the transaction.
+
+date: The date the transaction occurred.
+
+description: A brief description of the transaction.
+
+created_at: Timestamp of transaction creation.
+
+Available Operations
+The application provides a comprehensive set of CRUD (Create, Read, Update, Delete) operations for each of the core models.
+
+User Operations:
+
+POST /users/register: Creates a new user account.
+
+POST /users/login: Authenticates a user and returns a token.
+
+GET /users/me: Retrieves the details of the authenticated user.
+
+DELETE /users/me: Deletes the user account.
+
+Account Operations:
+
+POST /accounts: Creates a new financial account for the authenticated user.
+
+GET /accounts: Retrieves a list of all accounts for the authenticated user.
+
+GET /accounts/{id}: Retrieves details for a specific account.
+
+DELETE /accounts/{id}: Deletes a specific account.
+
+Transaction Operations:
+
+POST /transactions: Creates a new transaction for a specified account.
+
+GET /transactions: Retrieves a list of all transactions for the authenticated user.
+
+GET /transactions/{id}: Retrieves details for a specific transaction.
+
+DELETE /transactions/{id}: Deletes a specific transaction.
+
+Application Workflow
+The general workflow for a user interacting with the application is as follows:
+
+Registration and Login: A new user first registers an account. They then log in to gain access to their personal dashboard.
+
+Account Creation: Upon logging in, the user creates one or more financial accounts (e.g., a "Checking" or "Savings" account) to represent their real-world financial accounts.
+
+Transaction Management: The user begins adding transactions, categorizing them as either 'income' or 'expense' and linking them to a specific account.
+
+Financial Overview: The dashboard provides a visual summary of the user's finances, including total balances, spending trends over time, and a breakdown of transactions by category.
+
+Note: The feature for "transfer" transactions (moving money between two of the user's accounts) is currently not implemented but is planned for future updates.
