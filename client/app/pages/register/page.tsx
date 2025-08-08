@@ -61,14 +61,14 @@ function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-3 sm:px-4 py-8 sm:py-12">
       <div className="relative w-full max-w-md">
         {/* Main register card */}
-        <div className="card p-8 backdrop-blur-sm bg-surface-primary/80">
+        <div className="card p-6 sm:p-8 backdrop-blur-sm bg-surface-primary/80">
           {/* Header section */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-success-500 to-primary-600 rounded-full mb-4 shadow-lg">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-success-500 to-primary-600 rounded-full mb-4 shadow-lg">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -77,12 +77,12 @@ function Register() {
                 />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-neutral-800 mb-2">Create Account</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2">Create Account</h1>
             <p className="text-neutral-600 text-sm">Join us to start managing your finances</p>
           </div>
 
           {/* Register form */}
-          <form onSubmit={handleRegister} className="space-y-6">
+          <form onSubmit={handleRegister} className="space-y-4 sm:space-y-6">
             <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
@@ -90,7 +90,7 @@ function Register() {
                 </label>
                 <input
                   id="email"
-                  className="inputElement"
+                  className="inputElement text-sm sm:text-base"
                   type="email"
                   placeholder="Enter your email address"
                   required
@@ -105,7 +105,7 @@ function Register() {
                 </label>
                 <input
                   id="username"
-                  className="inputElement"
+                  className="inputElement text-sm sm:text-base"
                   type="text"
                   placeholder="Choose a username"
                   required
@@ -124,10 +124,10 @@ function Register() {
 
             {/* Error Messages */}
             {errors.length > 0 && (
-              <div className="bg-error-50 border border-error-200 rounded-input p-4">
+              <div className="bg-error-50 border border-error-200 rounded-input p-3 sm:p-4">
                 <div className="flex items-start">
                   <svg
-                    className="w-5 h-5 text-error-500 mt-0.5 mr-3 flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-error-500 mt-0.5 mr-2 sm:mr-3 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -150,9 +150,9 @@ function Register() {
               </div>
             )}
 
-            <button type="submit" className="submitButton">
+            <button type="submit" className="submitButton text-sm sm:text-base">
               <span className="flex items-center justify-center">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -166,11 +166,11 @@ function Register() {
           </form>
 
           {/* Password requirements info */}
-          <div className="mt-6 p-4 bg-primary-50 border border-primary-200 rounded-input">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-primary-50 border border-primary-200 rounded-input">
             <h3 className="text-sm font-medium text-primary-800 mb-2">Password Requirements:</h3>
             <ul className="text-xs text-primary-700 space-y-1">
               <li className="flex items-center">
-                <svg className="w-3 h-3 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3 h-3 mr-2 text-primary-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -180,7 +180,7 @@ function Register() {
                 At least 8 characters long
               </li>
               <li className="flex items-center">
-                <svg className="w-3 h-3 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3 h-3 mr-2 text-primary-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -190,7 +190,7 @@ function Register() {
                 Include uppercase and lowercase letters
               </li>
               <li className="flex items-center">
-                <svg className="w-3 h-3 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3 h-3 mr-2 text-primary-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -204,8 +204,8 @@ function Register() {
         </div>
 
         {/* Login link card */}
-        <div className="card p-6 mt-6 text-center backdrop-blur-sm bg-surface-primary/80">
-          <p className="text-neutral-600">
+        <div className="card p-4 sm:p-6 mt-4 sm:mt-6 text-center backdrop-blur-sm bg-surface-primary/80">
+          <p className="text-neutral-600 text-sm">
             Already have an account?{" "}
             <Link
               className="font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200 underline decoration-primary-200 hover:decoration-primary-300 underline-offset-2"
@@ -217,7 +217,7 @@ function Register() {
         </div>
 
         {/* Footer text */}
-        <div className="text-center mt-8">
+        <div className="text-center mt-6 sm:mt-8">
           <p className="text-xs text-neutral-500">
             By creating an account, you agree to our Terms of Service and Privacy Policy
           </p>

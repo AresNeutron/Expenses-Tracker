@@ -50,14 +50,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-3 sm:px-4 py-8 sm:py-12">
       <div className="relative w-full max-w-md">
         {/* Main login card */}
-        <div className="card p-8 backdrop-blur-sm bg-surface-primary/80">
+        <div className="card p-6 sm:p-8 backdrop-blur-sm bg-surface-primary/80">
           {/* Header section */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full mb-4 shadow-lg">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full mb-4 shadow-lg">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -66,12 +66,12 @@ export default function Login() {
                 />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-neutral-800 mb-2">Welcome Back</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2">Welcome Back</h1>
             <p className="text-neutral-600 text-sm">Sign in to manage your finances</p>
           </div>
 
           {/* Login form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-4">
               <div>
                 <label htmlFor="identifier" className="block text-sm font-medium text-neutral-700 mb-2">
@@ -79,7 +79,7 @@ export default function Login() {
                 </label>
                 <input
                   id="identifier"
-                  className="inputElement"
+                  className="inputElement text-sm sm:text-base"
                   type="text"
                   placeholder="Enter your username or email"
                   required
@@ -98,10 +98,10 @@ export default function Login() {
 
             {/* Error Messages */}
             {errors.length > 0 && (
-              <div className="bg-error-50 border border-error-200 rounded-input p-4">
+              <div className="bg-error-50 border border-error-200 rounded-input p-3 sm:p-4">
                 <div className="flex items-start">
                   <svg
-                    className="w-5 h-5 text-error-500 mt-0.5 mr-3 flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-error-500 mt-0.5 mr-2 sm:mr-3 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -124,9 +124,9 @@ export default function Login() {
               </div>
             )}
 
-            <button type="submit" className="submitButton">
+            <button type="submit" className="submitButton text-sm sm:text-base">
               <span className="flex items-center justify-center">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -141,8 +141,8 @@ export default function Login() {
         </div>
 
         {/* Register link card */}
-        <div className="card p-6 mt-6 text-center backdrop-blur-sm bg-surface-primary/80">
-          <p className="text-neutral-600">
+        <div className="card p-4 sm:p-6 mt-4 sm:mt-6 text-center backdrop-blur-sm bg-surface-primary/80">
+          <p className="text-neutral-600 text-sm">
             Don't have an account?{" "}
             <Link
               className="font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200 underline decoration-primary-200 hover:decoration-primary-300 underline-offset-2"
@@ -154,7 +154,7 @@ export default function Login() {
         </div>
 
         {/* Footer text */}
-        <div className="text-center mt-8">
+        <div className="text-center mt-6 sm:mt-8">
           <p className="text-xs text-neutral-500">Secure • Trusted • Modern Financial Management</p>
         </div>
       </div>

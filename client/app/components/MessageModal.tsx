@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react"
+import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from 'lucide-react'
 
 interface MessageModalProps {
   isOpen: boolean
@@ -81,18 +81,18 @@ const MessageModal: React.FC<MessageModalProps> = ({
   const colors = getColors()
 
   return (
-    <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
       <div className="card w-full max-w-md bg-surface-primary animate-in fade-in-0 zoom-in-95 duration-200">
         {/* Header */}
-        <div className="p-6 border-b border-border-primary">
+        <div className="p-4 sm:p-6 border-b border-border-primary">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               {getIcon()}
-              <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">{title}</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100 truncate">{title}</h2>
             </div>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-input transition-colors duration-200"
+              className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-input transition-colors duration-200 flex-shrink-0"
             >
               <X className="w-4 h-4 text-neutral-500" />
             </button>
@@ -100,17 +100,17 @@ const MessageModal: React.FC<MessageModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          <div className={`p-4 rounded-input ${colors.bg} ${colors.border} border`}>
+        <div className="p-4 sm:p-6">
+          <div className={`p-3 sm:p-4 rounded-input ${colors.bg} ${colors.border} border`}>
             <p className={`text-sm leading-relaxed ${colors.text}`}>{message}</p>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="p-6 border-t border-border-primary flex gap-3 justify-end">
+        <div className="p-4 sm:p-6 border-t border-border-primary flex flex-col sm:flex-row gap-3 justify-end">
           {type === "confirm" ? (
             <>
-              <button onClick={onClose} className="secondaryButton px-6 py-2">
+              <button onClick={onClose} className="secondaryButton px-4 sm:px-6 py-2 order-2 sm:order-1 text-sm sm:text-base">
                 {cancelText}
               </button>
               <button
@@ -118,13 +118,13 @@ const MessageModal: React.FC<MessageModalProps> = ({
                   onConfirm?.()
                   onClose()
                 }}
-                className="bg-error-500 hover:bg-error-600 text-white px-6 py-2 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+                className="bg-error-500 hover:bg-error-600 text-white px-4 sm:px-6 py-2 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover order-1 sm:order-2 text-sm sm:text-base"
               >
                 {confirmText}
               </button>
             </>
           ) : (
-            <button onClick={onClose} className="submitButton px-6 py-2">
+            <button onClick={onClose} className="submitButton px-4 sm:px-6 py-2 text-sm sm:text-base">
               Got it
             </button>
           )}

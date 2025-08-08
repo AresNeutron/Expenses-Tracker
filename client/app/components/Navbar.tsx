@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
-import { Building2, ArrowRightLeft, Menu, X, ChevronRight, Wallet } from "lucide-react"
+import { Building2, ArrowRightLeft, Menu, X, ChevronRight, Wallet } from 'lucide-react'
 
 const Navbar: React.FC = () => {
   const pathname = usePathname()
@@ -31,24 +31,24 @@ const Navbar: React.FC = () => {
     <>
       {/* Main Navbar */}
       <nav className="sticky top-0 z-40 w-full border-b border-border-primary bg-surface-primary/80 backdrop-blur-md shadow-card">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
+        <div className="container mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            {/* Logo - More compact on mobile */}
             <Link
               href="/pages/dashboard"
-              className="group flex items-center gap-3 transition-all duration-200 hover:scale-105"
+              className="group flex items-center gap-2 sm:gap-3 transition-all duration-200 hover:scale-105 flex-shrink-0"
             >
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200">
-                  <Wallet className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200">
+                  <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-success-400 rounded-full animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-success-400 rounded-full animate-pulse"></div>
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">
+              <div className="hidden xs:block sm:block">
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">
                   FinanTrack
                 </h1>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 -mt-1">Business Suite</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 -mt-1 hidden sm:block">Business Suite</p>
               </div>
             </Link>
 
@@ -91,7 +91,7 @@ const Navbar: React.FC = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-button text-neutral-600 dark:text-neutral-300 hover:bg-surface-secondary transition-colors duration-200"
+              className="md:hidden p-2 rounded-button text-neutral-600 dark:text-neutral-300 hover:bg-surface-secondary transition-colors duration-200 flex-shrink-0"
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -105,36 +105,36 @@ const Navbar: React.FC = () => {
             isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 overflow-hidden"
           }`}
         >
-          <div className="container mx-auto px-4 py-4 space-y-2">
+          <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`group flex items-center gap-4 p-4 rounded-card transition-all duration-200 ${
+                className={`group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-card transition-all duration-200 ${
                   item.isActive
                     ? "bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700/50"
                     : "hover:bg-surface-secondary border border-transparent"
                 }`}
               >
                 <div
-                  className={`p-2 rounded-input ${
+                  className={`p-2 rounded-input flex-shrink-0 ${
                     item.isActive
                       ? "bg-primary-100 dark:bg-primary-800/50"
                       : "bg-neutral-100 dark:bg-neutral-700 group-hover:bg-primary-100 dark:group-hover:bg-primary-800/50"
                   }`}
                 >
                   <item.icon
-                    className={`w-5 h-5 ${
+                    className={`w-4 h-4 sm:w-5 sm:h-5 ${
                       item.isActive
                         ? "text-primary-600 dark:text-primary-400"
                         : "text-neutral-600 dark:text-neutral-300 group-hover:text-primary-600 dark:group-hover:text-primary-400"
                     }`}
                   />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <h3
-                    className={`font-medium ${
+                    className={`font-medium text-sm sm:text-base ${
                       item.isActive
                         ? "text-primary-700 dark:text-primary-300"
                         : "text-neutral-800 dark:text-neutral-200"
@@ -142,9 +142,9 @@ const Navbar: React.FC = () => {
                   >
                     {item.name}
                   </h3>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{item.description}</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 truncate">{item.description}</p>
                 </div>
-                {item.isActive && <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>}
+                {item.isActive && <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse flex-shrink-0"></div>}
               </Link>
             ))}
           </div>

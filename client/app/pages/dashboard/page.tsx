@@ -5,18 +5,7 @@ import { useState } from "react";
 import { useExpenseContext } from "@/app/components/Context";
 import type { AccountType } from "@/app/interfaces/api_interfaces";
 import MessageModal from "@/app/components/MessageModal";
-import {
-  Plus,
-  CreditCard,
-  Wallet,
-  Building2,
-  Trash2,
-  DollarSign,
-  TrendingUp,
-  Eye,
-  EyeOff,
-  PiggyBank,
-} from "lucide-react";
+import { Plus, CreditCard, Wallet, Building2, Trash2, DollarSign, TrendingUp, Eye, EyeOff, PiggyBank } from 'lucide-react';
 
 const AccountsPage: React.FC = () => {
   const { accounts, createAccount, deleteAccount } = useExpenseContext();
@@ -131,7 +120,7 @@ const AccountsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 p-6 container mx-auto max-w-7xl">
+      <main className="flex-1 p-3 sm:p-6 container mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
@@ -147,10 +136,11 @@ const AccountsPage: React.FC = () => {
             {accounts.length > 0 && (
               <button
                 onClick={() => setShowCreateAccountModal(true)}
-                className="group flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+                className="group flex items-center gap-1 sm:gap-2 bg-primary-500 hover:bg-primary-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover text-sm sm:text-base"
               >
-                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-                Add Account
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" />
+                <span className="hidden xs:inline">Add Account</span>
+                <span className="xs:hidden">Add</span>
               </button>
             )}
           </div>
@@ -218,15 +208,16 @@ const AccountsPage: React.FC = () => {
               {/* Botón con animación llamativa solo cuando no hay cuentas */}
               <button
                 onClick={() => setShowCreateAccountModal(true)}
-                className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none"
+                className="group inline-flex items-center gap-1 sm:gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 sm:px-8 py-3 sm:py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none text-sm sm:text-base"
               >
-                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-                Create My First Account
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" />
+                <span className="hidden sm:inline">Create My First Account</span>
+                <span className="sm:hidden">Create Account</span>
               </button>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {accounts.map((account) => (
               <div
                 key={account.id}
@@ -296,10 +287,11 @@ const AccountsPage: React.FC = () => {
 
         {/* Create Account Modal */}
         {showCreateAccountModal && (
-          <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="card w-full max-w-md bg-surface-primary">
-              <div className="p-6 border-b border-border-primary">
-                <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100">
+          <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="card w-full max-w-md bg-surface-primary max-h-[90vh] overflow-y-auto">
+              {/* Modal content remains the same but with better mobile spacing */}
+              <div className="p-4 sm:p-6 border-b border-border-primary">
+                <h2 className="text-lg sm:text-xl font-semibold text-neutral-800 dark:text-neutral-100">
                   Create New Account
                 </h2>
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
@@ -307,7 +299,7 @@ const AccountsPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                     Account Name
@@ -368,16 +360,16 @@ const AccountsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-border-primary flex gap-3 justify-end">
+              <div className="p-4 sm:p-6 border-t border-border-primary flex flex-col sm:flex-row gap-3 justify-end">
                 <button
                   onClick={() => setShowCreateAccountModal(false)}
-                  className="secondaryButton px-6 py-2"
+                  className="secondaryButton px-4 sm:px-6 py-2 order-2 sm:order-1"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateAccount}
-                  className="submitButton px-6 py-2"
+                  className="submitButton px-4 sm:px-6 py-2 order-1 sm:order-2"
                 >
                   Create Account
                 </button>

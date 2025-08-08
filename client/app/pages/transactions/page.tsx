@@ -13,26 +13,7 @@ import { useExpenseContext } from "@/app/components/Context"
 import { initialFilters } from "@/app/interfaces/interfaces"
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal"
 import MessageModal from "@/app/components/MessageModal"
-import {
-  Plus,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  Calendar,
-  DollarSign,
-  Settings,
-  Trash2,
-  Eye,
-  EyeOff,
-  TrendingUp,
-  TrendingDown,
-  Building2,
-  Wallet,
-  CreditCard,
-  PiggyBank,
-  FileText,
-  ChevronDown,
-  ExternalLink,
-} from "lucide-react"
+import { Plus, ArrowUpCircle, ArrowDownCircle, Calendar, DollarSign, Settings, Trash2, Eye, EyeOff, TrendingUp, TrendingDown, Building2, Wallet, CreditCard, PiggyBank, FileText, ChevronDown, ExternalLink } from 'lucide-react'
 
 const TransactionsPage: React.FC = () => {
   const {
@@ -245,7 +226,7 @@ const TransactionsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 p-6 container mx-auto max-w-7xl">
+      <main className="flex-1 p-3 sm:p-6 container mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
@@ -257,17 +238,18 @@ const TransactionsPage: React.FC = () => {
             {shouldShowStatsAndFilters && (
               <button
                 onClick={() => setShowCreateTransactionModal(true)}
-                className="group flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+                className="group flex items-center gap-1 sm:gap-2 bg-primary-500 hover:bg-primary-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover text-sm sm:text-base"
               >
-                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-                Add Transaction
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" />
+                <span className="hidden xs:inline">Add Transaction</span>
+                <span className="xs:hidden">Add</span>
               </button>
             )}
           </div>
 
           {/* Statistics Cards - Solo mostrar si hay cuentas y (hay transacciones O hay filtros aplicados) */}
           {shouldShowStatsAndFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <div className="card p-6 bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-success-200 dark:border-success-700/50">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-success-500 rounded-full">
@@ -348,14 +330,14 @@ const TransactionsPage: React.FC = () => {
 
           {/* Filters - Solo mostrar si hay cuentas y (hay transacciones O hay filtros aplicados) */}
           {shouldShowStatsAndFilters && (
-            <div className="card p-6 mb-6">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="flex items-center gap-4 w-full md:w-auto flex-wrap">
-                  <div className="relative">
+            <div className="card p-4 sm:p-6 mb-4 sm:mb-6">
+              <div className="flex flex-col gap-4 items-start">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                  <div className="relative flex-1 min-w-0">
                     <select
                       value={filters.transactionType}
                       onChange={handleTransactionTypeChange}
-                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
                     >
                       <option value="all">All Types</option>
                       <option value="income">Income</option>
@@ -363,11 +345,11 @@ const TransactionsPage: React.FC = () => {
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                   </div>
-                  <div className="relative">
+                  <div className="relative flex-1 min-w-0">
                     <select
                       value={filters.accountID}
                       onChange={handleAccountFilterChange}
-                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
                     >
                       <option value="all">All Accounts</option>
                       {accounts.map((acc) => (
@@ -378,11 +360,11 @@ const TransactionsPage: React.FC = () => {
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                   </div>
-                  <div className="relative">
+                  <div className="relative flex-1 min-w-0">
                     <select
                       value={filters.categoryID}
                       onChange={handleCategoryFilterChange}
-                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200"
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
                     >
                       <option value="all">All Categories</option>
                       {defaultCategories && defaultCategories.length > 0 && (
@@ -407,16 +389,17 @@ const TransactionsPage: React.FC = () => {
                     <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
                   <span className="text-sm text-neutral-600 dark:text-neutral-400">
                     {transactions.length} transactions
                   </span>
                   <button
                     onClick={() => setShowManageCategoriesModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm bg-surface-secondary hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-border-primary rounded-input transition-colors duration-200"
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm bg-surface-secondary hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-border-primary rounded-input transition-colors duration-200"
                   >
-                    <Settings className="w-4 h-4" />
-                    Manage Categories
+                    <Settings className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Manage Categories</span>
+                    <span className="sm:hidden">Categories</span>
                   </button>
                 </div>
               </div>
@@ -467,10 +450,11 @@ const TransactionsPage: React.FC = () => {
               {isFiltersAtInitialState() && (
                 <button
                   onClick={() => setShowCreateTransactionModal(true)}
-                  className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none"
+                  className="group inline-flex items-center gap-1 sm:gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 sm:px-8 py-3 sm:py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none text-sm sm:text-base"
                 >
-                  <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-                  Record First Transaction
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" />
+                  <span className="hidden sm:inline">Record First Transaction</span>
+                  <span className="sm:hidden">Add Transaction</span>
                 </button>
               )}
             </div>
@@ -481,22 +465,22 @@ const TransactionsPage: React.FC = () => {
               <table className="min-w-full divide-y divide-border-primary">
                 <thead className="bg-surface-secondary">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                       Transaction
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider hidden sm:table-cell">
                       Account
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                       Category
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider hidden md:table-cell">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -506,12 +490,12 @@ const TransactionsPage: React.FC = () => {
                     const categoryInfo = getCategoryInfo(transaction)
                     return (
                       <tr key={transaction.id} className="hover:bg-surface-secondary transition-colors duration-150">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-2 sm:gap-3">
                             {getTransactionIcon(transaction.transaction_type)}
-                            <div>
+                            <div className="min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200 capitalize">
+                                <span className="text-xs sm:text-sm font-medium text-neutral-800 dark:text-neutral-200 capitalize">
                                   {transaction.transaction_type}
                                 </span>
                               </div>
@@ -520,12 +504,19 @@ const TransactionsPage: React.FC = () => {
                                   {transaction.notes}
                                 </p>
                               )}
+                              {/* Show account info on mobile when account column is hidden */}
+                              <div className="sm:hidden text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1">
+                                {getAccountIcon(transaction.account)}
+                                <span className="truncate">
+                                  {accounts.find((acc) => acc.id === transaction.account)?.name || "N/A"}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
                           <span
-                            className={`text-lg font-semibold ${
+                            className={`text-sm sm:text-lg font-semibold ${
                               transaction.transaction_type === "expense"
                                 ? "text-error-600 dark:text-error-400"
                                 : "text-success-600 dark:text-success-400"
@@ -534,21 +525,26 @@ const TransactionsPage: React.FC = () => {
                             {transaction.transaction_type === "expense" ? "-" : "+"}$
                             {Number.parseFloat(transaction.amount).toFixed(2)}
                           </span>
+                          {/* Show date on mobile when date column is hidden */}
+                          <div className="md:hidden text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(transaction.created_at).toLocaleDateString()}
+                          </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                           <div className="flex items-center gap-2">
                             <div className="p-1 bg-neutral-100 dark:bg-neutral-700 rounded text-neutral-600 dark:text-neutral-300">
                               {getAccountIcon(transaction.account)}
                             </div>
-                            <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                            <span className="text-sm text-neutral-700 dark:text-neutral-300 truncate">
                               {accounts.find((acc) => acc.id === transaction.account)?.name || "N/A"}
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <div
-                              className="w-8 h-8 rounded-input flex items-center justify-center text-sm border"
+                              className="w-6 h-6 sm:w-8 sm:h-8 rounded-input flex items-center justify-center text-xs sm:text-sm border"
                               style={{
                                 backgroundColor: `${categoryInfo.color}20`,
                                 borderColor: `${categoryInfo.color}40`,
@@ -556,8 +552,8 @@ const TransactionsPage: React.FC = () => {
                             >
                               {categoryInfo.icon}
                             </div>
-                            <div>
-                              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                            <div className="min-w-0">
+                              <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate block">
                                 {categoryInfo.name}
                               </span>
                               {categoryInfo.isDefault && (
@@ -566,18 +562,18 @@ const TransactionsPage: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                           <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
                             <Calendar className="w-4 h-4" />
                             {new Date(transaction.created_at).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                           <button
                             onClick={() => handleDeleteTransaction(transaction.id)}
-                            className="p-2 hover:bg-error-50 dark:hover:bg-error-900/20 text-error-500 hover:text-error-600 rounded-input transition-all duration-200"
+                            className="p-1 sm:p-2 hover:bg-error-50 dark:hover:bg-error-900/20 text-error-500 hover:text-error-600 rounded-input transition-all duration-200"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                           </button>
                         </td>
                       </tr>
@@ -591,15 +587,15 @@ const TransactionsPage: React.FC = () => {
 
         {/* Create Transaction Modal - Solo mostrar si hay cuentas */}
         {showCreateTransactionModal && accounts.length > 0 && (
-          <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
             <div className="card w-full max-w-2xl bg-surface-primary max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-border-primary">
-                <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100">Record New Transaction</h2>
+              <div className="p-4 sm:p-6 border-b border-border-primary">
+                <h2 className="text-lg sm:text-xl font-semibold text-neutral-800 dark:text-neutral-100">Record New Transaction</h2>
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Add a new income or expense</p>
               </div>
 
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       Transaction Type
@@ -713,14 +709,15 @@ const TransactionsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-border-primary flex gap-3 justify-end">
-                <button onClick={() => setShowCreateTransactionModal(false)} className="secondaryButton px-6 py-2">
+              <div className="p-4 sm:p-6 border-t border-border-primary flex flex-col sm:flex-row gap-3 justify-end">
+                <button onClick={() => setShowCreateTransactionModal(false)} className="secondaryButton px-4 sm:px-6 py-2 order-2 sm:order-1">
                   Cancel
                 </button>
-                <button onClick={handleCreateTransaction} className="submitButton px-6 py-2">
+                <button onClick={handleCreateTransaction} className="submitButton px-4 sm:px-6 py-2 order-1 sm:order-2">
                   <span className="flex items-center gap-2">
                     <Plus className="w-4 h-4" />
-                    Record Transaction
+                    <span className="hidden sm:inline">Record Transaction</span>
+                    <span className="sm:hidden">Record</span>
                   </span>
                 </button>
               </div>

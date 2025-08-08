@@ -45,10 +45,10 @@ export default function ThemeToggle() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
       <button
         onClick={toggleTheme}
-        className="group relative w-12 h-12 bg-surface-primary border border-border-primary rounded-full shadow-card hover:shadow-card-hover transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2"
+        className="group relative w-10 h-10 sm:w-12 sm:h-12 bg-surface-primary border border-border-primary rounded-full shadow-card hover:shadow-card-hover transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2"
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       >
         {/* Fondo con gradiente sutil */}
@@ -58,7 +58,7 @@ export default function ThemeToggle() {
         <div className="relative w-full h-full flex items-center justify-center">
           {/* Icono de sol (modo claro) */}
           <svg
-            className={`absolute w-5 h-5 text-warning-500 transition-all duration-500 ease-in-out ${
+            className={`absolute w-4 h-4 sm:w-5 sm:h-5 text-warning-500 transition-all duration-500 ease-in-out ${
               isDark ? "opacity-0 rotate-90 scale-50" : "opacity-100 rotate-0 scale-100"
             }`}
             fill="none"
@@ -71,7 +71,7 @@ export default function ThemeToggle() {
 
           {/* Icono de luna (modo oscuro) */}
           <svg
-            className={`absolute w-5 h-5 text-primary-400 transition-all duration-500 ease-in-out ${
+            className={`absolute w-4 h-4 sm:w-5 sm:h-5 text-primary-400 transition-all duration-500 ease-in-out ${
               isDark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50"
             }`}
             fill="none"
@@ -84,16 +84,16 @@ export default function ThemeToggle() {
 
         {/* Indicador de estado activo */}
         <div
-          className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full transition-all duration-300 ${
+          className={`absolute -bottom-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
             isDark ? "bg-primary-500 shadow-lg shadow-primary-500/50" : "bg-warning-500 shadow-lg shadow-warning-500/50"
           }`}
         ></div>
 
         {/* Tooltip */}
-        <div className="absolute -bottom-12 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <div className="bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-800 text-xs px-3 py-1 rounded-input whitespace-nowrap shadow-lg">
+        <div className="absolute -bottom-10 sm:-bottom-12 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-800 text-xs px-2 sm:px-3 py-1 rounded-input whitespace-nowrap shadow-lg">
             {isDark ? "Switch to light" : "Switch to dark"}
-            <div className="absolute -top-1 right-3 w-2 h-2 bg-neutral-800 dark:bg-neutral-200 rotate-45"></div>
+            <div className="absolute -top-1 right-2 sm:right-3 w-2 h-2 bg-neutral-800 dark:bg-neutral-200 rotate-45"></div>
           </div>
         </div>
       </button>
