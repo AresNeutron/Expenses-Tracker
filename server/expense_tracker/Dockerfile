@@ -4,7 +4,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # 3. Copia el archivo de dependencias a la imagen.
-COPY ../requirements.txt .
+COPY requirements.txt .
 
 # 4. Instala las dependencias de Python.
 RUN pip install --no-cache-dir -r requirements.txt
