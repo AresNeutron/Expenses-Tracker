@@ -149,6 +149,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://vercel.com/fabio-quevedos-projects/expenses-tracker/Ch6P7M6rBbaY5eY9EYbooCLKa7Lt',
+    'https://expenses-tracker-three-tawny.vercel.app/',
+    'https://expenses-tracker-fabio-quevedos-projects.vercel.app/',
+    'https://expenses-tracker-git-master-fabio-quevedos-projects.vercel.app/',
 ]
 
 REST_FRAMEWORK = {
