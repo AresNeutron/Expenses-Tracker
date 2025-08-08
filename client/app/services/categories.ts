@@ -18,7 +18,7 @@ export const getDefaultCategories = async (): Promise<DefaultCategory[]> => {
   const url = process.env.NEXT_PUBLIC_BACKEND_URL;
   try {
     // call to endpoint without authentication headers
-    const response = await axios.get<DefaultCategory[]>(url + "api/categories/default/");
+    const response = await axios.get<DefaultCategory[]>(url + "/api/categories/default/");
     return response.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
