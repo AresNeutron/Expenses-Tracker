@@ -206,7 +206,7 @@ function Register() {
         {/* Login link card */}
         <div className="card p-4 sm:p-6 mt-4 sm:mt-6 text-center backdrop-blur-sm bg-surface-primary/80">
           <p className="text-neutral-600 text-sm">
-            Already have an account?{" "}
+            Already have a profile?{" "}
             <Link
               className="font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-200 underline decoration-primary-200 hover:decoration-primary-300 underline-offset-2"
               href="/"
