@@ -50,6 +50,7 @@ const Navbar = () => {
       // Mostrar éxito sin desmontar la Navbar todavía
       setShowSuccess(true)
     } catch (e) {
+      console.log(e)
       // Podríamos mostrar un modal de error si lo necesitas en el futuro
       setShowSuccess(true)
     }
