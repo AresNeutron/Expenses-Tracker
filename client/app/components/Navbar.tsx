@@ -1,14 +1,20 @@
 "use client"
 
+import { useState } from "react"
+
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import type React from "react"
-import { ChevronRight, Wallet, Building2, ArrowRightLeft } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { ChevronRight, Wallet, Building2, ArrowRightLeft, LogOut } from "lucide-react"
+import { useExpenseContext } from "./Context"
+import { logout } from "@/app/utils/auth"
+import MessageModal from "@/app/components/MessageModal"
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const pathname = usePathname()
+  const router = useRouter()
+  const { setIsAuth } = useExpenseContext()
 
-  // Normalizar el pathname para manejar barras finales ("/pages/dashboard" === "/pages/dashboard/")
+  // Normalizar pathname
   const normalize = (p?: string | null) => {
     if (!p) return ""
     return p !== "/" && p.endsWith("/") ? p.slice(0, -1) : p
@@ -31,6 +37,29 @@ const Navbar: React.FC = () => {
       isActive: currentPath === "/pages/transactions",
     },
   ]
+
+  // Modales de confirmación y éxito
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+
+  const openConfirm = () => setShowConfirm(true)
+
+  const performLogout = async () => {
+    try {
+      await logout()
+      // Mostrar éxito sin desmontar la Navbar todavía
+      setShowSuccess(true)
+    } catch (e) {
+      // Podríamos mostrar un modal de error si lo necesitas en el futuro
+      setShowSuccess(true)
+    }
+  }
+
+  const finalizeAndRedirect = () => {
+    setShowSuccess(false)
+    setIsAuth(false)
+    router.push("/")
+  }
 
   return (
     <>
@@ -57,7 +86,7 @@ const Navbar: React.FC = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation (con botón Sign out al mismo nivel) */}
             <div className="hidden md:flex items-center space-x-1">
               {navigationItems.map((item) => (
                 <Link
@@ -70,19 +99,13 @@ const Navbar: React.FC = () => {
                   }`}
                   aria-current={item.isActive ? "page" : undefined}
                 >
-                  <item.icon
-                    className={`w-4 h-4 transition-all duration-200 ${
-                      item.isActive ? "text-primary-600 dark:text-primary-400" : "group-hover:scale-110"
-                    }`}
-                  />
+                  <item.icon/>
                   <span>{item.name}</span>
 
-                  {/* Active indicator */}
                   {item.isActive && (
                     <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary-500 rounded-full"></div>
                   )}
 
-                  {/* Hover arrow */}
                   <ChevronRight
                     className={`w-3 h-3 transition-all duration-200 ${
                       item.isActive
@@ -92,14 +115,21 @@ const Navbar: React.FC = () => {
                   />
                 </Link>
               ))}
+              <button
+                onClick={openConfirm}
+                className="group relative flex items-center gap-3 px-4 py-2 rounded-button text-sm font-medium text-error-600 hover:text-error-700 bg-surface-secondary hover:bg-error-50 border border-border-primary transition-all duration-200"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign out</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Navigation Tabs - always visible on small screens */}
+        {/* Mobile Navigation Tabs (3 columnas, incluyendo Sign out) */}
         <div className="md:hidden border-t border-border-primary bg-surface-primary">
           <div className="container mx-auto px-3 sm:px-4 py-2">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {navigationItems.map((item) => (
                 <Link
                   key={`m-${item.name}`}
@@ -111,20 +141,44 @@ const Navbar: React.FC = () => {
                   }`}
                   aria-current={item.isActive ? "page" : undefined}
                 >
-                  <item.icon
-                    className={`w-4 h-4 ${
-                      item.isActive
-                        ? "text-primary-600 dark:text-primary-400"
-                        : "text-neutral-600 dark:text-neutral-300"
-                    }`}
-                  />
+                  <item.icon />
                   <span className="truncate">{item.name}</span>
                 </Link>
               ))}
+              <button
+                onClick={openConfirm}
+                aria-label="Sign out"
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-button text-sm font-medium transition-all duration-200
+                           bg-surface-secondary text-error-600 border border-error-200 hover:bg-error-50 dark:hover:bg-error-900/20"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="truncate">Sign out</span>
+              </button>
             </div>
           </div>
         </div>
       </nav>
+
+      {/* Modal de confirmación */}
+      <MessageModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        type="confirm"
+        title="Log Out"
+        message="Are you sure you want to log out?"
+        onConfirm={performLogout}
+        confirmText="Log Out"
+        cancelText="Cancel"
+      />
+
+      {/* Modal de éxito */}
+      <MessageModal
+        isOpen={showSuccess}
+        onClose={finalizeAndRedirect}
+        type="success"
+        title="Logged Out"
+        message="You've successfully logged out."
+      />
     </>
   )
 }
