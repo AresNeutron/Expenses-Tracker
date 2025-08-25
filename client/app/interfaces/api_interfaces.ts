@@ -29,13 +29,11 @@ export interface Transaction {
   id: number;
   user: number;
   is_expense: boolean;
-  linked_transaction: number | null;
   category_id: number 
   category_type_model: CategoryTypeModel;
   amount: string; 
   notes: string;
   created_at: string;
-  updated_at: string;
 }
 
 
@@ -48,9 +46,7 @@ export interface CreateCategoryPayload {
 }
 
 export interface CreateTransactionPayload {
-  account: number;
   is_expense: boolean;
-  linked_transaction?: number | null; // Opcional, puede ser null
   category_id: number;
   category_type_model: CategoryTypeModel; 
   amount: string;

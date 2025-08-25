@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState } from "react"
-import Link from "next/link"
 import type {
   CategoryTypeModel,
   CreateTransactionPayload,
@@ -13,12 +12,11 @@ import { useExpenseContext } from "@/app/components/Context"
 import { initialFilters } from "@/app/interfaces/interfaces"
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal"
 import MessageModal from "@/app/components/MessageModal"
-import { Plus, ArrowUpCircle, ArrowDownCircle, Calendar, DollarSign, Settings, Trash2, Eye, EyeOff, TrendingUp, TrendingDown, Building2, Wallet, CreditCard, PiggyBank, FileText, ChevronDown, ExternalLink } from 'lucide-react'
+import { Plus, ArrowUpCircle, ArrowDownCircle, Calendar, DollarSign, Settings, Trash2, Eye, EyeOff, TrendingUp, TrendingDown, FileText, ChevronDown } from 'lucide-react'
 
 const TransactionsPage: React.FC = () => {
   const {
     transactions,
-    accounts,
     categories,
     createTransaction,
     deleteTransaction,
@@ -42,17 +40,15 @@ const TransactionsPage: React.FC = () => {
 
   // Estados para el formulario de nueva transacción
   const [amount, setAmount] = useState("")
-  const [accountID, setAccountID] = useState("")
   const [categoryID, setCategoryID] = useState("")
   const [categoryTypeModel, setCategoryTypeModel] = useState<CategoryTypeModel>("defaultcategory")
-  const [type, setType] = useState<TransactionType>("expense")
+  const [isExpense, setIsExpense] = useState(true)
   const [notes, setNotes] = useState("")
 
   // Función para verificar si los filtros están en su estado inicial
   const isFiltersAtInitialState = () => {
     return (
       filters.transactionType === initialFilters.transactionType &&
-      filters.accountID === initialFilters.accountID &&
       filters.categoryID === initialFilters.categoryID &&
       filters.categoryTypeModel === initialFilters.categoryTypeModel
     )
@@ -74,17 +70,16 @@ const TransactionsPage: React.FC = () => {
   }
 
   const handleCreateTransaction = async () => {
-    if (amount.trim() === "" || Number.isNaN(Number.parseFloat(amount)) || accountID === "" || categoryID === "") {
-      showMessage("error", "Validation Error", "Please fill in all required fields: Amount, Account, and Category.")
+    if (amount.trim() === "" || Number.isNaN(Number.parseFloat(amount)) || categoryID === "") {
+      showMessage("error", "Validation Error", "Please fill in all required fields: Amount and Category.")
       return
     }
 
     const payload: CreateTransactionPayload = {
       amount: amount,
-      account: Number.parseInt(accountID),
       category_id: Number.parseInt(categoryID),
       category_type_model: categoryTypeModel,
-      transaction_type: type,
+      is_expense: isExpense,
       notes: notes,
     }
 
@@ -92,12 +87,11 @@ const TransactionsPage: React.FC = () => {
 
     if (custom_response.success) {
       setAmount("")
-      setAccountID("")
       setCategoryID("")
-      setType("expense")
+      setIsExpense(true)
       setNotes("")
       setShowCreateTransactionModal(false)
-      showMessage("success", "Transaction Recorded", `Your ${type} transaction has been recorded successfully!`)
+      showMessage("success", "Transaction Recorded", `Your ${isExpense ? 'expense' : 'income'} transaction has been recorded successfully!`)
     } else {
       const error_details = custom_response.error_details
       let fieldError = Object.keys(error_details)[0]
@@ -152,40 +146,19 @@ const TransactionsPage: React.FC = () => {
     }
   }
 
-  const getAccountIcon = (accountId: number) => {
-    const account = accounts.find((acc) => acc.id === accountId)
-    if (!account) return <PiggyBank className="w-4 h-4" />
-
-    switch (account.acc_type) {
-      case "bank":
-        return <Building2 className="w-4 h-4" />
-      case "cash":
-        return <Wallet className="w-4 h-4" />
-      case "card":
-        return <CreditCard className="w-4 h-4" />
-      default:
-        return <PiggyBank className="w-4 h-4" />
-    }
-  }
-
-  const getTransactionIcon = (type: TransactionType) => {
-    switch (type) {
-      case "income":
-        return <ArrowUpCircle className="w-5 h-5 text-success-500" />
-      case "expense":
-        return <ArrowDownCircle className="w-5 h-5 text-error-500" />
-      default:
-        return <DollarSign className="w-5 h-5 text-neutral-500" />
-    }
+  const getTransactionIcon = (isExpense: boolean) => {
+    return isExpense ? 
+      <ArrowDownCircle className="w-5 h-5 text-error-500" /> :
+      <ArrowUpCircle className="w-5 h-5 text-success-500" />
   }
 
   // Calcular estadísticas
   const totalIncome = transactions
-    .filter((t) => t.transaction_type === "income")
+    .filter((t) => !t.is_expense)
     .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0)
 
   const totalExpenses = transactions
-    .filter((t) => t.transaction_type === "expense")
+    .filter((t) => t.is_expense)
     .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0)
 
   const netBalance = totalIncome - totalExpenses
@@ -196,10 +169,6 @@ const TransactionsPage: React.FC = () => {
       ...prev,
       transactionType: e.target.value as "all" | TransactionType,
     }))
-  }
-
-  const handleAccountFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilters((prev) => ({ ...prev, accountID: e.target.value }))
   }
 
   const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -222,7 +191,7 @@ const TransactionsPage: React.FC = () => {
   }
 
   // Condición para mostrar estadísticas y filtros
-  const shouldShowStatsAndFilters = accounts.length > 0 && (transactions.length > 0 || !isFiltersAtInitialState())
+  const shouldShowStatsAndFilters = transactions.length > 0 || !isFiltersAtInitialState()
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -234,7 +203,6 @@ const TransactionsPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">My Transactions</h1>
               <p className="text-neutral-600 dark:text-neutral-300">Track your income and expenses</p>
             </div>
-            {/* Solo mostrar el botón superior si hay cuentas y (hay transacciones O hay filtros aplicados) */}
             {shouldShowStatsAndFilters && (
               <button
                 onClick={() => setShowCreateTransactionModal(true)}
@@ -247,7 +215,7 @@ const TransactionsPage: React.FC = () => {
             )}
           </div>
 
-          {/* Statistics Cards - Solo mostrar si hay cuentas y (hay transacciones O hay filtros aplicados) */}
+          {/* Statistics Cards */}
           {shouldShowStatsAndFilters && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <div className="card p-6 bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-success-200 dark:border-success-700/50">
@@ -328,7 +296,7 @@ const TransactionsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Filters - Solo mostrar si hay cuentas y (hay transacciones O hay filtros aplicados) */}
+          {/* Filters */}
           {shouldShowStatsAndFilters && (
             <div className="card p-4 sm:p-6 mb-4 sm:mb-6">
               <div className="flex flex-col gap-4 items-start">
@@ -342,21 +310,6 @@ const TransactionsPage: React.FC = () => {
                       <option value="all">All Types</option>
                       <option value="income">Income</option>
                       <option value="expense">Expense</option>
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                  </div>
-                  <div className="relative flex-1 min-w-0">
-                    <select
-                      value={filters.accountID}
-                      onChange={handleAccountFilterChange}
-                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
-                    >
-                      <option value="all">All Accounts</option>
-                      {accounts.map((acc) => (
-                        <option key={`filter-acc-${acc.id}`} value={acc.id}>
-                          {acc.name}
-                        </option>
-                      ))}
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                   </div>
@@ -408,31 +361,7 @@ const TransactionsPage: React.FC = () => {
         </div>
 
         {/* Transactions List */}
-        {accounts.length === 0 ? (
-          // Mensaje cuando no hay cuentas
-          <div className="card p-12 text-center">
-            <div className="max-w-lg mx-auto">
-              <div className="p-4 bg-warning-100 dark:bg-warning-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                <Building2 className="w-10 h-10 text-warning-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-3">
-                No accounts available
-              </h3>
-              <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
-                You cannot record transactions without having any accounts first. Accounts are required to track where
-                your money comes from and goes to.
-              </p>
-              <Link
-                href="/pages/dashboard"
-                className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-8 py-4 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
-              >
-                <Building2 className="w-5 h-5" />
-                Go to Accounts Page
-                <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
-              </Link>
-            </div>
-          </div>
-        ) : transactions.length === 0 ? (
+        {transactions.length === 0 ? (
           <div className="card p-12 text-center">
             <div className="max-w-md mx-auto">
               <div className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -471,9 +400,6 @@ const TransactionsPage: React.FC = () => {
                     <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider hidden sm:table-cell">
-                      Account
-                    </th>
                     <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
                       Category
                     </th>
@@ -492,11 +418,11 @@ const TransactionsPage: React.FC = () => {
                       <tr key={transaction.id} className="hover:bg-surface-secondary transition-colors duration-150">
                         <td className="px-3 sm:px-6 py-3 sm:py-4">
                           <div className="flex items-center gap-2 sm:gap-3">
-                            {getTransactionIcon(transaction.transaction_type)}
+                            {getTransactionIcon(transaction.is_expense)}
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-xs sm:text-sm font-medium text-neutral-800 dark:text-neutral-200 capitalize">
-                                  {transaction.transaction_type}
+                                  {transaction.is_expense ? "Expense" : "Income"}
                                 </span>
                               </div>
                               {transaction.notes && (
@@ -504,41 +430,24 @@ const TransactionsPage: React.FC = () => {
                                   {transaction.notes}
                                 </p>
                               )}
-                              {/* Show account info on mobile when account column is hidden */}
-                              <div className="sm:hidden text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1">
-                                {getAccountIcon(transaction.account)}
-                                <span className="truncate">
-                                  {accounts.find((acc) => acc.id === transaction.account)?.name || "N/A"}
-                                </span>
-                              </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4">
                           <span
                             className={`text-sm sm:text-lg font-semibold ${
-                              transaction.transaction_type === "expense"
+                              transaction.is_expense
                                 ? "text-error-600 dark:text-error-400"
                                 : "text-success-600 dark:text-success-400"
                             }`}
                           >
-                            {transaction.transaction_type === "expense" ? "-" : "+"}$
+                            {transaction.is_expense ? "-" : "+"}$
                             {Number.parseFloat(transaction.amount).toFixed(2)}
                           </span>
                           {/* Show date on mobile when date column is hidden */}
                           <div className="md:hidden text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {new Date(transaction.created_at).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1 bg-neutral-100 dark:bg-neutral-700 rounded text-neutral-600 dark:text-neutral-300">
-                              {getAccountIcon(transaction.account)}
-                            </div>
-                            <span className="text-sm text-neutral-700 dark:text-neutral-300 truncate">
-                              {accounts.find((acc) => acc.id === transaction.account)?.name || "N/A"}
-                            </span>
                           </div>
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4">
@@ -585,8 +494,8 @@ const TransactionsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Create Transaction Modal - Solo mostrar si hay cuentas */}
-        {showCreateTransactionModal && accounts.length > 0 && (
+        {/* Create Transaction Modal */}
+        {showCreateTransactionModal && (
           <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
             <div className="card w-full max-w-2xl bg-surface-primary max-h-[90vh] overflow-y-auto">
               <div className="p-4 sm:p-6 border-b border-border-primary">
@@ -602,8 +511,8 @@ const TransactionsPage: React.FC = () => {
                     </label>
                     <div className="relative">
                       <select
-                        value={type}
-                        onChange={(e) => setType(e.target.value as TransactionType)}
+                        value={isExpense ? "expense" : "income"}
+                        onChange={(e) => setIsExpense(e.target.value === "expense")}
                         className="inputElement appearance-none pr-8"
                       >
                         <option value="expense">Expense</option>
@@ -630,26 +539,6 @@ const TransactionsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                    Account
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={accountID}
-                      onChange={(e) => setAccountID(e.target.value)}
-                      className="inputElement appearance-none pr-8"
-                    >
-                      <option value="">Select Account</option>
-                      {accounts.map((acc) => (
-                        <option key={acc.id} value={acc.id}>
-                          {acc.name} ({acc.acc_type})
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                  </div>
-                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">

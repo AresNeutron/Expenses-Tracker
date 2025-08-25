@@ -35,7 +35,6 @@ import {
   FiltersInterface,
   initialFilters,
 } from "../interfaces/interfaces";
-import Navbar from "./Navbar";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
   undefined
