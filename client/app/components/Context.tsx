@@ -10,15 +10,13 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { checkAuthenticationStatus, clearAuthTokens, setupTokenRefresh } from "../utils/tokens";
+import { checkAuthenticationStatus, clearAuthTokens } from "../utils/tokens";
 import {
   Transaction, // Importar Transaction
-  Account,
   Category,
   CreateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
-  CreateAccountPayload,
 } from "../interfaces/api_interfaces";
 
 import {
@@ -26,11 +24,6 @@ import {
   createTransaction as apiCreateTransaction, // Renombrado y aliased
   deleteTransaction as apiDeleteTransaction, // Renombrado y aliased
 } from "../services/transactions"; // Ruta y nombre de archivo actualizado
-import {
-  getAccounts,
-  createAccount as apiCreateAccount,
-  deleteAccount as apiDeleteAccount,
-} from "../services/accounts";
 import {
   getCategories,
   getDefaultCategories,
@@ -58,7 +51,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   // const [errors, setErrors] = useState<string[]>([]);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [defaultCategories, setDefaultCategories] = useState<DefaultCategory[]>(
     []
@@ -92,28 +84,6 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Failed to delete transaction:", error);
     }
-  }, []);
-
-  // --- Funciones API para Cuentas ---
-  const fetchAccounts = useCallback(async () => {
-    const data = await getAccounts();
-    setAccounts(data);
-  }, []);
-
-  const createAccount = useCallback(
-    async (newAccount: CreateAccountPayload) => {
-      const custom_response = await apiCreateAccount(newAccount);
-      if (custom_response.success) {
-        setAccounts((prev) => [...prev, custom_response.data]);
-      }
-      return custom_response;
-    },
-    []
-  );
-
-  const deleteAccount = useCallback(async (id: number) => {
-    await apiDeleteAccount(id);
-    setAccounts((prev) => prev.filter((acc) => acc.id !== id));
   }, []);
 
   // --- Funciones API para Categorías ---
@@ -154,16 +124,12 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const initializeAuth = useCallback(async () => {
     try {
       const isAuthenticated = await checkAuthenticationStatus();
-      
+
       if (isAuthenticated) {
         setIsAuth(true);
-        
+
         // Load user data after successful authentication
-        await Promise.all([
-          fetchTransactions(),
-          fetchAccounts(),
-          fetchCategories(),
-        ]);
+        await Promise.all([fetchTransactions(), fetchCategories()]);
 
         // Redirect to dashboard if user is on login/register pages
         if (currentPath === "/" || currentPath === "/pages/register/") {
@@ -181,36 +147,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       setIsAuth(false);
       clearAuthTokens();
     }
-  }, [fetchTransactions, fetchAccounts, fetchCategories, currentPath, router]);
-
-  // Handle successful login - call this after login API success
-  const handleLoginSuccess = useCallback(async () => {
-    setIsAuth(true);
-    setupTokenRefresh(); // Setup automatic token refresh
-    
-    // Load user data
-    await Promise.all([
-      fetchTransactions(),
-      fetchAccounts(),
-      fetchCategories(),
-    ]);
-    
-    router.push("/pages/dashboard/");
-  }, [fetchTransactions, fetchAccounts, fetchCategories, router]);
-
-  // Handle logout
-  const handleLogout = useCallback(() => {
-    setIsAuth(false);
-    clearAuthTokens(); // This also clears the refresh timeout
-    
-    // Clear all user data
-    setTransactions([]);
-    setAccounts([]);
-    setCategories([]);
-    setFilters(initialFilters);
-    
-    router.push("/");
-  }, [router]);
+  }, [fetchTransactions, fetchCategories, currentPath, router]);
 
   // Run authentication check only once on app mount
   useEffect(() => {
@@ -235,12 +172,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         isAuth,
         setIsAuth,
         setPassword,
-        handleLoginSuccess,
-        handleLogout,
         transactions, // Estado `transactions` para transacciones
-        accounts,
-        createAccount,
-        deleteAccount,
         categories,
         createTransaction,
         deleteTransaction,
