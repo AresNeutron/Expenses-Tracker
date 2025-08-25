@@ -1,15 +1,12 @@
 import {
   Transaction,
-  Account,
   Category,
-  CreateAccountPayload,
   CreateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
-  TransactionType,
   CategoryTypeModel,
   CustomTransacctionResponse,
-  CustomAccountResponse,
+  TransactionType,
 } from "./api_interfaces";
 
 // Interfaz para las propiedades del contexto (lo que provee el ExpenseProvider)
@@ -21,7 +18,6 @@ export interface ExpenseContextProps {
 
   // Estados para los datos
   transactions: Transaction[];
-  accounts: Account[];
   categories: Category[];
 
   // Funciones API para Transacciones
@@ -29,12 +25,6 @@ export interface ExpenseContextProps {
     newTransaction: CreateTransactionPayload
   ) => Promise<CustomTransacctionResponse>;
   deleteTransaction: (id: number) => Promise<void>;
-
-  // Funciones API para Cuentas
-  createAccount: (
-    newAccount: CreateAccountPayload
-  ) => Promise<CustomAccountResponse>;
-  deleteAccount: (id: number) => Promise<void>;
 
   // Funciones API para Categorías
   createCategory: (
@@ -51,14 +41,16 @@ export interface ExpenseContextProps {
 
 export interface FiltersInterface {
   transactionType: "all" | TransactionType;
-  accountID: string | "all";
+  date: "all" | string;
+  keywords: "all" | string;
   categoryID: string | "all";
   categoryTypeModel: CategoryTypeModel | "all";
 }
 
 export const initialFilters: FiltersInterface = {
   transactionType: "all",
-  accountID: "all",
+  date: "all",
+  keywords: "all",
   categoryID: "all",
   categoryTypeModel: "all",
 }
