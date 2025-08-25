@@ -149,10 +149,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'https://vercel.com/fabio-quevedos-projects/financial_app/8GVjW1Qt6fLKZWoaN9y9ykJAGoeT',
-    'https://financialapp-chi.vercel.app/',
-    'https://financialapp-fabio-quevedos-projects.vercel.app/',
-    'https://financialapp-git-master-fabio-quevedos-projects.vercel.app/',
+    'https://financialapp-chi.vercel.app',
+    'https://financialapp-fabio-quevedos-projects.vercel.app',
+    'https://financialapp-git-master-fabio-quevedos-projects.vercel.app',
 ]
 
 REST_FRAMEWORK = {
