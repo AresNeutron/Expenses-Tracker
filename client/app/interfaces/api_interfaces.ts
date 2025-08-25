@@ -1,23 +1,6 @@
 // Enums o tipos literales para las opciones
-export type AccountType = "bank" | "cash" | "card" | "other";
-export type TransactionType = "expense" | "income";
-export type TransactionStatus = "pending" | "cleared" | "reconciled" | "void";
+export type TransactionType = "expense" | "income"
 export type CategoryTypeModel = "category" | "defaultcategory";
-
-export interface Account {
-  id: number; 
-  user: number;
-  name: string;
-  acc_type: AccountType 
-  balance: string;
-  initial_balance: string;
-  is_active: boolean;
-  currency: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null; 
-  last_transaction_date: string | null; 
-}
 
 export interface Category {
   id: number;
@@ -45,10 +28,8 @@ export interface DefaultCategory {
 export interface Transaction {
   id: number;
   user: number;
-  account: number;
-  transaction_type: TransactionType; 
+  is_expense: boolean;
   linked_transaction: number | null;
-  status: TransactionStatus;
   category_id: number 
   category_type_model: CategoryTypeModel;
   amount: string; 
@@ -57,13 +38,6 @@ export interface Transaction {
   updated_at: string;
 }
 
-
-export interface CreateAccountPayload {
-  name: string;
-  acc_type: AccountType;
-  currency: string;
-  initial_balance: string;
-}
 
 export interface CreateCategoryPayload {
   name: string;
@@ -75,21 +49,14 @@ export interface CreateCategoryPayload {
 
 export interface CreateTransactionPayload {
   account: number;
-  transaction_type: TransactionType;
+  is_expense: boolean;
   linked_transaction?: number | null; // Opcional, puede ser null
-  status?: TransactionStatus; // Opcional, tiene un default en el backend
   category_id: number;
   category_type_model: CategoryTypeModel; 
   amount: string;
   notes?: string; // Opcional
 }
 
-
-export interface CustomAccountResponse {
-  success: boolean;
-  data: Account;
-  error_details: ErrorDetail;
-};
 
 export interface CustomTransacctionResponse {
   success: boolean;
