@@ -1,9 +1,10 @@
 from django.urls import reverse
 from rest_framework import status
 from .base import BaseAPITestCase
-from api.models import Account, Category, Transaction, User
+from api.models import Category, Transaction, User
 from django.utils import timezone
 from decimal import Decimal
+from django.contrib.contenttypes.models import ContentType
 
 class TransactionAPITestCase(BaseAPITestCase):
     """
@@ -13,32 +14,6 @@ class TransactionAPITestCase(BaseAPITestCase):
     def setUp(self):
         super().setUp() # This sets up self.user and self.client
         self.today = timezone.localdate() # Using localdate for date comparisons
-
-        # Create necessary Accounts for the test user
-        self.bank_account = Account.objects.create(
-            user=self.user,
-            name="Checking Account",
-            balance=Decimal('1000.00'),
-            initial_balance=Decimal('1000.00'),
-            currency="USD",
-            acc_type="bank"
-        )
-        self.cash_account = Account.objects.create(
-            user=self.user,
-            name="Cash Wallet",
-            balance=Decimal('200.00'),
-            initial_balance=Decimal('200.00'),
-            currency="USD",
-            acc_type="cash"
-        )
-        self.credit_card = Account.objects.create(
-            user=self.user,
-            name="Credit Card",
-            balance=Decimal('-500.00'), # Negative balance for credit card
-            initial_balance=Decimal('0.00'),
-            currency="USD",
-            acc_type="card"
-        )
 
         # Create necessary Categories for the test user
         self.expense_category = Category.objects.create(
@@ -57,33 +32,23 @@ class TransactionAPITestCase(BaseAPITestCase):
         # Create some initial transactions for listing/retrieval
         self.transaction1 = Transaction.objects.create(
             user=self.user,
-            account=self.bank_account,
-            category=self.expense_category,
+            category_type_model=ContentType.objects.get_for_model(Category),
+            category_id=self.expense_category.id,
             amount=Decimal('50.00'),
-            transaction_type='expense',
-            notes="Weekly groceries",
-            date=self.today
+            is_expense=True,
+            notes="Weekly groceries"
         )
         self.transaction2 = Transaction.objects.create(
             user=self.user,
-            account=self.cash_account,
-            category=self.income_category,
+            category_type_model=ContentType.objects.get_for_model(Category),
+            category_id=self.income_category.id,
             amount=Decimal('500.00'),
-            transaction_type='income',
-            notes="Freelance work",
-            date=self.today
+            is_expense=False,
+            notes="Freelance work"
         )
 
         # Other user's setup
         self.other_user = User.objects.create_user(username='otheruser', password='password')
-        self.other_account = Account.objects.create(
-            user=self.other_user,
-            name="Other User Bank",
-            balance=Decimal('100.00'),
-            initial_balance=Decimal('100.00'),
-            currency="USD",
-            acc_type="bank"
-        )
         self.other_category = Category.objects.create(
             user=self.other_user,
             name="Other User Category",
@@ -92,12 +57,11 @@ class TransactionAPITestCase(BaseAPITestCase):
         )
         self.other_transaction = Transaction.objects.create(
             user=self.other_user,
-            account=self.other_account,
-            category=self.other_category,
+            category_type_model=ContentType.objects.get_for_model(Category),
+            category_id=self.other_category.id,
             amount=Decimal('20.00'),
-            transaction_type='expense',
-            notes="Other's expense",
-            date=self.today
+            is_expense=True,
+            notes="Other's expense"
         )
 
     # --- Test Listing Transactions ---
@@ -118,62 +82,47 @@ class TransactionAPITestCase(BaseAPITestCase):
 
     def test_list_transactions_with_filters(self):
         """
-        Ensure we can list transactions with filters (e.g., transaction_type).
+        Ensure we can list transactions with filters (e.g., is_expense).
         """
         # Create an income transaction
         Transaction.objects.create(
             user=self.user,
-            account=self.bank_account,
-            category=self.income_category,
+            category_type_model=ContentType.objects.get_for_model(Category),
+            category_id=self.income_category.id,
             amount=Decimal('100.00'),
-            transaction_type='income',
-            notes="Bonus",
-            date=self.today
+            is_expense=False,
+            notes="Bonus"
         )
 
         url = reverse('transaction-list-create')
         # Filter by expense
-        response_expense = self.client.get(url + '?transaction_type=expense', format='json')
+        response_expense = self.client.get(url + '?is_expense=true', format='json')
         self.assertEqual(response_expense.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_expense.data), 1)
         self.assertEqual(response_expense.data[0]['notes'], 'Weekly groceries')
 
         # Filter by income
-        response_income = self.client.get(url + '?transaction_type=income', format='json')
+        response_income = self.client.get(url + '?is_expense=false', format='json')
         self.assertEqual(response_income.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_income.data), 2) # "Freelance work" and "Bonus"
-
-        # Filter by account (using account ID)
-        response_bank_account = self.client.get(url + f'?account={self.bank_account.pk}', format='json')
-        self.assertEqual(response_bank_account.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response_bank_account.data), 2) # "Weekly groceries" and "Bonus"
-
-        # Filter by category
-        response_groceries = self.client.get(url + f'?category={self.expense_category.pk}', format='json')
-        self.assertEqual(response_groceries.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response_groceries.data), 1)
-        self.assertEqual(response_groceries.data[0]['notes'], 'Weekly groceries')
 
 
     # --- Test Create Transactions ---
     def test_create_expense_transaction(self):
         """
-        Ensure we can create an expense transaction and account balance is updated.
+        Ensure we can create an expense transaction.
         """
         url = reverse('transaction-list-create')
         data = {
-            'account': self.bank_account.pk,
-            'category': self.expense_category.pk,
-            'amount': '25.00', # Sent as string, serializer should handle
-            'transaction_type': 'expense',
+            'category_type_model': 'Category',
+            'category_id': self.expense_category.pk,
+            'amount': '25.00',
+            'is_expense': True,
             'notes': 'Coffee',
         }
-        initial_balance = self.bank_account.balance
         response = self.client.post(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.bank_account.refresh_from_db()
-        self.assertEqual(self.bank_account.balance, initial_balance - Decimal('25.00'))
         self.assertEqual(Transaction.objects.filter(user=self.user).count(), 3) # Existing 2 + new 1
 
 

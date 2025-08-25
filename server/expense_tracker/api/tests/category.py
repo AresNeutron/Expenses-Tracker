@@ -1,8 +1,10 @@
 from django.urls import reverse
 from rest_framework import status
 from .base import BaseAPITestCase 
-from api.models import Category, User, Account
+from api.models import Category, User, Transaction
 from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
+from decimal import Decimal
 
 class CategoryAPITestCase(BaseAPITestCase):
     """
@@ -188,24 +190,13 @@ class CategoryAPITestCase(BaseAPITestCase):
         """
         Ensure category cannot be deleted if it has associated transactions (ProtectedError).
         """
-        # Create an account to link a transaction
-        account = Account.objects.create(
-            user=self.user,
-            name="Delete Test Account",
-            balance=100.00,
-            initial_balance=100.00,
-            currency="USD",
-            acc_type="bank"
-        )
         # Create a transaction linked to category1 (Food)
-        from api.models import Transaction # Import Transaction model if not already
         Transaction.objects.create(
             user=self.user,
-            account=account,
-            category=self.category1,
-            amount=10.00,
-            transaction_type='expense',
-            date=timezone.now()
+            category_type_model=ContentType.objects.get_for_model(Category),
+            category_id=self.category1.id,
+            amount=Decimal('10.00'),
+            is_expense=True
         )
 
         url = reverse('category-detail', kwargs={'pk': self.category1.pk})
