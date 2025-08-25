@@ -183,7 +183,8 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         setFilters,
       }}
     >
-      {isAuth && <Navbar />}
+      {/** Navbar disabled for now */}
+      {/* {isAuth && <Navbar />} */}
       {children}
     </ExpenseContext.Provider>
   );

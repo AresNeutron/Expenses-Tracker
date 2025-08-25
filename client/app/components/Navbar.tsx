@@ -4,7 +4,7 @@ import { useState } from "react"
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { ChevronRight, Wallet, Building2, ArrowRightLeft, LogOut } from "lucide-react"
+import { ChevronRight, Wallet, ArrowRightLeft, LogOut } from "lucide-react"
 import { useExpenseContext } from "./Context"
 import { logout } from "@/app/utils/auth"
 import MessageModal from "@/app/components/MessageModal"
@@ -22,13 +22,6 @@ const Navbar = () => {
   const currentPath = normalize(pathname)
 
   const navigationItems = [
-    {
-      name: "Accounts",
-      href: "/pages/dashboard",
-      icon: Building2,
-      description: "Manage your accounts and balances",
-      isActive: currentPath === "/pages/dashboard",
-    },
     {
       name: "Transactions",
       href: "/pages/transactions",
