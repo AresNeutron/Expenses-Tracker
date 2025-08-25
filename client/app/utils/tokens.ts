@@ -38,27 +38,84 @@ export const refreshToken = async (): Promise<string> => {
   }
 };
 
+let refreshTimeout: NodeJS.Timeout | null = null;
+
 export const setupTokenRefresh = (): void => {
+  // Clear any existing timeout to prevent duplicates
+  if (refreshTimeout) {
+    clearTimeout(refreshTimeout);
+    refreshTimeout = null;
+  }
+
   const accessToken = localStorage.getItem("access_token");
 
-  if (accessToken) {
-    const decoded: JwtPayload = jwtDecode<JwtPayload>(accessToken);
-    const expiresIn = decoded.exp! * 1000 - Date.now();
-    console.log("Token expires in:", expiresIn);
-
-    if (expiresIn > 0) {
-      // Schedule refresh and re-run setup
-      setTimeout(() => {
-        refreshToken()
-          .then(() => setupTokenRefresh())
-          .catch((err) => console.error("Token refresh failed:", err));
-      }, expiresIn - 60000);
-    } else {
-      // Refresh immediately and re-run setup
-      refreshToken()
-        .then(() => setupTokenRefresh())
-        .catch((err) => console.error("Token refresh failed:", err));
+  if (accessToken && isTokenValid()) {
+    try {
+      const decoded: JwtPayload = jwtDecode<JwtPayload>(accessToken);
+      const expiresIn = decoded.exp! * 1000 - Date.now();
+      
+      // Schedule refresh 1 minute before expiration (minimum 60 seconds from now)
+      const refreshTime = Math.max(expiresIn - 60000, 10000); // At least 10 seconds from now
+      
+      console.log(`Token refresh scheduled in ${Math.floor(refreshTime / 1000)} seconds`);
+      
+      refreshTimeout = setTimeout(async () => {
+        try {
+          await refreshToken();
+          setupTokenRefresh(); // Setup next refresh cycle
+        } catch (err) {
+          console.error("Scheduled token refresh failed:", err);
+          // Clear tokens on refresh failure
+          clearAuthTokens();
+          // Redirect to login page
+          window.location.href = "/";
+        }
+      }, refreshTime);
+    } catch (err) {
+      console.error("Error setting up token refresh:", err);
     }
+  }
+};
+
+export const clearTokenRefresh = (): void => {
+  if (refreshTimeout) {
+    clearTimeout(refreshTimeout);
+    refreshTimeout = null;
+  }
+};
+
+export const clearAuthTokens = (): void => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  clearTokenRefresh();
+};
+
+export const checkAuthenticationStatus = async (): Promise<boolean> => {
+  const refreshTokenValue = localStorage.getItem("refresh_token");
+  
+  // No refresh token means user is not authenticated
+  if (!refreshTokenValue) {
+    return false;
+  }
+
+  // Check if current access token is valid
+  if (isTokenValid()) {
+    // Token is valid, setup automatic refresh and return authenticated
+    setupTokenRefresh();
+    return true;
+  }
+
+  // Access token is expired or invalid, try to refresh
+  try {
+    await refreshToken();
+    // Refresh successful, setup automatic refresh
+    setupTokenRefresh();
+    return true;
+  } catch (error) {
+    // Refresh failed, clear all tokens
+    console.log("Authentication failed during token refresh:", error);
+    clearAuthTokens();
+    return false;
   }
 };
 

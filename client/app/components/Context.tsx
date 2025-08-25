@@ -10,7 +10,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { isTokenValid, refreshToken, setupTokenRefresh } from "../utils/tokens";
+import { checkAuthenticationStatus, clearAuthTokens, setupTokenRefresh } from "../utils/tokens";
 import {
   Transaction, // Importar Transaction
   Account,
@@ -150,60 +150,79 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     setDefaultCategories(data);
   }, []);
 
-  const initializeAuthAndData = useCallback(async () => {
-    const refresh = localStorage.getItem("refresh_token");
-
-    // case for a new user, there is no refresh token, redirect to register page without messages
-    if (!refresh) {
-      setIsAuth(false);
-    }
-
+  // Initialize authentication only once on app startup
+  const initializeAuth = useCallback(async () => {
     try {
-      await refreshToken();
-    } catch (error) {
-      // this catch block will work under the hood every time the user token is wrong
-      console.log("Error refreshing token:", error);
+      const isAuthenticated = await checkAuthenticationStatus();
+      
+      if (isAuthenticated) {
+        setIsAuth(true);
+        
+        // Load user data after successful authentication
+        await Promise.all([
+          fetchTransactions(),
+          fetchAccounts(),
+          fetchCategories(),
+        ]);
 
-      setIsAuth(false);
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-
-      return;
-    }
-
-    // this other block works if the token is still valid, and automatically redirects to dashboard
-    if (isTokenValid()) {
-      setIsAuth(true);
-      setupTokenRefresh();
-
-      await Promise.all([
-        fetchTransactions(),
-        fetchAccounts(),
-        fetchCategories(),
-      ]);
-
-      if (currentPath === "/" || currentPath === "/pages/register/") {
-        router.push("/pages/dashboard/");
+        // Redirect to dashboard if user is on login/register pages
+        if (currentPath === "/" || currentPath === "/pages/register/") {
+          router.push("/pages/dashboard/");
+        }
+      } else {
+        setIsAuth(false);
+        // Only redirect if user is trying to access protected pages
+        if (currentPath !== "/" && currentPath !== "/pages/register/") {
+          router.push("/");
+        }
       }
-    } else {
-      // in case the token exist but isn't valid, redirects to login page
+    } catch (error) {
+      console.error("Authentication initialization failed:", error);
       setIsAuth(false);
-
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
+      clearAuthTokens();
     }
-  }, [
-    router,
-    currentPath,
-    setIsAuth,
-    fetchTransactions,
-    fetchAccounts,
-    fetchCategories,
-  ]);
+  }, [fetchTransactions, fetchAccounts, fetchCategories, currentPath, router]);
 
+  // Handle successful login - call this after login API success
+  const handleLoginSuccess = useCallback(async () => {
+    setIsAuth(true);
+    setupTokenRefresh(); // Setup automatic token refresh
+    
+    // Load user data
+    await Promise.all([
+      fetchTransactions(),
+      fetchAccounts(),
+      fetchCategories(),
+    ]);
+    
+    router.push("/pages/dashboard/");
+  }, [fetchTransactions, fetchAccounts, fetchCategories, router]);
+
+  // Handle logout
+  const handleLogout = useCallback(() => {
+    setIsAuth(false);
+    clearAuthTokens(); // This also clears the refresh timeout
+    
+    // Clear all user data
+    setTransactions([]);
+    setAccounts([]);
+    setCategories([]);
+    setFilters(initialFilters);
+    
+    router.push("/");
+  }, [router]);
+
+  // Run authentication check only once on app mount
   useEffect(() => {
-    initializeAuthAndData();
-  }, [initializeAuthAndData]);
+    initializeAuth();
+  }, []); // Empty dependency array ensures this runs only once
+
+  // Separate effect for data refetching when filters change (only if authenticated)
+  useEffect(() => {
+    if (isAuth) {
+      fetchTransactions();
+    }
+  }, [filters, isAuth, fetchTransactions]);
 
   useEffect(() => {
     fetchDefaultCategories();
@@ -216,6 +235,8 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         isAuth,
         setIsAuth,
         setPassword,
+        handleLoginSuccess,
+        handleLogout,
         transactions, // Estado `transactions` para transacciones
         accounts,
         createAccount,
