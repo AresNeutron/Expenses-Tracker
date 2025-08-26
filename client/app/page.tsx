@@ -33,7 +33,7 @@ export default function Login() {
       setPassword("") // Clear password fields
       setIsAuth(true)
       
-      router.push("/pages/dashboard")
+      router.push("/pages/transactions/")
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response && err.response.status === 401) {
