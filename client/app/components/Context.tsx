@@ -15,6 +15,7 @@ import {
   Transaction, // Importar Transaction
   Category,
   CreateTransactionPayload,
+  UpdateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
 } from "../interfaces/api_interfaces";
@@ -22,6 +23,7 @@ import {
 import {
   getTransactions, // Renombrado
   createTransaction as apiCreateTransaction, // Renombrado y aliased
+  updateTransaction as apiUpdateTransaction, // Added update function
   deleteTransaction as apiDeleteTransaction, // Renombrado y aliased
 } from "../services/transactions"; // Ruta y nombre de archivo actualizado
 import {
@@ -72,6 +74,27 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         setTransactions((prev) => [...prev, custom_response.data]);
       }
       return custom_response;
+    },
+    []
+  );
+
+  const updateTransaction = useCallback(
+    async (id: number, updatedTransaction: UpdateTransactionPayload) => {
+      try {
+        const custom_response = await apiUpdateTransaction(id, updatedTransaction);
+        if (custom_response.success) {
+          setTransactions((prev) =>
+            prev.map((transaction) =>
+              transaction.id === id ? custom_response.data : transaction
+            )
+          );
+          return custom_response;
+        }
+        return custom_response;
+      } catch (error) {
+        console.error("Failed to update transaction:", error);
+        throw error;
+      }
     },
     []
   );
@@ -174,6 +197,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         transactions, // Estado `transactions` para transacciones
         categories,
         createTransaction,
+        updateTransaction,
         deleteTransaction,
         createCategory,
         deleteCategory,

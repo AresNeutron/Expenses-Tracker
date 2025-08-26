@@ -5,6 +5,7 @@ import { useState } from "react";
 import type {
   CategoryTypeModel,
   CreateTransactionPayload,
+  UpdateTransactionPayload,
   TransactionType,
   Transaction,
 } from "../../interfaces/api_interfaces";
@@ -34,6 +35,7 @@ const TransactionsPage: React.FC = () => {
     transactions,
     categories,
     createTransaction,
+    updateTransaction,
     deleteTransaction,
     defaultCategories,
     setFilters,
@@ -45,6 +47,17 @@ const TransactionsPage: React.FC = () => {
   const [showManageCategoriesModal, setShowManageCategoriesModal] =
     useState(false);
   const [showBalances, setShowBalances] = useState(true);
+
+  // Estados para inline editing
+  const [editingCell, setEditingCell] = useState<{
+    transactionId: number;
+    field: 'amount' | 'notes' | 'category';
+  } | null>(null);
+  const [editingValue, setEditingValue] = useState<string>("");
+  const [editingCategory, setEditingCategory] = useState<{
+    categoryId: string;
+    categoryTypeModel: CategoryTypeModel;
+  }>({ categoryId: "", categoryTypeModel: "defaultcategory" });
 
   // Estados para el MessageModal
   const [messageModal, setMessageModal] = useState({
@@ -149,6 +162,95 @@ const TransactionsPage: React.FC = () => {
         );
       }
     );
+  };
+
+  // Inline editing functions
+  const startEdit = (transactionId: number, field: 'amount' | 'notes' | 'category') => {
+    const transaction = transactions.find(t => t.id === transactionId);
+    if (!transaction) return;
+    
+    setEditingCell({ transactionId, field });
+    
+    if (field === 'amount') {
+      setEditingValue(transaction.amount);
+    } else if (field === 'notes') {
+      setEditingValue(transaction.notes || '');
+    } else if (field === 'category') {
+      setEditingCategory({
+        categoryId: transaction.category_id.toString(),
+        categoryTypeModel: transaction.category_type_model
+      });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingCell(null);
+    setEditingValue('');
+    setEditingCategory({ categoryId: '', categoryTypeModel: 'defaultcategory' });
+  };
+
+  const saveEdit = async () => {
+    if (!editingCell) return;
+    
+    try {
+      const updateData: UpdateTransactionPayload = {};
+      
+      if (editingCell.field === 'amount') {
+        const numValue = parseFloat(editingValue);
+        if (isNaN(numValue) || numValue <= 0) {
+          showMessage('error', 'Invalid Amount', 'Please enter a valid positive number.');
+          return;
+        }
+        updateData.amount = editingValue;
+      } else if (editingCell.field === 'notes') {
+        updateData.notes = editingValue;
+      } else if (editingCell.field === 'category') {
+        if (editingCategory.categoryId === '') {
+          showMessage('error', 'Category Required', 'Please select a category.');
+          return;
+        }
+        updateData.category_id = parseInt(editingCategory.categoryId);
+        updateData.category_type_model = editingCategory.categoryTypeModel;
+      }
+      
+      const result = await updateTransaction(editingCell.transactionId, updateData);
+      
+      if (result.success) {
+        showMessage('success', 'Updated', 'Transaction updated successfully.');
+        cancelEdit();
+      } else {
+        const error_details = result.error_details;
+        let fieldError = Object.keys(error_details)[0];
+        fieldError = fieldError.split('_').join(' ');
+        const messageToUser = Object.values(error_details)[0][0];
+        showMessage('error', 'Error updating ' + fieldError, messageToUser);
+      }
+    } catch (error) {
+      showMessage('error', 'Update Failed', 'Failed to update transaction. Please try again.');
+      console.error('Update error:', error);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEdit();
+    }
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    let categoryTypeModel: CategoryTypeModel = 'defaultcategory';
+    
+    if (defaultCategories.some(cat => cat.id === parseInt(categoryId))) {
+      categoryTypeModel = 'defaultcategory';
+    } else if (categories.some(cat => cat.id === parseInt(categoryId))) {
+      categoryTypeModel = 'category';
+    }
+    
+    setEditingCategory({ categoryId, categoryTypeModel });
   };
 
   const getCategoryInfo = (transaction: Transaction) => {
@@ -532,25 +634,65 @@ const TransactionsPage: React.FC = () => {
                                     : "Income"}
                                 </span>
                               </div>
-                              {transaction.notes && (
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs truncate">
-                                  {transaction.notes}
+                              {editingCell?.transactionId === transaction.id && editingCell?.field === 'notes' ? (
+                                <input
+                                  type="text"
+                                  value={editingValue}
+                                  onChange={(e) => setEditingValue(e.target.value)}
+                                  onKeyDown={handleKeyDown}
+                                  onBlur={saveEdit}
+                                  className="text-xs bg-surface-primary border border-primary-300 rounded px-1 py-0.5 mt-1 max-w-xs focus:outline-none focus:ring-1 focus:ring-primary-400"
+                                  placeholder="Add notes..."
+                                  autoFocus
+                                />
+                              ) : (
+                                <p 
+                                  className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs truncate cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 px-1 py-0.5 rounded transition-colors duration-150"
+                                  onClick={() => startEdit(transaction.id, 'notes')}
+                                  title={transaction.notes || 'Click to add notes'}
+                                >
+                                  {transaction.notes || 'Add notes...'}
                                 </p>
                               )}
                             </div>
                           </div>
                         </td>
                         <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
-                          <span
-                            className={`text-sm sm:text-lg font-semibold ${
-                              transaction.is_expense
-                                ? "text-error-600 dark:text-error-400"
-                                : "text-success-600 dark:text-success-400"
-                            }`}
-                          >
-                            {transaction.is_expense ? "-" : "+"}$
-                            {Number.parseFloat(transaction.amount).toFixed(2)}
-                          </span>
+                          {editingCell?.transactionId === transaction.id && editingCell?.field === 'amount' ? (
+                            <div className="flex items-center gap-1">
+                              <span className={`text-sm font-semibold ${
+                                transaction.is_expense
+                                  ? "text-error-600 dark:text-error-400"
+                                  : "text-success-600 dark:text-success-400"
+                              }`}>
+                                {transaction.is_expense ? "-" : "+"}$
+                              </span>
+                              <input
+                                type="number"
+                                value={editingValue}
+                                onChange={(e) => setEditingValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                onBlur={saveEdit}
+                                className="text-sm font-semibold bg-surface-primary border border-primary-300 rounded px-2 py-1 w-20 focus:outline-none focus:ring-1 focus:ring-primary-400"
+                                step="0.01"
+                                min="0"
+                                autoFocus
+                              />
+                            </div>
+                          ) : (
+                            <span
+                              className={`text-sm sm:text-lg font-semibold cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 px-2 py-1 rounded transition-colors duration-150 ${
+                                transaction.is_expense
+                                  ? "text-error-600 dark:text-error-400"
+                                  : "text-success-600 dark:text-success-400"
+                              }`}
+                              onClick={() => startEdit(transaction.id, 'amount')}
+                              title="Click to edit amount"
+                            >
+                              {transaction.is_expense ? "-" : "+"}$
+                              {Number.parseFloat(transaction.amount).toFixed(2)}
+                            </span>
+                          )}
                           {/* Show date on mobile when date column is hidden */}
                           <div className="md:hidden text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
@@ -560,27 +702,62 @@ const TransactionsPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            <div
-                              className="w-6 h-6 sm:w-8 sm:h-8 rounded-input flex items-center justify-center text-xs sm:text-sm border"
-                              style={{
-                                backgroundColor: `${categoryInfo.color}20`,
-                                borderColor: `${categoryInfo.color}40`,
-                              }}
+                          {editingCell?.transactionId === transaction.id && editingCell?.field === 'category' ? (
+                            <select
+                              value={editingCategory.categoryId}
+                              onChange={(e) => handleCategoryChange(e.target.value)}
+                              onKeyDown={handleKeyDown}
+                              onBlur={saveEdit}
+                              className="text-xs sm:text-sm bg-surface-primary border border-primary-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-400 max-w-full"
+                              autoFocus
                             >
-                              {categoryInfo.icon}
-                            </div>
-                            <div className="min-w-0">
-                              <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate block">
-                                {categoryInfo.name}
-                              </span>
-                              {categoryInfo.isDefault && (
-                                <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                                  Default
-                                </div>
+                              <option value="">Select Category</option>
+                              {defaultCategories && defaultCategories.length > 0 && (
+                                <optgroup label="Default Categories">
+                                  {defaultCategories.map((cat) => (
+                                    <option key={`edit-default-${cat.id}`} value={cat.id}>
+                                      {cat.icon} {cat.name}
+                                    </option>
+                                  ))}
+                                </optgroup>
                               )}
+                              {categories && categories.length > 0 && (
+                                <optgroup label="Your Categories">
+                                  {categories.map((cat) => (
+                                    <option key={`edit-user-${cat.id}`} value={cat.id}>
+                                      {cat.icon} {cat.name}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              )}
+                            </select>
+                          ) : (
+                            <div 
+                              className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 px-2 py-1 rounded transition-colors duration-150"
+                              onClick={() => startEdit(transaction.id, 'category')}
+                              title="Click to edit category"
+                            >
+                              <div
+                                className="w-6 h-6 sm:w-8 sm:h-8 rounded-input flex items-center justify-center text-xs sm:text-sm border"
+                                style={{
+                                  backgroundColor: `${categoryInfo.color}20`,
+                                  borderColor: `${categoryInfo.color}40`,
+                                }}
+                              >
+                                {categoryInfo.icon}
+                              </div>
+                              <div className="min-w-0">
+                                <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate block">
+                                  {categoryInfo.name}
+                                </span>
+                                {categoryInfo.isDefault && (
+                                  <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                                    Default
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </td>
                         <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30 hidden md:table-cell">
                           <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">

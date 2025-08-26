@@ -2,6 +2,7 @@
 import axios from "axios";
 import {
   CreateTransactionPayload,
+  UpdateTransactionPayload,
   CustomTransacctionResponse,
   CustomTransactionsListResponse,
   Transaction,
@@ -59,6 +60,22 @@ export const createTransaction = async (
   } catch (error) {
     if (axios.isAxiosError(error) && error.response && error.response.status === 400) {
       console.log(error.response.data)
+      return error.response.data;
+    }
+    throw error;
+  }
+};
+
+export const updateTransaction = async (
+  id: number,
+  transaction: UpdateTransactionPayload
+): Promise<CustomTransacctionResponse> => {
+  try {
+    const response = await api.put(`transactions/${id}/`, transaction);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response && error.response.status === 400) {
+      console.log(error.response.data);
       return error.response.data;
     }
     throw error;

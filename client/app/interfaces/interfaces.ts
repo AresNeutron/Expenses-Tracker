@@ -2,6 +2,7 @@ import {
   Transaction,
   Category,
   CreateTransactionPayload,
+  UpdateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
   CategoryTypeModel,
@@ -23,6 +24,10 @@ export interface ExpenseContextProps {
   // Funciones API para Transacciones
   createTransaction: (
     newTransaction: CreateTransactionPayload
+  ) => Promise<CustomTransacctionResponse>;
+  updateTransaction: (
+    id: number,
+    updatedTransaction: UpdateTransactionPayload
   ) => Promise<CustomTransacctionResponse>;
   deleteTransaction: (id: number) => Promise<void>;
 
