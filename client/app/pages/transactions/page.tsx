@@ -264,49 +264,49 @@ const TransactionsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 p-3 sm:p-6 container mx-auto max-w-7xl">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+      <main className="flex-1 p-2 sm:p-4 w-full max-w-none">
+        {/* Compact Header Section */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-1">
                 My Transactions
               </h1>
-              <p className="text-neutral-600 dark:text-neutral-300">
+              <p className="text-sm text-neutral-600 dark:text-neutral-300">
                 Track your income and expenses
               </p>
             </div>
+            {/* Move manage categories button here in top right corner */}
             {shouldShowStatsAndFilters && (
               <button
-                onClick={() => setShowCreateTransactionModal(true)}
-                className="group flex items-center gap-1 sm:gap-2 bg-primary-500 hover:bg-primary-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover text-sm sm:text-base"
+                onClick={() => setShowManageCategoriesModal(true)}
+                className="flex items-center gap-2 px-3 py-2 text-xs bg-surface-secondary hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-border-primary rounded-input transition-colors duration-200 text-neutral-600 dark:text-neutral-400"
               >
-                <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" />
-                <span className="hidden xs:inline">Add Transaction</span>
-                <span className="xs:hidden">Add</span>
+                <Settings className="w-3 h-3 flex-shrink-0" />
+                <span className="hidden sm:inline">Categories</span>
               </button>
             )}
           </div>
 
-          {/* Statistics Cards */}
+          {/* Compact Statistics Cards */}
           {shouldShowStatsAndFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-              <div className="card p-6 bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-success-200 dark:border-success-700/50">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-success-500 rounded-full">
-                    <TrendingUp className="w-6 h-6 text-white" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+              <div className="card p-4 bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-success-200 dark:border-success-700/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-success-500 rounded-full">
+                    <TrendingUp className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-success-700 dark:text-success-300 mb-1">
+                    <p className="text-xs font-medium text-success-700 dark:text-success-300 mb-1">
                       Total Income
                     </p>
                     <div className="flex items-center gap-2">
                       {showBalances ? (
-                        <p className="text-2xl font-bold text-success-600 dark:text-success-400">
+                        <p className="text-lg font-bold text-success-600 dark:text-success-400">
                           ${totalIncome.toFixed(2)}
                         </p>
                       ) : (
-                        <p className="text-2xl font-bold text-neutral-400">
+                        <p className="text-lg font-bold text-neutral-400">
                           ••••••
                         </p>
                       )}
@@ -315,22 +315,22 @@ const TransactionsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="card p-6 bg-gradient-to-r from-error-50 to-error-100 dark:from-error-900/20 dark:to-error-800/20 border-error-200 dark:border-error-700/50">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-error-500 rounded-full">
-                    <TrendingDown className="w-6 h-6 text-white" />
+              <div className="card p-4 bg-gradient-to-r from-error-50 to-error-100 dark:from-error-900/20 dark:to-error-800/20 border-error-200 dark:border-error-700/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-error-500 rounded-full">
+                    <TrendingDown className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-error-700 dark:text-error-300 mb-1">
+                    <p className="text-xs font-medium text-error-700 dark:text-error-300 mb-1">
                       Total Expenses
                     </p>
                     <div className="flex items-center gap-2">
                       {showBalances ? (
-                        <p className="text-2xl font-bold text-error-600 dark:text-error-400">
+                        <p className="text-lg font-bold text-error-600 dark:text-error-400">
                           ${totalExpenses.toFixed(2)}
                         </p>
                       ) : (
-                        <p className="text-2xl font-bold text-neutral-400">
+                        <p className="text-lg font-bold text-neutral-400">
                           ••••••
                         </p>
                       )}
@@ -339,19 +339,19 @@ const TransactionsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="card p-6 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-primary-200 dark:border-primary-700/50">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary-500 rounded-full">
-                    <DollarSign className="w-6 h-6 text-white" />
+              <div className="card p-4 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-primary-200 dark:border-primary-700/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary-500 rounded-full">
+                    <DollarSign className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                    <p className="text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">
                       Net Balance
                     </p>
                     <div className="flex items-center gap-3">
                       {showBalances ? (
                         <p
-                          className={`text-2xl font-bold ${
+                          className={`text-lg font-bold ${
                             netBalance >= 0
                               ? "text-success-600 dark:text-success-400"
                               : "text-error-600 dark:text-error-400"
@@ -360,7 +360,7 @@ const TransactionsPage: React.FC = () => {
                           ${netBalance.toFixed(2)}
                         </p>
                       ) : (
-                        <p className="text-2xl font-bold text-neutral-400">
+                        <p className="text-lg font-bold text-neutral-400">
                           ••••••
                         </p>
                       )}
@@ -369,9 +369,9 @@ const TransactionsPage: React.FC = () => {
                         className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-input transition-colors duration-200"
                       >
                         {showBalances ? (
-                          <EyeOff className="w-4 h-4 text-neutral-500" />
+                          <EyeOff className="w-3 h-3 text-neutral-500" />
                         ) : (
-                          <Eye className="w-4 h-4 text-neutral-500" />
+                          <Eye className="w-3 h-3 text-neutral-500" />
                         )}
                       </button>
                     </div>
@@ -381,28 +381,28 @@ const TransactionsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Filters */}
+          {/* Compact Filters */}
           {shouldShowStatsAndFilters && (
-            <div className="card p-4 sm:p-6 mb-4 sm:mb-6">
-              <div className="flex flex-col gap-4 items-start">
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+            <div className="card p-3 mb-4">
+              <div className="flex flex-col sm:flex-row gap-3 items-start">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                   <div className="relative flex-1 min-w-0">
                     <select
                       value={filters.transactionType}
                       onChange={handleTransactionTypeChange}
-                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-2 py-1.5 pr-6 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm"
                     >
                       <option value="all">All Types</option>
                       <option value="income">Income</option>
                       <option value="expense">Expense</option>
                     </select>
-                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-1.5 top-1/2 transform -translate-y-1/2 w-3 h-3 text-neutral-400 pointer-events-none" />
                   </div>
                   <div className="relative flex-1 min-w-0">
                     <select
                       value={filters.categoryID}
                       onChange={handleCategoryFilterChange}
-                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pr-8 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
+                      className="appearance-none bg-surface-primary border border-border-primary rounded-input px-2 py-1.5 pr-6 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm"
                     >
                       <option value="all">All Categories</option>
                       {defaultCategories && defaultCategories.length > 0 && (
@@ -430,52 +430,40 @@ const TransactionsPage: React.FC = () => {
                         </optgroup>
                       )}
                     </select>
-                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-1.5 top-1/2 transform -translate-y-1/2 w-3 h-3 text-neutral-400 pointer-events-none" />
                   </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
                   <div className="relative flex-1 min-w-0">
                     <input
                       type="date"
                       value={filters.date === "all" ? "" : filters.date}
                       onChange={handleDateFilterChange}
-                      className="bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
+                      className="bg-surface-primary border border-border-primary rounded-input px-2 py-1.5 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm"
                       placeholder="Filter by date"
                     />
-                    <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                   </div>
                   <div className="relative flex-1 min-w-0">
                     <input
                       type="text"
                       value={filters.keywords === "all" ? "" : filters.keywords}
                       onChange={handleKeywordsFilterChange}
-                      className="bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pl-10 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
-                      placeholder="Search transactions..."
+                      className="bg-surface-primary border border-border-primary rounded-input px-2 py-1.5 pl-7 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm"
+                      placeholder="Search..."
                     />
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-neutral-400 pointer-events-none" />
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
-                  <span className="text-sm text-neutral-600 dark:text-neutral-400">
-                    {transactions.length} transactions
-                  </span>
-                  <button
-                    onClick={() => setShowManageCategoriesModal(true)}
-                    className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm bg-surface-secondary hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-border-primary rounded-input transition-colors duration-200"
-                  >
-                    <Settings className="w-4 h-4 flex-shrink-0" />
-                    <span className="hidden sm:inline">Manage Categories</span>
-                    <span className="sm:hidden">Categories</span>
-                  </button>
-                </div>
+                <span className="text-xs text-neutral-600 dark:text-neutral-400 self-center whitespace-nowrap">
+                  {transactions.length} items
+                </span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Transactions List */}
+        {/* Large Transactions Table */}
+        <div className="flex-1 flex flex-col" style={{minHeight: 'calc(100vh - 300px)'}}>
         {transactions.length === 0 ? (
-          <div className="card p-12 text-center">
+          <div className="card p-12 text-center flex-1 flex items-center justify-center">
             <div className="max-w-md mx-auto">
               <div className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                 <FileText className="w-10 h-10 text-primary-600" />
@@ -494,36 +482,33 @@ const TransactionsPage: React.FC = () => {
               {isFiltersAtInitialState() && (
                 <button
                   onClick={() => setShowCreateTransactionModal(true)}
-                  className="group inline-flex items-center gap-1 sm:gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 sm:px-8 py-3 sm:py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none text-sm sm:text-base"
+                  className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-6 py-4 rounded-button font-medium transition-all duration-300 shadow-card hover:shadow-card-hover animate-pulse hover:animate-none"
                 >
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" />
-                  <span className="hidden sm:inline">
-                    Record First Transaction
-                  </span>
-                  <span className="sm:hidden">Add Transaction</span>
+                  <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
+                  <span>Record First Transaction</span>
                 </button>
               )}
             </div>
           </div>
         ) : (
-          <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border-primary">
-                <thead className="bg-surface-secondary">
+          <div className="card overflow-hidden flex-1 flex flex-col">
+            <div className="overflow-x-auto flex-1">
+              <table className="min-w-full divide-y-2 divide-border-primary h-full">
+                <thead className="bg-surface-secondary border-b-2 border-border-primary">
                   <tr>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wider border-r border-border-primary">
                       Transaction
                     </th>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wider border-r border-border-primary">
                       Amount
                     </th>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wider border-r border-border-primary">
                       Category
                     </th>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider hidden md:table-cell">
+                    <th className="px-4 sm:px-6 py-4 text-left text-sm font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wider border-r border-border-primary hidden md:table-cell">
                       Date
                     </th>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-medium text-neutral-600 dark:text-neutral-300 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-4 text-right text-sm font-semibold text-neutral-700 dark:text-neutral-200 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -534,9 +519,9 @@ const TransactionsPage: React.FC = () => {
                     return (
                       <tr
                         key={transaction.id}
-                        className="hover:bg-surface-secondary transition-colors duration-150"
+                        className="hover:bg-surface-secondary transition-colors duration-150 border-b border-border-primary/50"
                       >
-                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                        <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
                           <div className="flex items-center gap-2 sm:gap-3">
                             {getTransactionIcon(transaction.is_expense)}
                             <div className="min-w-0">
@@ -555,7 +540,7 @@ const TransactionsPage: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                        <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
                           <span
                             className={`text-sm sm:text-lg font-semibold ${
                               transaction.is_expense
@@ -574,7 +559,7 @@ const TransactionsPage: React.FC = () => {
                             ).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                        <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
                           <div className="flex items-center gap-1 sm:gap-2">
                             <div
                               className="w-6 h-6 sm:w-8 sm:h-8 rounded-input flex items-center justify-center text-xs sm:text-sm border"
@@ -597,7 +582,7 @@ const TransactionsPage: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
+                        <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30 hidden md:table-cell">
                           <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
                             <Calendar className="w-4 h-4" />
                             {new Date(
@@ -605,7 +590,7 @@ const TransactionsPage: React.FC = () => {
                             ).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
+                        <td className="px-4 sm:px-6 py-4 text-right">
                           <button
                             onClick={() =>
                               handleDeleteTransaction(transaction.id)
@@ -621,8 +606,19 @@ const TransactionsPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            {/* Full-width Add Transaction Button */}
+            <div className="p-4 border-t border-border-primary">
+              <button
+                onClick={() => setShowCreateTransactionModal(true)}
+                className="w-full group flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+              >
+                <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
+                <span>Add New Transaction</span>
+              </button>
+            </div>
           </div>
         )}
+        </div>
 
         {/* Create Transaction Modal */}
         {showCreateTransactionModal && (
