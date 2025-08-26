@@ -26,6 +26,7 @@ import {
   TrendingDown,
   FileText,
   ChevronDown,
+  Search,
 } from "lucide-react";
 
 const TransactionsPage: React.FC = () => {
@@ -67,7 +68,9 @@ const TransactionsPage: React.FC = () => {
     return (
       filters.transactionType === initialFilters.transactionType &&
       filters.categoryID === initialFilters.categoryID &&
-      filters.categoryTypeModel === initialFilters.categoryTypeModel
+      filters.categoryTypeModel === initialFilters.categoryTypeModel &&
+      filters.date === initialFilters.date &&
+      filters.keywords === initialFilters.keywords
     );
   };
 
@@ -238,6 +241,20 @@ const TransactionsPage: React.FC = () => {
       ...prev,
       categoryID: selectedCategoryId,
       categoryTypeModel: selectedCategoryTypeModel,
+    }));
+  };
+
+  const handleDateFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({
+      ...prev,
+      date: e.target.value || "all",
+    }));
+  };
+
+  const handleKeywordsFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({
+      ...prev,
+      keywords: e.target.value || "all",
     }));
   };
 
@@ -414,6 +431,28 @@ const TransactionsPage: React.FC = () => {
                       )}
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                  <div className="relative flex-1 min-w-0">
+                    <input
+                      type="date"
+                      value={filters.date === "all" ? "" : filters.date}
+                      onChange={handleDateFilterChange}
+                      className="bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
+                      placeholder="Filter by date"
+                    />
+                    <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  </div>
+                  <div className="relative flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={filters.keywords === "all" ? "" : filters.keywords}
+                      onChange={handleKeywordsFilterChange}
+                      className="bg-surface-primary border border-border-primary rounded-input px-3 sm:px-4 py-2 pl-10 text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-border-focus transition-all duration-200 w-full text-sm sm:text-base"
+                      placeholder="Search transactions..."
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
