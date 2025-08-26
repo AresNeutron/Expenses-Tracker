@@ -60,6 +60,12 @@ export interface CustomTransacctionResponse {
   error_details: ErrorDetail;
 }
 
+export interface CustomTransactionsListResponse {
+  success: boolean;
+  data: Transaction[];
+  error_details?: ErrorDetail;
+}
+
 type ErrorDetail = {
   [key: string]: string[]
 }

@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   CreateTransactionPayload,
   CustomTransacctionResponse,
+  CustomTransactionsListResponse,
   Transaction,
 } from "../interfaces/api_interfaces";
 import { FiltersInterface } from "../interfaces/interfaces";
@@ -17,9 +18,15 @@ export const getTransactions = async (
   if (filters.transactionType !== "all") {
     queryParams.push(`transaction_type=${filters.transactionType}`);
   }
-  if (filters.accountID !== "all") {
-    queryParams.push(`account=${filters.accountID}`);
+  
+  if (filters.date !== "all") {
+    queryParams.push(`date=${filters.date}`);
   }
+  
+  if (filters.keywords !== "all" && filters.keywords.trim() !== "") {
+    queryParams.push(`search=${encodeURIComponent(filters.keywords)}`);
+  }
+  
   if (filters.categoryID !== "all" && filters.categoryTypeModel !== "all") {
     queryParams.push(`category_id=${filters.categoryID}`);
     queryParams.push(`category_type_model=${filters.categoryTypeModel}`);
@@ -29,9 +36,14 @@ export const getTransactions = async (
     url += `?${queryParams.join("&")}`;
   }
   try {
-    const response = await api.get<Transaction[]>(url);
-    console.log(response.data);
-    return response.data;
+    const response = await api.get<CustomTransactionsListResponse>(url);
+    console.log("Transactions, response from server:", response);
+    
+    if (response.data.success) {
+      return response.data.data;
+    } else {
+      throw new Error("Failed to fetch transactions: " + JSON.stringify(response.data.error_details));
+    }
   } catch (error) {
     console.error("Error fetching transactions:", error);
     throw error;
