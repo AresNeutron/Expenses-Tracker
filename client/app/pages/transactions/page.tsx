@@ -1,18 +1,32 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
+import type React from "react";
+import { useState } from "react";
 import type {
   CategoryTypeModel,
   CreateTransactionPayload,
   TransactionType,
   Transaction,
-} from "../../interfaces/api_interfaces"
-import { useExpenseContext } from "@/app/components/Context"
-import { initialFilters } from "@/app/interfaces/interfaces"
-import ManageCategoriesModal from "@/app/components/ManageCategoriesModal"
-import MessageModal from "@/app/components/MessageModal"
-import { Plus, ArrowUpCircle, ArrowDownCircle, Calendar, DollarSign, Settings, Trash2, Eye, EyeOff, TrendingUp, TrendingDown, FileText, ChevronDown } from 'lucide-react'
+} from "../../interfaces/api_interfaces";
+import { useExpenseContext } from "@/app/components/Context";
+import { initialFilters } from "@/app/interfaces/interfaces";
+import ManageCategoriesModal from "@/app/components/ManageCategoriesModal";
+import MessageModal from "@/app/components/MessageModal";
+import {
+  Plus,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  Calendar,
+  DollarSign,
+  Settings,
+  Trash2,
+  Eye,
+  EyeOff,
+  TrendingUp,
+  TrendingDown,
+  FileText,
+  ChevronDown,
+} from "lucide-react";
 
 const TransactionsPage: React.FC = () => {
   const {
@@ -23,11 +37,13 @@ const TransactionsPage: React.FC = () => {
     defaultCategories,
     setFilters,
     filters,
-  } = useExpenseContext()
+  } = useExpenseContext();
 
-  const [showCreateTransactionModal, setShowCreateTransactionModal] = useState(false)
-  const [showManageCategoriesModal, setShowManageCategoriesModal] = useState(false)
-  const [showBalances, setShowBalances] = useState(true)
+  const [showCreateTransactionModal, setShowCreateTransactionModal] =
+    useState(false);
+  const [showManageCategoriesModal, setShowManageCategoriesModal] =
+    useState(false);
+  const [showBalances, setShowBalances] = useState(true);
 
   // Estados para el MessageModal
   const [messageModal, setMessageModal] = useState({
@@ -36,14 +52,15 @@ const TransactionsPage: React.FC = () => {
     title: "",
     message: "",
     onConfirm: undefined as (() => void) | undefined,
-  })
+  });
 
   // Estados para el formulario de nueva transacción
-  const [amount, setAmount] = useState("")
-  const [categoryID, setCategoryID] = useState("")
-  const [categoryTypeModel, setCategoryTypeModel] = useState<CategoryTypeModel>("defaultcategory")
-  const [isExpense, setIsExpense] = useState(true)
-  const [notes, setNotes] = useState("")
+  const [amount, setAmount] = useState("");
+  const [categoryID, setCategoryID] = useState("");
+  const [categoryTypeModel, setCategoryTypeModel] =
+    useState<CategoryTypeModel>("defaultcategory");
+  const [isExpense, setIsExpense] = useState(true);
+  const [notes, setNotes] = useState("");
 
   // Función para verificar si los filtros están en su estado inicial
   const isFiltersAtInitialState = () => {
@@ -51,14 +68,14 @@ const TransactionsPage: React.FC = () => {
       filters.transactionType === initialFilters.transactionType &&
       filters.categoryID === initialFilters.categoryID &&
       filters.categoryTypeModel === initialFilters.categoryTypeModel
-    )
-  }
+    );
+  };
 
   const showMessage = (
     type: "success" | "error" | "warning" | "info" | "confirm",
     title: string,
     message: string,
-    onConfirm?: () => void,
+    onConfirm?: () => void
   ) => {
     setMessageModal({
       isOpen: true,
@@ -66,13 +83,21 @@ const TransactionsPage: React.FC = () => {
       title,
       message,
       onConfirm,
-    })
-  }
+    });
+  };
 
   const handleCreateTransaction = async () => {
-    if (amount.trim() === "" || Number.isNaN(Number.parseFloat(amount)) || categoryID === "") {
-      showMessage("error", "Validation Error", "Please fill in all required fields: Amount and Category.")
-      return
+    if (
+      amount.trim() === "" ||
+      Number.isNaN(Number.parseFloat(amount)) ||
+      categoryID === ""
+    ) {
+      showMessage(
+        "error",
+        "Validation Error",
+        "Please fill in all required fields: Amount and Category."
+      );
+      return;
     }
 
     const payload: CreateTransactionPayload = {
@@ -81,25 +106,31 @@ const TransactionsPage: React.FC = () => {
       category_type_model: categoryTypeModel,
       is_expense: isExpense,
       notes: notes,
-    }
+    };
 
-    const custom_response = await createTransaction(payload)
+    const custom_response = await createTransaction(payload);
 
     if (custom_response.success) {
-      setAmount("")
-      setCategoryID("")
-      setIsExpense(true)
-      setNotes("")
-      setShowCreateTransactionModal(false)
-      showMessage("success", "Transaction Recorded", `Your ${isExpense ? 'expense' : 'income'} transaction has been recorded successfully!`)
+      setAmount("");
+      setCategoryID("");
+      setIsExpense(true);
+      setNotes("");
+      setShowCreateTransactionModal(false);
+      showMessage(
+        "success",
+        "Transaction Recorded",
+        `Your ${
+          isExpense ? "expense" : "income"
+        } transaction has been recorded successfully!`
+      );
     } else {
-      const error_details = custom_response.error_details
-      let fieldError = Object.keys(error_details)[0]
-      fieldError = fieldError.split("_").join(" ")
-      const messageToUser = Object.values(error_details)[0][0]
-      showMessage("error", "Error in input " + fieldError, messageToUser)
+      const error_details = custom_response.error_details;
+      let fieldError = Object.keys(error_details)[0];
+      fieldError = fieldError.split("_").join(" ");
+      const messageToUser = Object.values(error_details)[0][0];
+      showMessage("error", "Error in input " + fieldError, messageToUser);
     }
-  }
+  };
 
   const handleDeleteTransaction = async (id: number) => {
     showMessage(
@@ -107,35 +138,43 @@ const TransactionsPage: React.FC = () => {
       "Delete Transaction",
       "Are you sure you want to delete this transaction? This action cannot be undone.",
       async () => {
-        await deleteTransaction(id)
-        showMessage("success", "Transaction Deleted", "The transaction has been deleted successfully.")
-      },
-    )
-  }
+        await deleteTransaction(id);
+        showMessage(
+          "success",
+          "Transaction Deleted",
+          "The transaction has been deleted successfully."
+        );
+      }
+    );
+  };
 
   const getCategoryInfo = (transaction: Transaction) => {
     const defaultCategory = defaultCategories.find(
-      (cat) => cat.id === transaction.category_id && transaction.category_type_model.includes("default"),
-    )
+      (cat) =>
+        cat.id === transaction.category_id &&
+        transaction.category_type_model.includes("default")
+    );
     if (defaultCategory) {
       return {
         name: defaultCategory.name,
         icon: defaultCategory.icon,
         color: defaultCategory.color,
         isDefault: true,
-      }
+      };
     }
 
     const userCategory = categories.find(
-      (cat) => cat.id === transaction.category_id && transaction.category_type_model.includes("category"),
-    )
+      (cat) =>
+        cat.id === transaction.category_id &&
+        transaction.category_type_model.includes("category")
+    );
     if (userCategory) {
       return {
         name: userCategory.name,
         icon: userCategory.icon,
         color: userCategory.color,
         isDefault: false,
-      }
+      };
     }
 
     return {
@@ -143,43 +182,55 @@ const TransactionsPage: React.FC = () => {
       icon: "📦",
       color: "#6B7280",
       isDefault: false,
-    }
-  }
+    };
+  };
 
   const getTransactionIcon = (isExpense: boolean) => {
-    return isExpense ? 
-      <ArrowDownCircle className="w-5 h-5 text-error-500" /> :
+    return isExpense ? (
+      <ArrowDownCircle className="w-5 h-5 text-error-500" />
+    ) : (
       <ArrowUpCircle className="w-5 h-5 text-success-500" />
-  }
+    );
+  };
 
   // Calcular estadísticas
   const totalIncome = transactions
     .filter((t) => !t.is_expense)
-    .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0)
+    .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0);
 
   const totalExpenses = transactions
     .filter((t) => t.is_expense)
-    .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0)
+    .reduce((sum, t) => sum + Number.parseFloat(t.amount), 0);
 
-  const netBalance = totalIncome - totalExpenses
+  const netBalance = totalIncome - totalExpenses;
 
   // Manejadores para los filtros
-  const handleTransactionTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleTransactionTypeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setFilters((prev) => ({
       ...prev,
       transactionType: e.target.value as "all" | TransactionType,
-    }))
-  }
+    }));
+  };
 
-  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCategoryId = e.target.value
-    let selectedCategoryTypeModel: CategoryTypeModel | "all" = "all"
+  const handleCategoryFilterChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedCategoryId = e.target.value;
+    let selectedCategoryTypeModel: CategoryTypeModel | "all" = "all";
 
     if (selectedCategoryId !== "all") {
-      if (defaultCategories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))) {
-        selectedCategoryTypeModel = "defaultcategory"
-      } else if (categories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))) {
-        selectedCategoryTypeModel = "category"
+      if (
+        defaultCategories.some(
+          (cat) => cat.id === Number.parseInt(selectedCategoryId)
+        )
+      ) {
+        selectedCategoryTypeModel = "defaultcategory";
+      } else if (
+        categories.some((cat) => cat.id === Number.parseInt(selectedCategoryId))
+      ) {
+        selectedCategoryTypeModel = "category";
       }
     }
 
@@ -187,11 +238,12 @@ const TransactionsPage: React.FC = () => {
       ...prev,
       categoryID: selectedCategoryId,
       categoryTypeModel: selectedCategoryTypeModel,
-    }))
-  }
+    }));
+  };
 
   // Condición para mostrar estadísticas y filtros
-  const shouldShowStatsAndFilters = transactions.length > 0 || !isFiltersAtInitialState()
+  const shouldShowStatsAndFilters =
+    transactions.length > 0 || !isFiltersAtInitialState();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -200,8 +252,12 @@ const TransactionsPage: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">My Transactions</h1>
-              <p className="text-neutral-600 dark:text-neutral-300">Track your income and expenses</p>
+              <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
+                My Transactions
+              </h1>
+              <p className="text-neutral-600 dark:text-neutral-300">
+                Track your income and expenses
+              </p>
             </div>
             {shouldShowStatsAndFilters && (
               <button
@@ -224,14 +280,18 @@ const TransactionsPage: React.FC = () => {
                     <TrendingUp className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-success-700 dark:text-success-300 mb-1">Total Income</p>
+                    <p className="text-sm font-medium text-success-700 dark:text-success-300 mb-1">
+                      Total Income
+                    </p>
                     <div className="flex items-center gap-2">
                       {showBalances ? (
                         <p className="text-2xl font-bold text-success-600 dark:text-success-400">
                           ${totalIncome.toFixed(2)}
                         </p>
                       ) : (
-                        <p className="text-2xl font-bold text-neutral-400">••••••</p>
+                        <p className="text-2xl font-bold text-neutral-400">
+                          ••••••
+                        </p>
                       )}
                     </div>
                   </div>
@@ -244,14 +304,18 @@ const TransactionsPage: React.FC = () => {
                     <TrendingDown className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-error-700 dark:text-error-300 mb-1">Total Expenses</p>
+                    <p className="text-sm font-medium text-error-700 dark:text-error-300 mb-1">
+                      Total Expenses
+                    </p>
                     <div className="flex items-center gap-2">
                       {showBalances ? (
                         <p className="text-2xl font-bold text-error-600 dark:text-error-400">
                           ${totalExpenses.toFixed(2)}
                         </p>
                       ) : (
-                        <p className="text-2xl font-bold text-neutral-400">••••••</p>
+                        <p className="text-2xl font-bold text-neutral-400">
+                          ••••••
+                        </p>
                       )}
                     </div>
                   </div>
@@ -264,7 +328,9 @@ const TransactionsPage: React.FC = () => {
                     <DollarSign className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">Net Balance</p>
+                    <p className="text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
+                      Net Balance
+                    </p>
                     <div className="flex items-center gap-3">
                       {showBalances ? (
                         <p
@@ -277,7 +343,9 @@ const TransactionsPage: React.FC = () => {
                           ${netBalance.toFixed(2)}
                         </p>
                       ) : (
-                        <p className="text-2xl font-bold text-neutral-400">••••••</p>
+                        <p className="text-2xl font-bold text-neutral-400">
+                          ••••••
+                        </p>
                       )}
                       <button
                         onClick={() => setShowBalances(!showBalances)}
@@ -323,7 +391,10 @@ const TransactionsPage: React.FC = () => {
                       {defaultCategories && defaultCategories.length > 0 && (
                         <optgroup label="Default Categories">
                           {defaultCategories.map((cat) => (
-                            <option key={`filter-default-${cat.id}`} value={cat.id}>
+                            <option
+                              key={`filter-default-${cat.id}`}
+                              value={cat.id}
+                            >
                               {cat.icon} {cat.name}
                             </option>
                           ))}
@@ -332,7 +403,10 @@ const TransactionsPage: React.FC = () => {
                       {categories && categories.length > 0 && (
                         <optgroup label="Your Categories">
                           {categories.map((cat) => (
-                            <option key={`filter-user-${cat.id}`} value={cat.id}>
+                            <option
+                              key={`filter-user-${cat.id}`}
+                              value={cat.id}
+                            >
                               {cat.icon} {cat.name}
                             </option>
                           ))}
@@ -368,7 +442,9 @@ const TransactionsPage: React.FC = () => {
                 <FileText className="w-10 h-10 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-3">
-                {isFiltersAtInitialState() ? "No transactions yet" : "No matching transactions"}
+                {isFiltersAtInitialState()
+                  ? "No transactions yet"
+                  : "No matching transactions"}
               </h3>
               <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
                 {isFiltersAtInitialState()
@@ -382,7 +458,9 @@ const TransactionsPage: React.FC = () => {
                   className="group inline-flex items-center gap-1 sm:gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 sm:px-8 py-3 sm:py-4 rounded-button font-medium transition-all duration-1500 shadow-card hover:shadow-card-hover animate-bounce hover:animate-none text-sm sm:text-base"
                 >
                   <Plus className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200 flex-shrink-0" />
-                  <span className="hidden sm:inline">Record First Transaction</span>
+                  <span className="hidden sm:inline">
+                    Record First Transaction
+                  </span>
                   <span className="sm:hidden">Add Transaction</span>
                 </button>
               )}
@@ -413,16 +491,21 @@ const TransactionsPage: React.FC = () => {
                 </thead>
                 <tbody className="bg-surface-primary divide-y divide-border-primary">
                   {transactions.map((transaction) => {
-                    const categoryInfo = getCategoryInfo(transaction)
+                    const categoryInfo = getCategoryInfo(transaction);
                     return (
-                      <tr key={transaction.id} className="hover:bg-surface-secondary transition-colors duration-150">
+                      <tr
+                        key={transaction.id}
+                        className="hover:bg-surface-secondary transition-colors duration-150"
+                      >
                         <td className="px-3 sm:px-6 py-3 sm:py-4">
                           <div className="flex items-center gap-2 sm:gap-3">
                             {getTransactionIcon(transaction.is_expense)}
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-xs sm:text-sm font-medium text-neutral-800 dark:text-neutral-200 capitalize">
-                                  {transaction.is_expense ? "Expense" : "Income"}
+                                  {transaction.is_expense
+                                    ? "Expense"
+                                    : "Income"}
                                 </span>
                               </div>
                               {transaction.notes && (
@@ -447,7 +530,9 @@ const TransactionsPage: React.FC = () => {
                           {/* Show date on mobile when date column is hidden */}
                           <div className="md:hidden text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            {new Date(transaction.created_at).toLocaleDateString()}
+                            {new Date(
+                              transaction.created_at
+                            ).toLocaleDateString()}
                           </div>
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4">
@@ -466,7 +551,9 @@ const TransactionsPage: React.FC = () => {
                                 {categoryInfo.name}
                               </span>
                               {categoryInfo.isDefault && (
-                                <div className="text-xs text-neutral-500 dark:text-neutral-400">Default</div>
+                                <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                                  Default
+                                </div>
                               )}
                             </div>
                           </div>
@@ -474,19 +561,23 @@ const TransactionsPage: React.FC = () => {
                         <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                           <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
                             <Calendar className="w-4 h-4" />
-                            {new Date(transaction.created_at).toLocaleDateString()}
+                            {new Date(
+                              transaction.created_at
+                            ).toLocaleDateString()}
                           </div>
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                           <button
-                            onClick={() => handleDeleteTransaction(transaction.id)}
+                            onClick={() =>
+                              handleDeleteTransaction(transaction.id)
+                            }
                             className="p-1 sm:p-2 hover:bg-error-50 dark:hover:bg-error-900/20 text-error-500 hover:text-error-600 rounded-input transition-all duration-200"
                           >
                             <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                           </button>
                         </td>
                       </tr>
-                    )
+                    );
                   })}
                 </tbody>
               </table>
@@ -499,8 +590,12 @@ const TransactionsPage: React.FC = () => {
           <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
             <div className="card w-full max-w-2xl bg-surface-primary max-h-[90vh] overflow-y-auto">
               <div className="p-4 sm:p-6 border-b border-border-primary">
-                <h2 className="text-lg sm:text-xl font-semibold text-neutral-800 dark:text-neutral-100">Record New Transaction</h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Add a new income or expense</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-neutral-800 dark:text-neutral-100">
+                  Record New Transaction
+                </h2>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                  Add a new income or expense
+                </p>
               </div>
 
               <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -512,7 +607,9 @@ const TransactionsPage: React.FC = () => {
                     <div className="relative">
                       <select
                         value={isExpense ? "expense" : "income"}
-                        onChange={(e) => setIsExpense(e.target.value === "expense")}
+                        onChange={(e) =>
+                          setIsExpense(e.target.value === "expense")
+                        }
                         className="inputElement appearance-none pr-8"
                       >
                         <option value="expense">Expense</option>
@@ -539,7 +636,6 @@ const TransactionsPage: React.FC = () => {
                   </div>
                 </div>
 
-
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                     Category
@@ -548,15 +644,25 @@ const TransactionsPage: React.FC = () => {
                     <select
                       value={categoryID}
                       onChange={(e) => {
-                        const selectedCategoryId = Number.parseInt(e.target.value)
-                        setCategoryID(e.target.value)
+                        const selectedCategoryId = Number.parseInt(
+                          e.target.value
+                        );
+                        setCategoryID(e.target.value);
 
-                        if (defaultCategories.some((cat) => cat.id === selectedCategoryId)) {
-                          setCategoryTypeModel("defaultcategory")
-                        } else if (categories.some((cat) => cat.id === selectedCategoryId)) {
-                          setCategoryTypeModel("category")
+                        if (
+                          defaultCategories.some(
+                            (cat) => cat.id === selectedCategoryId
+                          )
+                        ) {
+                          setCategoryTypeModel("defaultcategory");
+                        } else if (
+                          categories.some(
+                            (cat) => cat.id === selectedCategoryId
+                          )
+                        ) {
+                          setCategoryTypeModel("category");
                         } else {
-                          setCategoryTypeModel("defaultcategory")
+                          setCategoryTypeModel("defaultcategory");
                         }
                       }}
                       className="inputElement appearance-none pr-8"
@@ -599,10 +705,16 @@ const TransactionsPage: React.FC = () => {
               </div>
 
               <div className="p-4 sm:p-6 border-t border-border-primary flex flex-col sm:flex-row gap-3 justify-end">
-                <button onClick={() => setShowCreateTransactionModal(false)} className="secondaryButton px-4 sm:px-6 py-2 order-2 sm:order-1">
+                <button
+                  onClick={() => setShowCreateTransactionModal(false)}
+                  className="secondaryButton px-4 sm:px-6 py-2 order-2 sm:order-1"
+                >
                   Cancel
                 </button>
-                <button onClick={handleCreateTransaction} className="submitButton px-4 sm:px-6 py-2 order-1 sm:order-2">
+                <button
+                  onClick={handleCreateTransaction}
+                  className="submitButton px-4 sm:px-6 py-2 order-1 sm:order-2"
+                >
                   <span className="flex items-center gap-2">
                     <Plus className="w-4 h-4" />
                     <span className="hidden sm:inline">Record Transaction</span>
@@ -615,7 +727,11 @@ const TransactionsPage: React.FC = () => {
         )}
 
         {/* Manage Categories Modal */}
-        {showManageCategoriesModal && <ManageCategoriesModal onClose={() => setShowManageCategoriesModal(false)} />}
+        {showManageCategoriesModal && (
+          <ManageCategoriesModal
+            onClose={() => setShowManageCategoriesModal(false)}
+          />
+        )}
 
         {/* Message Modal */}
         <MessageModal
@@ -630,7 +746,7 @@ const TransactionsPage: React.FC = () => {
         />
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default TransactionsPage
+export default TransactionsPage;

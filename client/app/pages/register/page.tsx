@@ -53,7 +53,7 @@ function Register() {
       setIsAuth(true);
 
       // Redirect to dashboard
-      router.push("/pages/dashboard")
+      router.push("/pages/transactions/")
     } catch (err) {
       console.error(err)
       setErrors(["Registration failed. Please try again."])

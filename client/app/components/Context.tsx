@@ -130,9 +130,9 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         // Load user data after successful authentication
         await Promise.all([fetchTransactions(), fetchCategories()]);
 
-        // Redirect to dashboard if user is on login/register pages
+        // Redirect to transactions if user is on login/register pages
         if (currentPath === "/" || currentPath === "/pages/register/") {
-          router.push("/pages/dashboard/");
+          router.push("/pages/transactions/");
         }
       } else {
         setIsAuth(false);
