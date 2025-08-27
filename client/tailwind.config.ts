@@ -11,6 +11,15 @@ export default {
   ],
   theme: {
   	extend: {
+		animation: {
+        'gentle-bounce': 'gentle-bounce 1s ease-in-out infinite', // Ajusta la duración y el tipo de curva aquí
+		},
+		keyframes: {
+			'gentle-bounce': {
+			'0%, 100%': { transform: 'translateY(0)' },
+			'50%': { transform: 'translateY(-8px)' }, // Controla la altura del salto
+			},
+		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
