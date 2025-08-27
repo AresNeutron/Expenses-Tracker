@@ -79,6 +79,7 @@ class TransactionRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIV
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
+    renderer_classes = [CustomResponseRenderer]
     lookup_field = 'pk'
 
     def get_object(self):

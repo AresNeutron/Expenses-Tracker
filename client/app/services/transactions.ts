@@ -2,17 +2,15 @@
 import axios from "axios";
 import {
   CreateTransactionPayload,
-  UpdateTransactionPayload,
   CustomTransacctionResponse,
   CustomTransactionsListResponse,
-  Transaction,
 } from "../interfaces/api_interfaces";
 import { FiltersInterface } from "../interfaces/interfaces";
 import api from "./api";
 
 export const getTransactions = async (
   filters: FiltersInterface
-): Promise<Transaction[]> => {
+): Promise<CustomTransactionsListResponse> => {
   let url = "transactions/";
   const queryParams = [];
 
@@ -37,14 +35,10 @@ export const getTransactions = async (
     url += `?${queryParams.join("&")}`;
   }
   try {
-    const response = await api.get<CustomTransactionsListResponse>(url);
-    console.log("Transactions, response from server:", response);
+    const response = await api.get(url);
+    const customServerResponse = response.data as CustomTransactionsListResponse;
+    return customServerResponse;
     
-    if (response.data.success) {
-      return response.data.data;
-    } else {
-      throw new Error("Failed to fetch transactions: " + JSON.stringify(response.data.error_details));
-    }
   } catch (error) {
     console.error("Error fetching transactions:", error);
     throw error;
@@ -56,7 +50,8 @@ export const createTransaction = async (
 ): Promise<CustomTransacctionResponse> => {
   try {
     const response = await api.post("transactions/create/", transaction);
-    return response.data;
+    const customServerResponse = response.data as CustomTransacctionResponse;
+    return customServerResponse
   } catch (error) {
     if (axios.isAxiosError(error) && error.response && error.response.status === 400) {
       console.log(error.response.data)
@@ -68,11 +63,12 @@ export const createTransaction = async (
 
 export const updateTransaction = async (
   id: number,
-  transaction: UpdateTransactionPayload
+  transaction: CreateTransactionPayload // send all updated transaction data
 ): Promise<CustomTransacctionResponse> => {
   try {
     const response = await api.put(`transactions/${id}/`, transaction);
-    return response.data;
+    const customServerResponse = response.data as CustomTransacctionResponse;
+    return customServerResponse;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response && error.response.status === 400) {
       console.log(error.response.data);
