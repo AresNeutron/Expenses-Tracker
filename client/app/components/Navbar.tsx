@@ -5,7 +5,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ChevronRight, Wallet, ArrowRightLeft, LogOut } from "lucide-react"
-import { useExpenseContext } from "./Context"
+import { useExpenseContext } from "@/app/context/Context"
 import { logout } from "@/app/utils/auth"
 import MessageModal from "@/app/components/MessageModal"
 

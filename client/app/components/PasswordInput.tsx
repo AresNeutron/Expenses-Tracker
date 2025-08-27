@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Eye, EyeOff, Lock } from "lucide-react"
-import { useExpenseContext } from "./Context"
+import { useExpenseContext } from "@/app/context/Context"
 
 export default function PasswordInput() {
   const { password, setPassword } = useExpenseContext()

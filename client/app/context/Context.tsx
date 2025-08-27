@@ -36,7 +36,7 @@ import {
   FiltersInterface,
   initialFilters,
 } from "../interfaces/interfaces";
-import MessageModal from "./MessageModal";
+import MessageModal from "../components/MessageModal";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
   undefined
@@ -95,12 +95,12 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       if (custom_response.success) {
         setTransactions((prev) => [...prev, custom_response.data]);
         showMessage(
-        "success",
-        "Transaction Recorded",
-        `Your ${
-          newTransaction.is_expense ? "expense" : "income"
-        } transaction has been recorded successfully!`
-      );
+          "success",
+          "Transaction Recorded",
+          `Your ${
+            newTransaction.is_expense ? "expense" : "income"
+          } transaction has been recorded successfully!`
+        );
       } else {
         const error_details = custom_response.error_details;
         let fieldError = Object.keys(error_details)[0];
@@ -148,10 +148,10 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       await apiDeleteTransaction(id);
       setTransactions((prev) => prev.filter((exp) => exp.id !== id));
       showMessage(
-          "success",
-          "Transaction Deleted",
-          "The transaction has been deleted successfully."
-        );
+        "success",
+        "Transaction Deleted",
+        "The transaction has been deleted successfully."
+      );
     } catch (error) {
       console.error("Failed to delete transaction:", error);
     }
@@ -260,16 +260,16 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       {/* {isAuth && <Navbar />} */}
       {children}
       {/* Message Modal */}
-        <MessageModal
-          isOpen={messageModal.isOpen}
-          onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
-          type={messageModal.type}
-          title={messageModal.title}
-          message={messageModal.message}
-          onConfirm={messageModal.onConfirm}
-          confirmText="Delete Transaction"
-          cancelText="Keep Transaction"
-        />
+      <MessageModal
+        isOpen={messageModal.isOpen}
+        onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
+        type={messageModal.type}
+        title={messageModal.title}
+        message={messageModal.message}
+        onConfirm={messageModal.onConfirm}
+        confirmText="Delete Transaction"
+        cancelText="Keep Transaction"
+      />
     </ExpenseContext.Provider>
   );
 };

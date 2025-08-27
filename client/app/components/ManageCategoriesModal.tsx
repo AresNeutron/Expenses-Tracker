@@ -1,21 +1,23 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import type { Category } from "../interfaces/api_interfaces"
-import { useExpenseContext } from "./Context"
-import { Plus, Trash2, X, Palette, Smile, Tag } from 'lucide-react'
+import type React from "react";
+import { useState } from "react";
+import type { Category } from "../interfaces/api_interfaces";
+import { useExpenseContext } from "../context/Context";
+import { Plus, Trash2, X, Palette, Smile, Tag } from "lucide-react";
 
 interface ManageCategoriesModalProps {
-  onClose: () => void
+  onClose: () => void;
 }
 
-const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }) => {
-  const { categories, createCategory, deleteCategory } = useExpenseContext()
-  const [newCategoryName, setNewCategoryName] = useState("")
-  const [newCategoryIcon, setNewCategoryIcon] = useState("📦")
-  const [newCategoryColor, setNewCategoryColor] = useState("#6B7280")
-  const [newCategoryIsExpense, setNewCategoryIsExpense] = useState(true)
+const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({
+  onClose,
+}) => {
+  const { categories, createCategory, deleteCategory } = useExpenseContext();
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryIcon, setNewCategoryIcon] = useState("📦");
+  const [newCategoryColor, setNewCategoryColor] = useState("#6B7280");
+  const [newCategoryIsExpense, setNewCategoryIsExpense] = useState(true);
 
   // Emojis predefinidos para selección rápida
   const commonEmojis = [
@@ -49,7 +51,7 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
     "🎯",
     "⭐",
     "🔥",
-  ]
+  ];
 
   // Colores predefinidos
   const commonColors = [
@@ -71,12 +73,12 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
     "#1ABC9C",
     "#E67E22",
     "#34495E",
-  ]
+  ];
 
   const handleCreateCategory = async () => {
     if (newCategoryName.trim() === "") {
-      alert("Please enter a category name.")
-      return
+      alert("Please enter a category name.");
+      return;
     }
 
     const created = await createCategory({
@@ -84,21 +86,21 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
       is_expense: newCategoryIsExpense,
       icon: newCategoryIcon,
       color: newCategoryColor,
-    })
+    });
 
     if (created) {
-      setNewCategoryName("")
-      setNewCategoryIcon("📦")
-      setNewCategoryColor("#6B7280")
-      setNewCategoryIsExpense(true)
+      setNewCategoryName("");
+      setNewCategoryIcon("📦");
+      setNewCategoryColor("#6B7280");
+      setNewCategoryIsExpense(true);
     }
-  }
+  };
 
   const handleDeleteCategory = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      await deleteCategory(id)
+      await deleteCategory(id);
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
@@ -107,7 +109,9 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
         <div className="p-4 sm:p-6 border-b border-border-primary">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 dark:text-neutral-100">Manage Categories</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 dark:text-neutral-100">
+                Manage Categories
+              </h2>
               <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
                 Create and organize your custom categories
               </p>
@@ -204,7 +208,9 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
                         key={emoji}
                         onClick={() => setNewCategoryIcon(emoji)}
                         className={`w-7 h-7 sm:w-8 sm:h-8 rounded-input text-sm sm:text-lg hover:bg-surface-secondary transition-colors duration-200 ${
-                          newCategoryIcon === emoji ? "bg-primary-100 dark:bg-primary-900/30" : ""
+                          newCategoryIcon === emoji
+                            ? "bg-primary-100 dark:bg-primary-900/30"
+                            : ""
                         }`}
                       >
                         {emoji}
@@ -281,7 +287,9 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Tag className="w-6 h-6 sm:w-8 sm:h-8 text-neutral-400" />
                 </div>
-                <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base">No custom categories yet.</p>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base">
+                  No custom categories yet.
+                </p>
                 <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-500 mt-1">
                   Create your first category to get started!
                 </p>
@@ -289,7 +297,10 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
             ) : (
               <div className="space-y-2 sm:space-y-3 max-h-64 sm:max-h-96 overflow-y-auto pr-1 sm:pr-2">
                 {categories.map((category: Category) => (
-                  <div key={category.id} className="group card p-3 sm:p-4 hover:shadow-card-hover transition-all duration-200">
+                  <div
+                    key={category.id}
+                    className="group card p-3 sm:p-4 hover:shadow-card-hover transition-all duration-200"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <div
@@ -302,7 +313,9 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
                           {category.icon || "📦"}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-medium text-neutral-800 dark:text-neutral-100 text-sm sm:text-base truncate">{category.name}</h4>
+                          <h4 className="font-medium text-neutral-800 dark:text-neutral-100 text-sm sm:text-base truncate">
+                            {category.name}
+                          </h4>
                           <div className="flex items-center gap-2 mt-1">
                             <span
                               className={`text-xs px-2 py-1 rounded-full ${
@@ -335,7 +348,7 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ onClose }
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ManageCategoriesModal
+export default ManageCategoriesModal;
