@@ -7,10 +7,12 @@ from django.contrib.contenttypes.models import ContentType
 from ..renderer import CustomResponseRenderer
 
 
-class TransactionListCreateAPIView(generics.ListCreateAPIView):
+class TransactionListAPIView(generics.ListAPIView):
+    """
+    Vista para listar transacciones.
+    """
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
-    renderer_classes = [CustomResponseRenderer]
     
     def get_queryset(self):
         queryset = Transaction.objects.filter(user=self.request.user, deleted_at__isnull=True)
@@ -70,7 +72,16 @@ class TransactionListCreateAPIView(generics.ListCreateAPIView):
     
     def get_serializer_context(self):
         return {'request': self.request}
-    
+
+
+class TransactionCreateAPIView(generics.CreateAPIView):
+    """
+    Vista para crear una nueva transacción.
+    """
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [CustomResponseRenderer]
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 

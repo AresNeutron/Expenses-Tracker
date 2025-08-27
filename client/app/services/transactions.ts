@@ -3,14 +3,14 @@ import axios from "axios";
 import {
   CreateTransactionPayload,
   CustomTransacctionResponse,
-  CustomTransactionsListResponse,
+  Transaction,
 } from "../interfaces/api_interfaces";
 import { FiltersInterface } from "../interfaces/interfaces";
 import api from "./api";
 
 export const getTransactions = async (
   filters: FiltersInterface
-): Promise<CustomTransactionsListResponse> => {
+): Promise<Transaction[]> => {
   let url = "transactions/";
   const queryParams = [];
 
@@ -36,8 +36,7 @@ export const getTransactions = async (
   }
   try {
     const response = await api.get(url);
-    const customServerResponse = response.data as CustomTransactionsListResponse;
-    return customServerResponse;
+    return response.data;
     
   } catch (error) {
     console.error("Error fetching transactions:", error);

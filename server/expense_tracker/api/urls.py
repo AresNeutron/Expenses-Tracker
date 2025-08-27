@@ -1,6 +1,6 @@
 from django.urls import path
 from .views.authentication import RegisterUserView, LoginUserView, LogoutUserView, UserDetailView, CustomTokenRefreshView
-from .views.transaction import TransactionListCreateAPIView, TransactionRetrieveUpdateDestroyAPIView
+from .views.transaction import TransactionListAPIView, TransactionCreateAPIView, TransactionRetrieveUpdateDestroyAPIView
 from .views.category import CategoryListCreateAPIView, CategoryRetrieveUpdateDestroyAPIView
 from .views.default_category import DefaultCategoryListView
 
@@ -13,7 +13,8 @@ urlpatterns = [
     path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'), # For refreshing JWT tokens
 
     # --- Transaction URLs ---
-    path('transactions/', TransactionListCreateAPIView.as_view(), name='transaction-list-create'),
+    path('transactions/', TransactionListAPIView.as_view(), name='transaction-list'),
+    path('transactions/create/', TransactionCreateAPIView.as_view(), name='transaction-create'),
     path('transactions/<int:pk>/', TransactionRetrieveUpdateDestroyAPIView.as_view(), name='transaction-detail'),
 
     # --- Category URLs ---
