@@ -4,21 +4,16 @@ import type React from "react";
 import { useState } from "react";
 import type {
   CategoryTypeModel,
-  CreateTransactionPayload,
   TransactionType,
-  Transaction,
 } from "../../interfaces/api_interfaces";
-import { useExpenseContext } from "@/app/components/Context";
+import { useExpenseContext } from "@/app/context/Context";
 import { initialFilters } from "@/app/interfaces/interfaces";
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal";
+import TransactionRow from "@/app/components/TransactionRow";
 import {
   Plus,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  Calendar,
   DollarSign,
   Settings,
-  Trash2,
   Eye,
   EyeOff,
   TrendingUp,
@@ -28,44 +23,20 @@ import {
   Search,
 } from "lucide-react";
 
-
 const TransactionsPage: React.FC = () => {
-  const {
-    transactions,
-    categories,
-    showMessage,
-    createTransaction,
-    deleteTransaction,
-    defaultCategories,
-    setFilters,
-    filters,
-  } = useExpenseContext();
+  const { transactions, categories, defaultCategories, setFilters, filters } =
+    useExpenseContext();
 
-  const [showCreateTransactionModal, setShowCreateTransactionModal] =
-    useState(false);
   const [showManageCategoriesModal, setShowManageCategoriesModal] =
     useState(false);
   const [showBalances, setShowBalances] = useState(true);
+  const [showNewRow, setShowNewRow] = useState(false);
 
   // Estados para inline editing
   const [editingCell, setEditingCell] = useState<{
     transactionId: number;
     field: "amount" | "notes" | "category";
   } | null>(null);
-  const [editingValue, setEditingValue] = useState<string>("");
-  const [editingCategory, setEditingCategory] = useState<{
-    categoryId: string;
-    categoryTypeModel: CategoryTypeModel;
-  }>({ categoryId: "", categoryTypeModel: "defaultcategory" });
-
-
-  // Estados para el formulario de nueva transacción
-  const [amount, setAmount] = useState("");
-  const [categoryID, setCategoryID] = useState("");
-  const [categoryTypeModel, setCategoryTypeModel] =
-    useState<CategoryTypeModel>("defaultcategory");
-  const [isExpense, setIsExpense] = useState(true);
-  const [notes, setNotes] = useState("");
 
   // Función para verificar si los filtros están en su estado inicial
   const isFiltersAtInitialState = () => {
@@ -78,133 +49,25 @@ const TransactionsPage: React.FC = () => {
     );
   };
 
-  
-
-  const handleCreateTransaction = async () => {
-    if (
-      amount.trim() === "" ||
-      Number.isNaN(Number.parseFloat(amount)) ||
-      categoryID === ""
-    ) {
-      showMessage(
-        "error",
-        "Validation Error",
-        "Please fill in all required fields: Amount and Category."
-      );
-      return;
-    }
-
-    const payload: CreateTransactionPayload = {
-      amount: amount,
-      category_id: Number.parseInt(categoryID),
-      category_type_model: categoryTypeModel,
-      is_expense: isExpense,
-      notes: notes,
-    };
-
-    await createTransaction(payload);
-
-    setAmount("");
-    setCategoryID("");
-    setIsExpense(true);
-    setNotes("");
-    setShowCreateTransactionModal(false);
-  };
-
-  const handleDeleteTransaction = async (id: number) => {
-    showMessage(
-      "confirm",
-      "Delete Transaction",
-      "Are you sure you want to delete this transaction? This action cannot be undone.",
-      async () => {
-        await deleteTransaction(id);
-      }
-    );
-  };
-
   // Inline editing functions
   const startEdit = (
     transactionId: number,
     field: "amount" | "notes" | "category"
   ) => {
-    const transaction = transactions.find((t) => t.id === transactionId);
-    if (!transaction) return;
-
     setEditingCell({ transactionId, field });
-
-    if (field === "amount") {
-      setEditingValue(transaction.amount);
-    } else if (field === "notes") {
-      setEditingValue(transaction.notes || "");
-    } else if (field === "category") {
-      setEditingCategory({
-        categoryId: transaction.category_id.toString(),
-        categoryTypeModel: transaction.category_type_model,
-      });
-    }
   };
 
-
-
-  const handleCategoryChange = (categoryId: string) => {
-    let categoryTypeModel: CategoryTypeModel = "defaultcategory";
-
-    if (
-      defaultCategories.some((cat) => cat.id === Number.parseInt(categoryId))
-    ) {
-      categoryTypeModel = "defaultcategory";
-    } else if (
-      categories.some((cat) => cat.id === Number.parseInt(categoryId))
-    ) {
-      categoryTypeModel = "category";
-    }
-
-    setEditingCategory({ categoryId, categoryTypeModel });
+  const cancelEdit = () => {
+    setEditingCell(null);
   };
 
-  const getCategoryInfo = (transaction: Transaction) => {
-    const defaultCategory = defaultCategories.find(
-      (cat) =>
-        cat.id === transaction.category_id &&
-        transaction.category_type_model.includes("default")
-    );
-    if (defaultCategory) {
-      return {
-        name: defaultCategory.name,
-        icon: defaultCategory.icon,
-        color: defaultCategory.color,
-        isDefault: true,
-      };
-    }
-
-    const userCategory = categories.find(
-      (cat) =>
-        cat.id === transaction.category_id &&
-        transaction.category_type_model.includes("category")
-    );
-    if (userCategory) {
-      return {
-        name: userCategory.name,
-        icon: userCategory.icon,
-        color: userCategory.color,
-        isDefault: false,
-      };
-    }
-
-    return {
-      name: "N/A",
-      icon: "📦",
-      color: "#6B7280",
-      isDefault: false,
-    };
+  const handleNewTransaction = () => {
+    // CLAUDE, this function triggers, but no row is appearing
+    setShowNewRow(true);
   };
 
-  const getTransactionIcon = (isExpense: boolean) => {
-    return isExpense ? (
-      <ArrowDownCircle className="w-5 h-5 text-error-500" />
-    ) : (
-      <ArrowUpCircle className="w-5 h-5 text-success-500" />
-    );
+  const cancelNewTransaction = () => {
+    setShowNewRow(false);
   };
 
   // Calcular estadísticas
@@ -478,7 +341,7 @@ const TransactionsPage: React.FC = () => {
           className="flex-1 flex flex-col"
           style={{ minHeight: "calc(100vh - 300px)" }}
         >
-          {transactions.length === 0 ? (
+          {transactions.length === 0 && !showNewRow ? (
             <div className="card p-12 text-center flex-1 flex items-center justify-center">
               <div className="max-w-md mx-auto">
                 <div className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -497,7 +360,7 @@ const TransactionsPage: React.FC = () => {
                 {/* Botón con animación llamativa solo cuando no hay transacciones y filtros están en estado inicial */}
                 {isFiltersAtInitialState() && (
                   <button
-                    onClick={() => setShowCreateTransactionModal(true)}
+                    onClick={handleNewTransaction}
                     className="group inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600
           text-white px-6 py-4 rounded-button font-medium transition-all duration-1500
             shadow-card hover:shadow-card-hover animate-gentle-bounce hover:animate-none"
@@ -510,6 +373,18 @@ const TransactionsPage: React.FC = () => {
             </div>
           ) : (
             <div className="card overflow-hidden flex-1 flex flex-col">
+              {/* Record New Transaction Button */}
+              {!showNewRow && (
+                <div className="p-4 border-b border-border-primary">
+                  <button
+                    onClick={handleNewTransaction}
+                    className="w-full group flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
+                  >
+                    <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
+                    <span>Record New Transaction</span>
+                  </button>
+                </div>
+              )}
               <div className="overflow-x-auto flex-1">
                 <table className="min-w-full divide-y-2 divide-border-primary h-full">
                   <thead className="bg-surface-secondary border-b-2 border-border-primary">
@@ -532,350 +407,35 @@ const TransactionsPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-surface-primary divide-y divide-border-primary">
-                    {transactions.map((transaction) => {
-                      const categoryInfo = getCategoryInfo(transaction);
-                      return (
-                        <tr
-                          key={transaction.id}
-                          className="hover:bg-surface-secondary transition-colors duration-150 border-b border-border-primary/50"
-                        >
-                          <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              {getTransactionIcon(transaction.is_expense)}
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs sm:text-sm font-medium text-neutral-800 dark:text-neutral-200 capitalize">
-                                    {transaction.is_expense
-                                      ? "Expense"
-                                      : "Income"}
-                                  </span>
-                                </div>
-                                {editingCell?.transactionId ===
-                                  transaction.id &&
-                                editingCell?.field === "notes" ? (
-                                  <input
-                                    type="text"
-                                    value={editingValue}
-                                    onChange={(e) =>
-                                      setEditingValue(e.target.value)
-                                    }
-                                    className="text-xs bg-surface-primary border border-primary-300 rounded px-1 py-0.5 mt-1 max-w-xs focus:outline-none focus:ring-1 focus:ring-primary-400"
-                                    placeholder="Add notes..."
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <p
-                                    className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs truncate cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 px-1 py-0.5 rounded transition-colors duration-150"
-                                    onClick={() =>
-                                      startEdit(transaction.id, "notes")
-                                    }
-                                    title={
-                                      transaction.notes || "Click to add notes"
-                                    }
-                                  >
-                                    {transaction.notes || "Add notes..."}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
-                            {editingCell?.transactionId === transaction.id &&
-                            editingCell?.field === "amount" ? (
-                              <div className="flex items-center gap-1">
-                                <span
-                                  className={`text-sm font-semibold ${
-                                    transaction.is_expense
-                                      ? "text-error-600 dark:text-error-400"
-                                      : "text-success-600 dark:text-success-400"
-                                  }`}
-                                >
-                                  {transaction.is_expense ? "-" : "+"}$
-                                </span>
-                                <input
-                                  type="number"
-                                  value={editingValue}
-                                  onChange={(e) =>
-                                    setEditingValue(e.target.value)
-                                  }
-                                  className="text-sm font-semibold bg-surface-primary border border-primary-300 rounded px-2 py-1 w-20 focus:outline-none focus:ring-1 focus:ring-primary-400"
-                                  step="0.01"
-                                  min="0"
-                                  autoFocus
-                                />
-                              </div>
-                            ) : (
-                              <span
-                                className={`text-sm sm:text-lg font-semibold cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 px-2 py-1 rounded transition-colors duration-150 ${
-                                  transaction.is_expense
-                                    ? "text-error-600 dark:text-error-400"
-                                    : "text-success-600 dark:text-success-400"
-                                }`}
-                                onClick={() =>
-                                  startEdit(transaction.id, "amount")
-                                }
-                                title="Click to edit amount"
-                              >
-                                {transaction.is_expense ? "-" : "+"}$
-                                {Number.parseFloat(transaction.amount).toFixed(
-                                  2
-                                )}
-                              </span>
-                            )}
-                            {/* Show date on mobile when date column is hidden */}
-                            <div className="md:hidden text-xs text-neutral-500 dark:text-neutral-400 mt-1 flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(
-                                transaction.created_at
-                              ).toLocaleDateString()}
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30">
-                            {editingCell?.transactionId === transaction.id &&
-                            editingCell?.field === "category" ? (
-                              <select
-                                value={editingCategory.categoryId}
-                                onChange={(e) =>
-                                  handleCategoryChange(e.target.value)
-                                }
-                                className="text-xs sm:text-sm bg-surface-primary border border-primary-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-400 max-w-full"
-                                autoFocus
-                              >
-                                <option value="">Select Category</option>
-                                {defaultCategories &&
-                                  defaultCategories.length > 0 && (
-                                    <optgroup label="Default Categories">
-                                      {defaultCategories.map((cat) => (
-                                        <option
-                                          key={`edit-default-${cat.id}`}
-                                          value={cat.id}
-                                        >
-                                          {cat.icon} {cat.name}
-                                        </option>
-                                      ))}
-                                    </optgroup>
-                                  )}
-                                {categories && categories.length > 0 && (
-                                  <optgroup label="Your Categories">
-                                    {categories.map((cat) => (
-                                      <option
-                                        key={`edit-user-${cat.id}`}
-                                        value={cat.id}
-                                      >
-                                        {cat.icon} {cat.name}
-                                      </option>
-                                    ))}
-                                  </optgroup>
-                                )}
-                              </select>
-                            ) : (
-                              <div
-                                className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 px-2 py-1 rounded transition-colors duration-150"
-                                onClick={() =>
-                                  startEdit(transaction.id, "category")
-                                }
-                                title="Click to edit category"
-                              >
-                                <div
-                                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-input flex items-center justify-center text-xs sm:text-sm border"
-                                  style={{
-                                    backgroundColor: `${categoryInfo.color}20`,
-                                    borderColor: `${categoryInfo.color}40`,
-                                  }}
-                                >
-                                  {categoryInfo.icon}
-                                </div>
-                                <div className="min-w-0">
-                                  <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate block">
-                                    {categoryInfo.name}
-                                  </span>
-                                  {categoryInfo.isDefault && (
-                                    <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                                      Default
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 border-r border-border-primary/30 hidden md:table-cell">
-                            <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(
-                                transaction.created_at
-                              ).toLocaleDateString()}
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 text-right">
-                            <button
-                              onClick={() =>
-                                handleDeleteTransaction(transaction.id)
-                              }
-                              className="p-1 sm:p-2 hover:bg-error-50 dark:hover:bg-error-900/20 text-error-500 hover:text-error-600 rounded-input transition-all duration-200"
-                            >
-                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {showNewRow && (
+                      <TransactionRow
+                        isNew={true}
+                        onCancel={cancelNewTransaction}
+                        onEdit={startEdit}
+                      />
+                    )}
+                    {transactions.map((transaction) => (
+                      <TransactionRow
+                        key={transaction.id}
+                        transaction={transaction}
+                        isEditing={
+                          editingCell?.transactionId === transaction.id
+                        }
+                        editingField={
+                          editingCell?.transactionId === transaction.id
+                            ? editingCell.field
+                            : null
+                        }
+                        onCancel={cancelEdit}
+                        onEdit={startEdit}
+                      />
+                    ))}
                   </tbody>
                 </table>
-              </div>
-              {/* Full-width Add Transaction Button */}
-              <div className="p-4 border-t border-border-primary">
-                <button
-                  onClick={() => setShowCreateTransactionModal(true)}
-                  className="w-full group flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-3 rounded-button font-medium transition-all duration-200 shadow-card hover:shadow-card-hover"
-                >
-                  <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-                  <span>Add New Transaction</span>
-                </button>
               </div>
             </div>
           )}
         </div>
-
-        {/* Create Transaction Modal */}
-        {showCreateTransactionModal && (
-          <div className="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
-            <div className="card w-full max-w-2xl bg-surface-primary max-h-[90vh] overflow-y-auto">
-              <div className="p-4 sm:p-6 border-b border-border-primary">
-                <h2 className="text-lg sm:text-xl font-semibold text-neutral-800 dark:text-neutral-100">
-                  Record New Transaction
-                </h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-                  Add a new income or expense
-                </p>
-              </div>
-
-              <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                      Transaction Type
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={isExpense ? "expense" : "income"}
-                        onChange={(e) =>
-                          setIsExpense(e.target.value === "expense")
-                        }
-                        className="inputElement appearance-none pr-8"
-                      >
-                        <option value="expense">Expense</option>
-                        <option value="income">Income</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                      Amount
-                    </label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                      <input
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        className="inputElement pl-10"
-                        placeholder="0.00"
-                        step="0.01"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                    Category
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={categoryID}
-                      onChange={(e) => {
-                        const selectedCategoryId = Number.parseInt(
-                          e.target.value
-                        );
-                        setCategoryID(e.target.value);
-
-                        if (
-                          defaultCategories.some(
-                            (cat) => cat.id === selectedCategoryId
-                          )
-                        ) {
-                          setCategoryTypeModel("defaultcategory");
-                        } else if (
-                          categories.some(
-                            (cat) => cat.id === selectedCategoryId
-                          )
-                        ) {
-                          setCategoryTypeModel("category");
-                        } else {
-                          setCategoryTypeModel("defaultcategory");
-                        }
-                      }}
-                      className="inputElement appearance-none pr-8"
-                    >
-                      <option value="">Select Category</option>
-                      {defaultCategories && defaultCategories.length > 0 && (
-                        <optgroup label="Default Categories">
-                          {defaultCategories.map((cat) => (
-                            <option key={`default-${cat.id}`} value={cat.id}>
-                              {cat.icon} {cat.name}
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                      {categories && categories.length > 0 && (
-                        <optgroup label="Your Categories">
-                          {categories.map((cat) => (
-                            <option key={`user-${cat.id}`} value={cat.id}>
-                              {cat.icon} {cat.name}
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                    Notes (Optional)
-                  </label>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="inputElement h-24 resize-none"
-                    placeholder="Add any additional details about this transaction..."
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-6 border-t border-border-primary flex flex-col sm:flex-row gap-3 justify-end">
-                <button
-                  onClick={() => setShowCreateTransactionModal(false)}
-                  className="secondaryButton px-4 sm:px-6 py-2 order-2 sm:order-1"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateTransaction}
-                  className="submitButton px-4 sm:px-6 py-2 order-1 sm:order-2"
-                >
-                  <span className="flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Record Transaction</span>
-                    <span className="sm:hidden">Record</span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Manage Categories Modal */}
         {showManageCategoriesModal && (
@@ -883,7 +443,6 @@ const TransactionsPage: React.FC = () => {
             onClose={() => setShowManageCategoriesModal(false)}
           />
         )}
-
       </main>
     </div>
   );
