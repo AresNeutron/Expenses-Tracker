@@ -10,7 +10,7 @@ import { useState } from "react";
 import { setupTokenRefresh } from "./utils/tokens";
 
 export default function Login() {
-  const { password, setPassword, setIsAuth } = useExpenseContext();
+  const { password, setPassword, setIsAuth, startLoading, stopLoading } = useExpenseContext();
   const [identifier, setIdentifier] = useState<string>(""); // For email or username
   const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
@@ -18,6 +18,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors([]); // Clear any previous errors
+    startLoading();
     try {
       console.log("Payload:", { identifier, password });
       const response = await axios.post(
@@ -49,6 +50,8 @@ export default function Login() {
         console.log(err);
         setErrors(["An unexpected error occurred. Please try again later."]);
       }
+    } finally {
+      stopLoading();
     }
   };
 
