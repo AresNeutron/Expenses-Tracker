@@ -17,7 +17,6 @@ import {
   CreateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
-  ErrorDetail,
 } from "../interfaces/api_interfaces";
 
 import {
@@ -37,6 +36,7 @@ import {
   FiltersInterface,
   initialFilters,
 } from "../interfaces/interfaces";
+import MessageModal from "./MessageModal";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
   undefined
@@ -49,7 +49,6 @@ interface ExpenseProviderProps {
 const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const [password, setPassword] = useState<string>("");
   const [isAuth, setIsAuth] = useState<boolean>(false);
-  const [errors, setErrors] = useState<ErrorDetail>({});
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,17 +57,36 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   );
   const [filters, setFilters] = useState<FiltersInterface>(initialFilters);
 
+  const [messageModal, setMessageModal] = useState({
+    isOpen: false,
+    type: "info" as "success" | "error" | "warning" | "info" | "confirm",
+    title: "",
+    message: "",
+    onConfirm: undefined as (() => void) | undefined,
+  });
+
   const router = useRouter();
   const currentPath = usePathname();
 
+  const showMessage = (
+    type: "success" | "error" | "warning" | "info" | "confirm",
+    title: string,
+    message: string,
+    onConfirm?: () => void
+  ) => {
+    setMessageModal({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm,
+    });
+  };
+
   // --- Funciones API para Transacciones (anteriormente Gastos) ---
   const fetchTransactions = useCallback(async () => {
-    const customServerResponse = await getTransactions(filters);
-    if (customServerResponse.success) {
-      setTransactions(customServerResponse.data);
-    } else {
-      setErrors(customServerResponse.error_details);
-    }
+    const transactions = await getTransactions(filters);
+    setTransactions(transactions);
   }, [filters]);
 
   const createTransaction = useCallback(
@@ -76,8 +94,19 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       const custom_response = await apiCreateTransaction(newTransaction);
       if (custom_response.success) {
         setTransactions((prev) => [...prev, custom_response.data]);
+        showMessage(
+        "success",
+        "Transaction Recorded",
+        `Your ${
+          newTransaction.is_expense ? "expense" : "income"
+        } transaction has been recorded successfully!`
+      );
       } else {
-        setErrors(custom_response.error_details);
+        const error_details = custom_response.error_details;
+        let fieldError = Object.keys(error_details)[0];
+        fieldError = fieldError.split("_").join(" ");
+        const messageToUser = Object.values(error_details)[0][0];
+        showMessage("error", "Error in input " + fieldError, messageToUser);
       }
     },
     []
@@ -100,7 +129,11 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
             )
           );
         } else {
-          setErrors(custom_response.error_details);
+          const error_details = custom_response.error_details;
+          let fieldError = Object.keys(error_details)[0];
+          fieldError = fieldError.split("_").join(" ");
+          const messageToUser = Object.values(error_details)[0][0];
+          showMessage("error", "Error in input " + fieldError, messageToUser);
         }
       } catch (error) {
         console.error("Failed to update transaction:", error);
@@ -114,6 +147,11 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     try {
       await apiDeleteTransaction(id);
       setTransactions((prev) => prev.filter((exp) => exp.id !== id));
+      showMessage(
+          "success",
+          "Transaction Deleted",
+          "The transaction has been deleted successfully."
+        );
     } catch (error) {
       console.error("Failed to delete transaction:", error);
     }
@@ -205,7 +243,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         isAuth,
         setIsAuth,
         setPassword,
-        errors,
+        showMessage,
         transactions, // Estado `transactions` para transacciones
         categories,
         createTransaction,
@@ -221,6 +259,17 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       {/** Navbar disabled for now */}
       {/* {isAuth && <Navbar />} */}
       {children}
+      {/* Message Modal */}
+        <MessageModal
+          isOpen={messageModal.isOpen}
+          onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
+          type={messageModal.type}
+          title={messageModal.title}
+          message={messageModal.message}
+          onConfirm={messageModal.onConfirm}
+          confirmText="Delete Transaction"
+          cancelText="Keep Transaction"
+        />
     </ExpenseContext.Provider>
   );
 };

@@ -6,7 +6,6 @@ import {
   DefaultCategory,
   CategoryTypeModel,
   TransactionType,
-  ErrorDetail,
 } from "./api_interfaces";
 
 // Interfaz para las propiedades del contexto (lo que provee el ExpenseProvider)
@@ -16,17 +15,25 @@ export interface ExpenseContextProps {
   setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
 
-  errors: ErrorDetail;
-
   // Estados para los datos
   transactions: Transaction[];
   categories: Category[];
+
+  showMessage: (
+    type: "success" | "error" | "warning" | "info" | "confirm",
+    title: string,
+    message: string,
+    onConfirm?: (() => void) | undefined
+  ) => void;
 
   // Funciones API para Transacciones
   createTransaction: (
     newTransaction: CreateTransactionPayload
   ) => Promise<void>;
-  updateTransaction: (id: number, updatedTransaction: CreateTransactionPayload) => Promise<void>
+  updateTransaction: (
+    id: number,
+    updatedTransaction: CreateTransactionPayload
+  ) => Promise<void>;
   deleteTransaction: (id: number) => Promise<void>;
 
   // Funciones API para Categorías
@@ -40,7 +47,6 @@ export interface ExpenseContextProps {
   filters: FiltersInterface;
   setFilters: React.Dispatch<React.SetStateAction<FiltersInterface>>;
 }
-
 
 export interface FiltersInterface {
   transactionType: "all" | TransactionType;
@@ -56,4 +62,4 @@ export const initialFilters: FiltersInterface = {
   keywords: "all",
   categoryID: "all",
   categoryTypeModel: "all",
-}
+};

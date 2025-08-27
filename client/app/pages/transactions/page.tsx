@@ -5,14 +5,12 @@ import { useState } from "react";
 import type {
   CategoryTypeModel,
   CreateTransactionPayload,
-  UpdateTransactionPayload,
   TransactionType,
   Transaction,
 } from "../../interfaces/api_interfaces";
 import { useExpenseContext } from "@/app/components/Context";
 import { initialFilters } from "@/app/interfaces/interfaces";
 import ManageCategoriesModal from "@/app/components/ManageCategoriesModal";
-import MessageModal from "@/app/components/MessageModal";
 import {
   Plus,
   ArrowUpCircle,
@@ -30,12 +28,13 @@ import {
   Search,
 } from "lucide-react";
 
+
 const TransactionsPage: React.FC = () => {
   const {
     transactions,
     categories,
+    showMessage,
     createTransaction,
-    updateTransaction,
     deleteTransaction,
     defaultCategories,
     setFilters,
@@ -59,14 +58,6 @@ const TransactionsPage: React.FC = () => {
     categoryTypeModel: CategoryTypeModel;
   }>({ categoryId: "", categoryTypeModel: "defaultcategory" });
 
-  // Estados para el MessageModal
-  const [messageModal, setMessageModal] = useState({
-    isOpen: false,
-    type: "info" as "success" | "error" | "warning" | "info" | "confirm",
-    title: "",
-    message: "",
-    onConfirm: undefined as (() => void) | undefined,
-  });
 
   // Estados para el formulario de nueva transacción
   const [amount, setAmount] = useState("");
@@ -87,20 +78,7 @@ const TransactionsPage: React.FC = () => {
     );
   };
 
-  const showMessage = (
-    type: "success" | "error" | "warning" | "info" | "confirm",
-    title: string,
-    message: string,
-    onConfirm?: () => void
-  ) => {
-    setMessageModal({
-      isOpen: true,
-      type,
-      title,
-      message,
-      onConfirm,
-    });
-  };
+  
 
   const handleCreateTransaction = async () => {
     if (
@@ -124,28 +102,13 @@ const TransactionsPage: React.FC = () => {
       notes: notes,
     };
 
-    const custom_response = await createTransaction(payload);
+    await createTransaction(payload);
 
-    if (custom_response.success) {
-      setAmount("");
-      setCategoryID("");
-      setIsExpense(true);
-      setNotes("");
-      setShowCreateTransactionModal(false);
-      showMessage(
-        "success",
-        "Transaction Recorded",
-        `Your ${
-          isExpense ? "expense" : "income"
-        } transaction has been recorded successfully!`
-      );
-    } else {
-      const error_details = custom_response.error_details;
-      let fieldError = Object.keys(error_details)[0];
-      fieldError = fieldError.split("_").join(" ");
-      const messageToUser = Object.values(error_details)[0][0];
-      showMessage("error", "Error in input " + fieldError, messageToUser);
-    }
+    setAmount("");
+    setCategoryID("");
+    setIsExpense(true);
+    setNotes("");
+    setShowCreateTransactionModal(false);
   };
 
   const handleDeleteTransaction = async (id: number) => {
@@ -155,11 +118,6 @@ const TransactionsPage: React.FC = () => {
       "Are you sure you want to delete this transaction? This action cannot be undone.",
       async () => {
         await deleteTransaction(id);
-        showMessage(
-          "success",
-          "Transaction Deleted",
-          "The transaction has been deleted successfully."
-        );
       }
     );
   };
@@ -186,81 +144,7 @@ const TransactionsPage: React.FC = () => {
     }
   };
 
-  const cancelEdit = () => {
-    setEditingCell(null);
-    setEditingValue("");
-    setEditingCategory({
-      categoryId: "",
-      categoryTypeModel: "defaultcategory",
-    });
-  };
 
-  const saveEdit = async () => {
-    if (!editingCell) return;
-
-    try {
-      const updateData: UpdateTransactionPayload = {};
-
-      if (editingCell.field === "amount") {
-        const numValue = Number.parseFloat(editingValue);
-        if (isNaN(numValue) || numValue <= 0) {
-          showMessage(
-            "error",
-            "Invalid Amount",
-            "Please enter a valid positive number."
-          );
-          return;
-        }
-        updateData.amount = editingValue;
-      } else if (editingCell.field === "notes") {
-        updateData.notes = editingValue;
-      } else if (editingCell.field === "category") {
-        if (editingCategory.categoryId === "") {
-          showMessage(
-            "error",
-            "Category Required",
-            "Please select a category."
-          );
-          return;
-        }
-        updateData.category_id = Number.parseInt(editingCategory.categoryId);
-        updateData.category_type_model = editingCategory.categoryTypeModel;
-      }
-
-      const result = await updateTransaction(
-        editingCell.transactionId,
-        updateData
-      );
-
-      if (result.success) {
-        showMessage("success", "Updated", "Transaction updated successfully.");
-        cancelEdit();
-      } else {
-        const error_details = result.error_details;
-        let fieldError = Object.keys(error_details)[0];
-        fieldError = fieldError.split("_").join(" ");
-        const messageToUser = Object.values(error_details)[0][0];
-        showMessage("error", "Error updating " + fieldError, messageToUser);
-      }
-    } catch (error) {
-      showMessage(
-        "error",
-        "Update Failed",
-        "Failed to update transaction. Please try again."
-      );
-      console.error("Update error:", error);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      saveEdit();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      cancelEdit();
-    }
-  };
 
   const handleCategoryChange = (categoryId: string) => {
     let categoryTypeModel: CategoryTypeModel = "defaultcategory";
@@ -675,8 +559,6 @@ const TransactionsPage: React.FC = () => {
                                     onChange={(e) =>
                                       setEditingValue(e.target.value)
                                     }
-                                    onKeyDown={handleKeyDown}
-                                    onBlur={saveEdit}
                                     className="text-xs bg-surface-primary border border-primary-300 rounded px-1 py-0.5 mt-1 max-w-xs focus:outline-none focus:ring-1 focus:ring-primary-400"
                                     placeholder="Add notes..."
                                     autoFocus
@@ -716,8 +598,6 @@ const TransactionsPage: React.FC = () => {
                                   onChange={(e) =>
                                     setEditingValue(e.target.value)
                                   }
-                                  onKeyDown={handleKeyDown}
-                                  onBlur={saveEdit}
                                   className="text-sm font-semibold bg-surface-primary border border-primary-300 rounded px-2 py-1 w-20 focus:outline-none focus:ring-1 focus:ring-primary-400"
                                   step="0.01"
                                   min="0"
@@ -758,8 +638,6 @@ const TransactionsPage: React.FC = () => {
                                 onChange={(e) =>
                                   handleCategoryChange(e.target.value)
                                 }
-                                onKeyDown={handleKeyDown}
-                                onBlur={saveEdit}
                                 className="text-xs sm:text-sm bg-surface-primary border border-primary-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary-400 max-w-full"
                                 autoFocus
                               >
@@ -1006,17 +884,6 @@ const TransactionsPage: React.FC = () => {
           />
         )}
 
-        {/* Message Modal */}
-        <MessageModal
-          isOpen={messageModal.isOpen}
-          onClose={() => setMessageModal({ ...messageModal, isOpen: false })}
-          type={messageModal.type}
-          title={messageModal.title}
-          message={messageModal.message}
-          onConfirm={messageModal.onConfirm}
-          confirmText="Delete Transaction"
-          cancelText="Keep Transaction"
-        />
       </main>
     </div>
   );
