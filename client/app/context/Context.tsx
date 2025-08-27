@@ -37,6 +37,7 @@ import {
   initialFilters,
 } from "../interfaces/interfaces";
 import MessageModal from "../components/MessageModal";
+import LoadingModal from "../components/LoadingModal";
 
 export const ExpenseContext = createContext<ExpenseContextProps | undefined>(
   undefined
@@ -65,6 +66,14 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     onConfirm: undefined as (() => void) | undefined,
   });
 
+  // Loading state
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingStartTime, setLoadingStartTime] = useState<number | undefined>(
+    undefined
+  );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [activeRequests, setActiveRequests] = useState<number>(0);
+
   const router = useRouter();
   const currentPath = usePathname();
 
@@ -83,33 +92,68 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
     });
   };
 
+  // Loading control functions
+  const startLoading = useCallback(() => {
+    setActiveRequests((prev) => {
+      const newCount = prev + 1;
+      if (newCount === 1) {
+        // First request, start loading
+        setIsLoading(true);
+        setLoadingStartTime(Date.now());
+      }
+      return newCount;
+    });
+  }, []);
+
+  const stopLoading = useCallback(() => {
+    setActiveRequests((prev) => {
+      const newCount = Math.max(0, prev - 1);
+      if (newCount === 0) {
+        // All requests completed, stop loading
+        setIsLoading(false);
+        setLoadingStartTime(undefined);
+      }
+      return newCount;
+    });
+  }, []);
+
   // --- Funciones API para Transacciones (anteriormente Gastos) ---
   const fetchTransactions = useCallback(async () => {
-    const transactions = await getTransactions(filters);
-    setTransactions(transactions);
-  }, [filters]);
+    startLoading();
+    try {
+      const transactions = await getTransactions(filters);
+      setTransactions(transactions);
+    } finally {
+      stopLoading();
+    }
+  }, [filters, startLoading, stopLoading]);
 
   const createTransaction = useCallback(
     async (newTransaction: CreateTransactionPayload): Promise<void> => {
-      const custom_response = await apiCreateTransaction(newTransaction);
-      if (custom_response.success) {
-        setTransactions((prev) => [...prev, custom_response.data]);
-        showMessage(
-          "success",
-          "Transaction Recorded",
-          `Your ${
-            newTransaction.is_expense ? "expense" : "income"
-          } transaction has been recorded successfully!`
-        );
-      } else {
-        const error_details = custom_response.error_details;
-        let fieldError = Object.keys(error_details)[0];
-        fieldError = fieldError.split("_").join(" ");
-        const messageToUser = Object.values(error_details)[0][0];
-        showMessage("error", "Error in input " + fieldError, messageToUser);
+      startLoading();
+      try {
+        const custom_response = await apiCreateTransaction(newTransaction);
+        if (custom_response.success) {
+          setTransactions((prev) => [...prev, custom_response.data]);
+          showMessage(
+            "success",
+            "Transaction Recorded",
+            `Your ${
+              newTransaction.is_expense ? "expense" : "income"
+            } transaction has been recorded successfully!`
+          );
+        } else {
+          const error_details = custom_response.error_details;
+          let fieldError = Object.keys(error_details)[0];
+          fieldError = fieldError.split("_").join(" ");
+          const messageToUser = Object.values(error_details)[0][0];
+          showMessage("error", "Error in input " + fieldError, messageToUser);
+        }
+      } finally {
+        stopLoading();
       }
     },
-    []
+    [startLoading, stopLoading]
   );
 
   const updateTransaction = useCallback(
@@ -117,6 +161,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       id: number,
       updatedTransaction: CreateTransactionPayload
     ): Promise<void> => {
+      startLoading();
       try {
         const custom_response = await apiUpdateTransaction(
           id,
@@ -138,12 +183,15 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       } catch (error) {
         console.error("Failed to update transaction:", error);
         throw error;
+      } finally {
+        stopLoading();
       }
     },
-    []
+    [startLoading, stopLoading]
   );
 
   const deleteTransaction = useCallback(async (id: number) => {
+    startLoading();
     try {
       await apiDeleteTransaction(id);
       setTransactions((prev) => prev.filter((exp) => exp.id !== id));
@@ -154,8 +202,10 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       );
     } catch (error) {
       console.error("Failed to delete transaction:", error);
+    } finally {
+      stopLoading();
     }
-  }, []);
+  }, [startLoading, stopLoading]);
 
   // --- Funciones API para Categorías ---
   const fetchCategories = useCallback(async () => {
@@ -193,6 +243,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
 
   // Initialize authentication only once on app startup
   const initializeAuth = useCallback(async () => {
+    startLoading();
     try {
       const isAuthenticated = await checkAuthenticationStatus();
 
@@ -217,13 +268,15 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
       console.error("Authentication initialization failed:", error);
       setIsAuth(false);
       clearAuthTokens();
+    } finally {
+      stopLoading();
     }
-  }, [fetchTransactions, fetchCategories, currentPath, router]);
+  }, [fetchTransactions, fetchCategories, currentPath, router, startLoading, stopLoading]);
 
   // Run authentication check only once on app mount
   useEffect(() => {
     initializeAuth();
-  }, []); // Empty dependency array ensures this runs only once
+  }, [initializeAuth]); // Include initializeAuth dependency
 
   // Separate effect for data refetching when filters change (only if authenticated)
   useEffect(() => {
@@ -254,11 +307,17 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         defaultCategories,
         filters,
         setFilters,
+        isLoading,
+        loadingStartTime,
+        startLoading,
+        stopLoading,
       }}
     >
       {/** Navbar disabled for now */}
       {/* {isAuth && <Navbar />} */}
       {children}
+      {/* Loading Modal */}
+      <LoadingModal isOpen={isLoading} requestStartTime={loadingStartTime} />
       {/* Message Modal */}
       <MessageModal
         isOpen={messageModal.isOpen}

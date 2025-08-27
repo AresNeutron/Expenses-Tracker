@@ -19,6 +19,12 @@ export interface ExpenseContextProps {
   transactions: Transaction[];
   categories: Category[];
 
+  // Loading state
+  isLoading: boolean;
+  loadingStartTime: number | undefined;
+  startLoading: () => void;
+  stopLoading: () => void;
+
   showMessage: (
     type: "success" | "error" | "warning" | "info" | "confirm",
     title: string,

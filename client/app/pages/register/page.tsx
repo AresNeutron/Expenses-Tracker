@@ -9,7 +9,7 @@ import { useState } from "react";
 import type React from "react";
 
 function Register() {
-  const { password, setIsAuth } = useExpenseContext();
+  const { password, setIsAuth, startLoading, stopLoading } = useExpenseContext();
   const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
@@ -38,6 +38,7 @@ function Register() {
 
     // Clear errors
     setErrors([]);
+    startLoading();
 
     try {
       const response = await axios.post(
@@ -60,6 +61,8 @@ function Register() {
     } catch (err) {
       console.error(err);
       setErrors(["Registration failed. Please try again."]);
+    } finally {
+      stopLoading();
     }
   };
 
