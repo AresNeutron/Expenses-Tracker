@@ -53,15 +53,6 @@ export interface CreateTransactionPayload {
   notes?: string; // Opcional
 }
 
-export interface UpdateTransactionPayload {
-  is_expense?: boolean;
-  category_id?: number;
-  category_type_model?: CategoryTypeModel; 
-  amount?: string;
-  notes?: string;
-}
-
-
 export interface CustomTransacctionResponse {
   success: boolean;
   data: Transaction;
@@ -71,9 +62,9 @@ export interface CustomTransacctionResponse {
 export interface CustomTransactionsListResponse {
   success: boolean;
   data: Transaction[];
-  error_details?: ErrorDetail;
+  error_details: ErrorDetail;
 }
 
-type ErrorDetail = {
+export type ErrorDetail = {
   [key: string]: string[]
 }

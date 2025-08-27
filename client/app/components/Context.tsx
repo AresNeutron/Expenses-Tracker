@@ -15,9 +15,9 @@ import {
   Transaction, // Importar Transaction
   Category,
   CreateTransactionPayload,
-  UpdateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
+  ErrorDetail,
 } from "../interfaces/api_interfaces";
 
 import {
@@ -49,7 +49,7 @@ interface ExpenseProviderProps {
 const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
   const [password, setPassword] = useState<string>("");
   const [isAuth, setIsAuth] = useState<boolean>(false);
-  // const [errors, setErrors] = useState<string[]>([]);
+  const [errors, setErrors] = useState<ErrorDetail>({});
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -63,34 +63,45 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
 
   // --- Funciones API para Transacciones (anteriormente Gastos) ---
   const fetchTransactions = useCallback(async () => {
-    const data = await getTransactions(filters);
-    setTransactions(data);
+    const customServerResponse = await getTransactions(filters);
+    if (customServerResponse.success) {
+      setTransactions(customServerResponse.data);
+    } else {
+      setErrors(customServerResponse.error_details);
+    }
   }, [filters]);
 
   const createTransaction = useCallback(
-    async (newTransaction: CreateTransactionPayload) => {
+    async (newTransaction: CreateTransactionPayload): Promise<void> => {
       const custom_response = await apiCreateTransaction(newTransaction);
       if (custom_response.success) {
         setTransactions((prev) => [...prev, custom_response.data]);
+      } else {
+        setErrors(custom_response.error_details);
       }
-      return custom_response;
     },
     []
   );
 
   const updateTransaction = useCallback(
-    async (id: number, updatedTransaction: UpdateTransactionPayload) => {
+    async (
+      id: number,
+      updatedTransaction: CreateTransactionPayload
+    ): Promise<void> => {
       try {
-        const custom_response = await apiUpdateTransaction(id, updatedTransaction);
+        const custom_response = await apiUpdateTransaction(
+          id,
+          updatedTransaction
+        );
         if (custom_response.success) {
           setTransactions((prev) =>
             prev.map((transaction) =>
               transaction.id === id ? custom_response.data : transaction
             )
           );
-          return custom_response;
+        } else {
+          setErrors(custom_response.error_details);
         }
-        return custom_response;
       } catch (error) {
         console.error("Failed to update transaction:", error);
         throw error;
@@ -194,6 +205,7 @@ const ExpenseProvider: React.FC<ExpenseProviderProps> = ({ children }) => {
         isAuth,
         setIsAuth,
         setPassword,
+        errors,
         transactions, // Estado `transactions` para transacciones
         categories,
         createTransaction,

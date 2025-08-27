@@ -2,12 +2,11 @@ import {
   Transaction,
   Category,
   CreateTransactionPayload,
-  UpdateTransactionPayload,
   CreateCategoryPayload,
   DefaultCategory,
   CategoryTypeModel,
-  CustomTransacctionResponse,
   TransactionType,
+  ErrorDetail,
 } from "./api_interfaces";
 
 // Interfaz para las propiedades del contexto (lo que provee el ExpenseProvider)
@@ -17,6 +16,8 @@ export interface ExpenseContextProps {
   setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
 
+  errors: ErrorDetail;
+
   // Estados para los datos
   transactions: Transaction[];
   categories: Category[];
@@ -24,11 +25,8 @@ export interface ExpenseContextProps {
   // Funciones API para Transacciones
   createTransaction: (
     newTransaction: CreateTransactionPayload
-  ) => Promise<CustomTransacctionResponse>;
-  updateTransaction: (
-    id: number,
-    updatedTransaction: UpdateTransactionPayload
-  ) => Promise<CustomTransacctionResponse>;
+  ) => Promise<void>;
+  updateTransaction: (id: number, updatedTransaction: CreateTransactionPayload) => Promise<void>
   deleteTransaction: (id: number) => Promise<void>;
 
   // Funciones API para Categorías
